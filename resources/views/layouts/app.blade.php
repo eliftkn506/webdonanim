@@ -1081,11 +1081,11 @@ body {
             <div class="top-bar-left">
                 <a href="tel:+905554443322" class="top-bar-item">
                     <i class="fas fa-phone"></i>
-                    <span>+90 555 444 33 22</span>
+                    <span>tel:+90850 533 3444</span>
                 </a>
                 <a href="mailto:destek@webdonanim.com" class="top-bar-item">
                     <i class="fas fa-envelope"></i>
-                    <span>destek@webdonanim.com</span>
+                    <span>bilgi@avantajbilisim.com</span>
                 </a>
                 <span class="top-bar-item">
                     <i class="fas fa-clock"></i>
@@ -1453,11 +1453,11 @@ body {
                 </p>
                 <p>
                     <i class="fas fa-phone"></i>
-                    +90 555 444 33 22
+                    tel:+90850 533 3444
                 </p>
                 <p>
                     <i class="fas fa-envelope"></i>
-                    destek@webdonanim.com
+                    bilgi@avantajbilisim.com
                 </p>
                 <p>
                     <i class="fas fa-clock"></i>
