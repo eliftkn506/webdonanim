@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use App\Traits\LogsAdminActivity;
 
-class Urunkriterdegeri extends Pivot
+class UrunKriterDegeri extends Pivot
 {
     protected $table = 'urun_kriter_degerleri';
     protected $fillable = ['urun_id', 'kriter_id', 'kriter_deger_id'];
