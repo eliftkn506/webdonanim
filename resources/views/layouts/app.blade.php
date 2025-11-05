@@ -1390,7 +1390,7 @@ body {
             <div class="footer-brand">
                 <div class="footer-logo">
                     <i class="fas fa-microchip"></i>
-                    WebDonanım
+                    Avantaj Bilişim
                 </div>
                 <p class="footer-description">
                     Türkiye'nin önde gelen bilgisayar donanım ve teknoloji mağazası. 
@@ -1467,7 +1467,7 @@ body {
         </div>
         
         <div class="footer-bottom">
-            <p>&copy; {{ date('Y') }} WebDonanım. Tüm hakları saklıdır.</p>
+            <p>&copy; {{ date('Y') }} Avantaj Bilişim. Tüm hakları saklıdır.</p>
         </div>
     </div>
 </footer>
