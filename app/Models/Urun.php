@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Urunkriterdegeri;
+use App\Models\UrunKriterDegeri;
 use App\Traits\LogsAdminActivity;
 use App\Models\User;
 
