@@ -548,7 +548,7 @@
             <div class="hero-content">
                 <h1 class="hero-title">Hakkımızda</h1>
                 <p class="hero-subtitle">
-                    2015'ten beri bilgisayar donanımları alanında Türkiye'nin güvenilir adresi. 
+                    Bilgisayar donanımları alanında Türkiye'nin güvenilir adresi. 
                     Teknoloji tutkusu ve müşteri memnuniyetiyle büyüyen bir marka hikayesi.
                 </p>
             </div>
@@ -598,7 +598,7 @@
                 <div class="content-text">
                     <h3>Misyonumuz</h3>
                     <p>
-                        WebDonanım olarak, bilgisayar donanımları alanında Türkiye'nin en güvenilir ve yenilikçi 
+                        Avantaj Bilişim olarak, bilgisayar donanımları alanında Türkiye'nin en güvenilir ve yenilikçi 
                         markası olmayı hedefliyoruz. Her geçen gün gelişen teknolojiye ayak uydurarak, 
                         müşterilerimize en kaliteli ürünleri en uygun fiyatlarla sunmaya devam ediyoruz.
                     </p>
