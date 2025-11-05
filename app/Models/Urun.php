@@ -79,7 +79,7 @@ class Urun extends Model
 
     public function urunKriterDegerleri()
     {
-        return $this->hasMany(Urunkriterdegeri::class, 'urun_id', 'id')->with('kriter', 'kriterDeger');
+        return $this->hasMany(UrunKriterDegeri::class, 'urun_id', 'id')->with('kriter', 'kriterDeger');
     }
 
     // Bir ürünün kampanyaları / indirimleri
