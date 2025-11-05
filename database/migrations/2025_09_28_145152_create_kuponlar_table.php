@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('kuponlar', function (Blueprint $table) {
+            $table->id();
+            $table->string('kupon_kodu')->unique();
+            $table->string('baslik');
+            $table->text('aciklama')->nullable();
+            $table->enum('indirim_tipi', ['yuzde', 'sabit']); // % veya TL
+            $table->decimal('indirim_miktari', 10, 2);
+            $table->decimal('minimum_tutar', 10, 2)->nullable();
+            $table->integer('kullanim_limiti')->nullable();
+            $table->integer('kullanilan_adet')->default(0);
+            $table->dateTime('baslangic_tarihi');
+            $table->dateTime('bitis_tarihi');
+            $table->boolean('aktif')->default(true);
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('kuponlar');
+    }
+};
