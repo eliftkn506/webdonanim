@@ -11,11 +11,18 @@
         </a>
     </div>
 
+    {{-- Başarı Mesajları --}}
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    {{-- Hata Mesajları (Silme hatası burada görünecek) --}}
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
     <div class="card">
+        {{-- Sneat/Bootstrap 5 için responsif tablo yapısı --}}
         <div class="table-responsive text-nowrap">
             <table class="table table-hover table-borderless align-middle">
                 <thead class="table-dark">
@@ -41,6 +48,7 @@
                             <td>{{ $urun->marka }}</td>
                             <td>{{ $urun->model }}</td>
                             <td>
+                                {{-- Fiyat Listeleme --}}
                                 @forelse($urun->fiyatlar as $fiyat)
                                     @php
                                         $temel = $fiyat->maliyet + ($fiyat->maliyet * $fiyat->kar_orani / 100);
@@ -51,7 +59,7 @@
                                     @endphp
 
                                     <div class="mb-2 p-2 border rounded bg-light">
-                                        <strong>{{ ucfirst($fiyat->fiyat_turu) }}</strong>: 
+                                        <strong>{{ ucfirst($fiyat->fiyat_turu) }}</strong>:
                                         ₺{{ number_format($hesaplanmis, 2, ',', '.') }}
 
                                         @if($fiyat->pivot)
@@ -66,6 +74,7 @@
                                 @endforelse
                             </td>
                             <td>
+                                {{-- Resim Gösterimi --}}
                                 @if($urun->resim_url && file_exists(public_path($urun->resim_url)))
                                     <img src="{{ asset($urun->resim_url) }}" width="60" class="rounded shadow-sm">
                                 @else
@@ -75,25 +84,25 @@
                             <td>{{ $urun->barkod_no ?? '-' }}</td>
                             <td>{{ $urun->stok }}</td>
                             <td class="text-center">
+                                {{-- İşlemler --}}
                                 <a href="{{ route('admin.urunler.edit', $urun->id) }}" class="btn btn-sm btn-warning me-1">
                                     <i class="bx bx-edit me-1"></i> Düzenle
                                 </a>
 
-                                <!-- Fiyat Ekle Butonu -->
                                 <button class="btn btn-sm btn-success me-1" data-bs-toggle="modal" data-bs-target="#fiyatModal{{ $urun->id }}">
                                     <i class="bx bx-plus me-1"></i> Fiyat Ekle
                                 </button>
 
-                                <form action="{{ route('admin.urunler.destroy', $urun->id) }}" method="POST" class="d-inline">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Silmek istediğinize emin misiniz?')" class="btn btn-sm btn-danger">
+                                <form action="{{ route('admin.urunler.destroy', $urun->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Silmek istediğinize emin misiniz?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger">
                                         <i class="bx bx-trash me-1"></i> Sil
                                     </button>
                                 </form>
                             </td>
                         </tr>
 
-                        <!-- Fiyat Ekle Modal -->
                         <div class="modal fade" id="fiyatModal{{ $urun->id }}" tabindex="-1" aria-labelledby="fiyatModalLabel{{ $urun->id }}" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -105,7 +114,6 @@
                                         </div>
                                         <div class="modal-body">
 
-                                            <!-- Fiyat Türü Filtre -->
                                             <div class="mb-3">
                                                 <label>Fiyat Türü</label>
                                                 <select id="fiyatTuru{{ $urun->id }}" class="form-control">
@@ -116,21 +124,20 @@
                                                 </select>
                                             </div>
 
-                                            <!-- Fiyat Seç -->
                                             <div class="mb-3">
                                                 <label>Fiyat Seç <span class="text-danger">*</span></label>
                                                 <select name="fiyat_id" id="fiyatSelect{{ $urun->id }}" class="form-control" required>
                                                     <option value="">Seçiniz</option>
                                                     @foreach($fiyatlar as $fiyat)
                                                         @php
-                                                            $temel = $fiyat->maliyet + ($fiyat->maliyet * $fiyat->kar_orani / 100);
+                                                            $temel_modal = $fiyat->maliyet + ($fiyat->maliyet * $fiyat->kar_orani / 100);
                                                             if ($fiyat->bayi_indirimi > 0) {
-                                                                $temel -= ($temel * $fiyat->bayi_indirimi / 100);
+                                                                $temel_modal -= ($temel_modal * $fiyat->bayi_indirimi / 100);
                                                             }
-                                                            $hesaplanmis = $temel + ($temel * $fiyat->vergi_orani / 100);
+                                                            $hesaplanmis_modal = $temel_modal + ($temel_modal * $fiyat->vergi_orani / 100);
                                                         @endphp
                                                         <option data-tur="{{ $fiyat->fiyat_turu }}" value="{{ $fiyat->fiyat_id }}">
-                                                            {{ ucfirst($fiyat->fiyat_turu) }} - ₺{{ number_format($hesaplanmis, 2, ',', '.') }}
+                                                            {{ ucfirst($fiyat->fiyat_turu) }} - ₺{{ number_format($hesaplanmis_modal, 2, ',', '.') }}
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -158,7 +165,6 @@
                             </div>
                         </div>
 
-                        <!-- Fiyat Türü JS -->
                         <script>
                             document.getElementById('fiyatTuru{{ $urun->id }}').addEventListener('change', function() {
                                 let secilenTur = this.value;
@@ -171,7 +177,6 @@
                                         option.style.display = 'none';
                                     }
                                 });
-
                                 document.getElementById('fiyatSelect{{ $urun->id }}').value = "";
                             });
                         </script>
@@ -185,8 +190,7 @@
             </table>
         </div>
 
-        <!-- Pagination -->
-        <div class="mt-3 d-flex justify-content-end">
+        <div class="mt-3 d-flex justify-content-end p-3">
             {{ $urunler->links('pagination::bootstrap-5') }}
         </div>
     </div>

@@ -238,31 +238,49 @@ class UrunController extends Controller
         }
     }
 
-    // Ürün silme
-    public function destroy(Urun $urun)
+   public function destroy(Urun $urun)
     {
         DB::beginTransaction();
         try {
-            // Kriter değerlerini sil
+            // 1. Kriter değerlerini sil (belongsToMany)
             $urun->kriterDegerleri()->detach();
             
-            // Varyasyonları ve kriter değerlerini sil
+            // 2. FİYAT ilişkilerini sil (belongsToMany) - BU EKSİKTİ
+            $urun->fiyatlar()->detach();
+
+            // 3. Varyasyonları ve kriter değerlerini sil (hasMany)
             foreach ($urun->varyasyonlar as $varyasyon) {
+                // Varyasyonun kendi kriterlerini sil
                 UrunVaryasyonKriterDegeri::where('urun_varyasyon_id', $varyasyon->id)->delete();
             }
-            $urun->varyasyonlar()->delete();
+            $urun->varyasyonlar()->delete(); // Tüm varyasyonları sil
             
-            // Uyumluluk kayıtlarını sil
+            // 4. Uyumluluk kayıtlarını sil (hasMany/custom)
             UyumluUrun::where('urun_id', $urun->id)
                 ->orWhere('uyumlu_urun_id', $urun->id)
                 ->delete();
             
-            // Ürünü sil
-            $urun->delete();
+            // 5. FAVORİLERİ sil (hasMany) - BU EKSİKTİ
+            $urun->favoriler()->delete();
+
+            // 6. KAMPANYALARI sil (hasMany) - BU EKSİKTİ
+            $urun->kampanyalar()->delete();
+
             
+            // 7. Ürünü sil
+            
+            // SEÇENEK 1: Eğer Soft Deletes kullanıyorsanız ve bu amaçlıysa, bu kalsın:
+            // $urun->delete(); 
+            // Bu, 'deleted_at' sütununu doldurur ve ürün listede görünmez.
+
+            // SEÇENEK 2: Eğer veritabanından KALICI olarak silmek istiyorsanız:
+            $urun->forceDelete(); 
+            // Yukarıdaki $urun->delete(); satırını silip bunu kullanın.
+            
+
             DB::commit();
             return redirect()->route('admin.urunler.index')
-                ->with('success', 'Ürün başarıyla silindi.');
+                ->with('success', 'Ürün başarıyla kalıcı olarak silindi.'); // Mesajı güncelleyebilirsiniz
                 
         } catch (\Exception $e) {
             DB::rollBack();

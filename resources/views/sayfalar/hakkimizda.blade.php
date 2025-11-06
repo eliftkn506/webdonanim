@@ -676,7 +676,7 @@
             <div class="section-header">
                 <h2 class="section-title">Takımımız</h2>
                 <p class="section-subtitle">
-                    WebDonanım'ın başarısının arkasındaki deneyimli ve tutkulu ekibimiz
+                    Avantaj Bilişimin başarısının arkasındaki deneyimli ve tutkulu ekibimiz
                 </p>
             </div>
             
@@ -723,7 +723,7 @@
             <div class="section-header">
                 <h2 class="section-title">Hikayemiz</h2>
                 <p class="section-subtitle">
-                    WebDonanım'ın kuruluşundan bugüne kadar geçirdiği önemli kilometre taşları
+                    Avantaj Bilişimin kuruluşundan bugüne kadar geçirdiği önemli kilometre taşları
                 </p>
             </div>
             
@@ -731,10 +731,10 @@
                 <div class="timeline-item">
                     <div class="timeline-marker"></div>
                     <div class="timeline-content">
-                        <div class="timeline-year">2015</div>
+                        <div class="timeline-year">#</div>
                         <h3 class="timeline-title">Kuruluş</h3>
                         <p class="timeline-description">
-                            WebDonanım, küçük bir ekip ve büyük hayallerle İstanbul'da kuruldu.
+                            Avantaj Bilişim<img src="" alt="" sizes="" srcset="">
                         </p>
                     </div>
                 </div>
@@ -742,10 +742,10 @@
                 <div class="timeline-item">
                     <div class="timeline-marker"></div>
                     <div class="timeline-content">
-                        <div class="timeline-year">2017</div>
+                        <div class="timeline-year">#</div>
                         <h3 class="timeline-title">İlk Büyük Başarı</h3>
                         <p class="timeline-description">
-                            10.000'inci müşterimize ulaştık ve Türkiye genelinde kargo hizmeti başlattık.
+                            #
                         </p>
                     </div>
                 </div>
@@ -753,7 +753,7 @@
                 <div class="timeline-item">
                     <div class="timeline-marker"></div>
                     <div class="timeline-content">
-                        <div class="timeline-year">2019</div>
+                        <div class="timeline-year">2025</div>
                         <h3 class="timeline-title">Teknolojik Dönüşüm</h3>
                         <p class="timeline-description">
                             PC Toplama Sihirbazı sistemimizi geliştirdik ve müşteri deneyimini yeniden tanımladık.
@@ -764,7 +764,7 @@
                 <div class="timeline-item">
                     <div class="timeline-marker"></div>
                     <div class="timeline-content">
-                        <div class="timeline-year">2021</div>
+                        <div class="timeline-year">#</div>
                         <h3 class="timeline-title">Büyük Büyüme</h3>
                         <p class="timeline-description">
                             Ürün gamımızı genişlettik ve 5000+ ürün çeşidine ulaştık.
@@ -775,8 +775,8 @@
                 <div class="timeline-item">
                     <div class="timeline-marker"></div>
                     <div class="timeline-content">
-                        <div class="timeline-year">2023</div>
-                        <h3 class="timeline-title">Bugün</h3>
+                        <div class="timeline-year">#</div>
+                        <h3 class="timeline-title">#</h3>
                         <p class="timeline-description">
                             50.000+ mutlu müşteri ve Türkiye'nin en güvenilir donanım markalarından biri haline geldik.
                         </p>

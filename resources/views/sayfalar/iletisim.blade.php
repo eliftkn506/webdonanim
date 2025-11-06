@@ -621,7 +621,7 @@ textarea.form-control {
                     <h3 class="method-title">Telefon</h3>
                     <div class="method-info">
                         7/24 müşteri hizmetlerimiz<br>
-                        <strong>0850 120 00 00</strong>
+                        <strong>tel:+90850 533 3444</strong>
                     </div>
                     <a href="tel:08501234567" class="method-action">
                         <i class="fas fa-phone"></i>Hemen Ara
@@ -635,9 +635,9 @@ textarea.form-control {
                     <h3 class="method-title">E-posta</h3>
                     <div class="method-info">
                         24 saat içinde yanıt<br>
-                        <strong>info@webdonanim.com</strong>
+                        <strong>bilgi@avantajbilisim.com</strong>
                     </div>
-                    <a href="mailto:info@webdonanim.com" class="method-action">
+                    <a href="mailto:bilgi@avantajbilisim.com" class="method-action">
                         <i class="fas fa-envelope"></i>E-posta Gönder
                     </a>
                 </div>
@@ -663,9 +663,9 @@ textarea.form-control {
                     <h3 class="method-title">WhatsApp</h3>
                     <div class="method-info">
                         WhatsApp üzerinden<br>
-                        <strong>+90 537 487 05 48</strong>
+                        <strong>#</strong>
                     </div>
-                    <a href="https://wa.me/905374870548" class="method-action" target="_blank">
+                    <a href="https://wa.me/#" class="method-action" target="_blank">
                         <i class="fab fa-whatsapp"></i>WhatsApp
                     </a>
                 </div>
@@ -682,7 +682,7 @@ textarea.form-control {
                     <div class="form-info fade-in-up">
                         <h3>İletişim Bilgileri</h3>
                         <p>
-                            WebDonanım ekibi olarak, müşteri memnuniyeti bizim önceliğimizdir. 
+                            Avantaj Bilişim ekibi olarak, müşteri memnuniyeti bizim önceliğimizdir. 
                             Aşağıdaki kanallardan bize ulaşabilirsiniz.
                         </p>
                         
@@ -693,8 +693,8 @@ textarea.form-control {
                             <div class="info-text">
                                 <div class="info-label">Adres</div>
                                 <div class="info-value">
-                                    Konya Fevziçakmak mah. KTM Plaza<br>
-                                    Selçuklu/Konya
+                                    #<br>
+                                    #
                                 </div>
                             </div>
                         </div>
@@ -705,7 +705,7 @@ textarea.form-control {
                             </div>
                             <div class="info-text">
                                 <div class="info-label">Telefon</div>
-                                <div class="info-value">0850 120 00 00</div>
+                                <div class="info-value">+90850 533 3444</div>
                             </div>
                         </div>
                         
@@ -715,7 +715,7 @@ textarea.form-control {
                             </div>
                             <div class="info-text">
                                 <div class="info-label">E-posta</div>
-                                <div class="info-value">info@webdonanim.com</div>
+                                <div class="info-value">bilgi@avantajbilisim.com</div>
                             </div>
                         </div>
                         

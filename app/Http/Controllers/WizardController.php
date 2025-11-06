@@ -11,6 +11,7 @@ use App\Models\KonfigurasyonUrun;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+
 class WizardController extends Controller
 {
     public function index()
@@ -58,8 +59,8 @@ class WizardController extends Controller
         $urunler = $urunlerQuery->with(['fiyatlar' => function($query) {
             $query->wherePivot('baslangic_tarihi', '<=', now())
                   ->where(function($q) {
-                      $q->whereNull('urun_fiyat_urun.bitis_tarihi')
-                        ->orWhere('urun_fiyat_urun.bitis_tarihi', '>=', now());
+                        $q->whereNull('urun_fiyat_urun.bitis_tarihi')
+                          ->orWhere('urun_fiyat_urun.bitis_tarihi', '>=', now());
                   })
                   ->latest('urun_fiyat_urun.baslangic_tarihi');
         }])->get(['id','urun_ad','marka','model','resim_url']);
@@ -95,8 +96,7 @@ class WizardController extends Controller
 
         return response()->json($urunler);
     }
-
-    public function konfigurasyonKaydet(Request $request)
+public function konfigurasyonKaydet(Request $request)
     {
         $request->validate([
             'isim' => 'required|string|max:255',
@@ -138,10 +138,17 @@ class WizardController extends Controller
                 'konfigürasyon_id' => $konfig->id,
                 'urun_id' => $urunData['id'],
                 'adet' => $urunData['adet'] ?? 1,
-                'fiyat' => $guncelFiyat, // Kullanıcıya özel güncel fiyat
+                'fiyat' => $guncelFiyat ?? 0, // === ÇÖZÜM BURADA === (Eğer $guncelFiyat null ise 0 olarak kaydet)
             ]);
         }
 
-        return response()->json(['success' => true, 'message' => 'Konfigürasyon kaydedildi']);
+        return response()->json([
+            'success' => true, 
+            'message' => 'Konfigürasyon kaydedildi',
+            'redirect_url' => route('profil') // Profil sayfasının URL'i
+        ]);
+    
+
+       
     }
 }
