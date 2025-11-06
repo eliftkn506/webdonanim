@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Şifre Sıfırla')
 
 @section('content')
 <div class="container">

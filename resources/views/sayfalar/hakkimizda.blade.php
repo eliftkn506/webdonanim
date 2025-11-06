@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title', 'Hakkımızda ')
 @section('content')
 <style>
 :root {

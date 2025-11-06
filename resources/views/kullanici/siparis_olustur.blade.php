@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title', 'Sipariş Oluştur ')
 @section('content')
 <style>
 :root {

@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Sipariş Detay ')
 
 @section('content')
 <style>

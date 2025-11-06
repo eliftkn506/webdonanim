@@ -67,11 +67,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     // Kampanyalar
     Route::resource('kampanyalar', KampanyaIndirimController::class);
 
-    // Siparişler
+
     Route::resource('siparisler', AdminSiparisController::class);
     Route::get('siparisler/bekleyen', [AdminSiparisController::class, 'bekleyen'])->name('siparisler.bekleyen');
     Route::post('siparisler/{id}/durum-guncelle', [AdminSiparisController::class, 'durumGuncelle'])
-        ->name('siparisler.durum-guncelle');
+        ->name('siparisler.durumGuncelle');
+
+
 
    Route::resource('kuponlar', \App\Http\Controllers\Admin\KuponController::class);
     Route::get('kuponlar/kullanici-ara', [\App\Http\Controllers\Admin\KuponController::class, 'kullaniciAra'])->name('kuponlar.kullanici-ara');

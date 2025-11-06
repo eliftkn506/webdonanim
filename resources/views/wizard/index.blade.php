@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Pc Toplama Sihirbazı ')
 
 @section('content')
 <style>

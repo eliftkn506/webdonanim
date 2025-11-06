@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>@yield('title', config('app.name', 'WebDonanım'))</title>
+<title>@yield('title', config('app.name', 'Avantaj'))</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -580,7 +580,7 @@ body {
 }
 .top-bar-right {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem; /* Sosyal ikonlar ve auth arası boşluk */
     align-items: center;
 }
 .social-link {
@@ -601,6 +601,41 @@ body {
     color: white;
     transform: scale(1.1);
 }
+
+/* YENİ: Top Bar Auth Linkleri */
+.top-bar-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 0.5rem;
+}
+.top-bar-auth-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    border: 1px solid transparent;
+}
+.top-bar-auth-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+.top-bar-auth-link.top-bar-auth-register {
+     background: var(--warning-color);
+     border-color: var(--warning-color);
+}
+.top-bar-auth-link.top-bar-auth-register:hover {
+     background: #ffbe33;
+     border-color: #ffbe33;
+}
+
 
 /* ========== MAIN NAVBAR ========== */
 .main-navbar {
@@ -793,11 +828,11 @@ body {
     width: 3px;
 }
 
-/* ========== SEARCH BAR (DÜZELTİLDİ) ========== */
+/* ========== SEARCH BAR (DÜZENLENDİ) ========== */
 .search-wrapper {
     position: relative;
     width: 100%;
-    max-width: 450px;
+    max-width: 600px; /* Genişletildi */
 }
 .search-form {
     position: relative;
@@ -1455,14 +1490,24 @@ body {
                 <a href="#" class="social-link" aria-label="YouTube">
                     <i class="fab fa-youtube"></i>
                 </a>
-            </div>
+                
+                @guest
+                <span class="top-bar-divider"></span>
+                <a href="{{ route('login') }}" class="top-bar-auth-link">
+                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                </a>
+                <a href="{{ route('register') }}" class="top-bar-auth-link top-bar-auth-register">
+                    <i class="fas fa-user-plus"></i> Kayıt Ol
+                </a>
+                @endguest
+                </div>
         </div>
     </div>
 </div>
 
 <nav class="main-navbar">
     <div class="container">
-        <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
             
             <div class="d-flex align-items-center">
                 <a href="/" class="navbar-brand">
@@ -1546,18 +1591,17 @@ body {
                 </ul>
             </div>
             
-            <div class="d-flex align-items-center gap-2">
-                
-                <div class="search-wrapper d-none d-lg-block">
-                    <form method="GET" action="{{ route('urun.ara') }}" class="search-form">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="search" name="q" class="search-input" placeholder="Ürün ara...">
-                        <button type="submit" class="search-btn">
-                            <i class="fas fa-search me-1"></i>Ara
-                        </button>
-                    </form>
-                </div>
-                
+            <div class="search-wrapper d-none d-lg-block mx-4" style="flex-grow: 1;">
+                <form method="GET" action="{{ route('urun.ara') }}" class="search-form">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="search" name="q" class="search-input" placeholder="Ürün ara...">
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search me-1"></i>Ara
+                    </button>
+                </form>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2 ms-auto">
                 <div class="action-buttons">
                     <div class="cart-menu" id="cartMenu">
                         <a href="#" class="cart-button" id="cartToggle">
@@ -1607,14 +1651,6 @@ body {
                     </div>
                     
                     @guest
-                    <a href="{{ route('login') }}" class="btn-modern btn-primary d-none d-lg-inline-flex">
-                        <i class="fas fa-sign-in-alt"></i>
-                        Giriş Yap
-                    </a>
-                    <a href="{{ route('register') }}" class="btn-modern btn-warning d-none d-lg-inline-flex">
-                        <i class="fas fa-user-plus"></i>
-                        Kayıt Ol
-                    </a>
                     @else
                     <div class="user-menu" id="userMenu">
                         <div class="user-avatar" id="userToggle">
@@ -1669,7 +1705,6 @@ body {
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
-            
         </div>
         
         <div class="mobile-menu" id="mobileMenu">
