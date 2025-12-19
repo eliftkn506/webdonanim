@@ -1,341 +1,260 @@
-<aside class="layout-menu menu-vertical menu bg-menu-theme">
-    <!-- Logo / Marka -->
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
         <a href="{{ route('admin.dashboard') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
-                <!-- Logo buraya -->
+                <svg width="25" viewBox="0 0 25 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <defs>
+                        <path d="M13.7918663,0.358365126 L3.39788168,7.44174259 C0.566865006,9.69408886 -0.379795268,12.4788597 0.557900856,15.7960551 C0.68998853,16.2305145 1.09562888,17.7872135 3.12357076,19.2293357 C3.8146334,19.7207684 5.32369333,20.3834223 7.65075054,21.2172976 L7.59773219,21.2525164 L2.63468769,24.5493413 C0.445452254,26.3002124 0.0884951797,28.5083815 1.56381646,31.1738486 C2.83770406,32.8170431 5.20850219,33.2640127 7.09180128,32.5391577 C8.347334,32.0559211 11.4559176,30.0011079 16.4175519,26.3747182 C18.0338572,24.4997857 18.6973423,22.4544883 18.4080071,20.2388261 C17.963753,17.5346866 16.1776345,15.5799961 13.0496516,14.3747546 L10.9194936,13.4715819 L18.6192054,7.984237 L13.7918663,0.358365126 Z" id="path-1"></path>
+                        <path d="M5.47320593,6.00457225 C4.05321814,8.216144 4.36334763,10.0722806 6.40359441,11.5729822 C8.61520715,12.571656 10.0999176,13.2171421 10.8577257,13.5094407 L15.5088241,14.433041 L18.6192054,7.984237 C15.5364148,3.11535317 13.9273018,0.573395879 13.7918663,0.358365126 C13.5790555,0.511491653 10.8061687,2.3935607 5.47320593,6.00457225 Z" id="path-3"></path>
+                    </defs>
+                    <g id="g-app-brand" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                        <g id="Brand-Logo" transform="translate(-27.000000, -15.000000)">
+                            <g id="Icon" transform="translate(27.000000, 15.000000)">
+                                <g id="Mask" transform="translate(0.000000, 8.000000)">
+                                    <mask id="mask-2" fill="white">
+                                        <use xlink:href="#path-1"></use>
+                                    </mask>
+                                    <use fill="#696cff" xlink:href="#path-1"></use>
+                                    <g id="Path-3" mask="url(#mask-2)">
+                                        <use fill="#696cff" xlink:href="#path-3"></use>
+                                        <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-3"></use>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </svg>
             </span>
-            <span class="app-brand-text demo menu-text fw-bold">Admin Panel</span>
+            <span class="app-brand-text demo menu-text fw-bolder ms-2">AdminPanel</span>
+        </a>
+
+        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+            <i class="bx bx-chevron-left bx-sm align-middle"></i>
         </a>
     </div>
 
-    <!-- Menü Başlangıç -->
-    <ul class="menu-inner py-1">
+    <div class="menu-inner-shadow"></div>
 
-        <!-- 1. Gösterge Paneli -->
+    <ul class="menu-inner py-1">
+        
         <li class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
             <a href="{{ route('admin.dashboard') }}" class="menu-link">
-                <i class="menu-icon tf-icons fas fa-home"></i>
-                <div>Gösterge Paneli</div>
+                <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                <div data-i18n="Analytics">Gösterge Paneli</div>
             </a>
         </li>
 
-        <!-- 2. Kullanıcı Profili -->
         <li class="menu-item {{ request()->routeIs('admin.profil.*') ? 'active' : '' }}">
-            <a href="" class="menu-link">
-                <i class="menu-icon tf-icons fas fa-user"></i>
+            <a href="{{ route('profil') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user"></i>
                 <div>Kullanıcı Profili</div>
             </a>
         </li>
 
-        <!-- 3. E-Ticaret -->
-        <li class="menu-header small text-uppercase mt-3">E-Ticaret</li>
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">E-Ticaret Yönetimi</span>
+        </li>
 
-        <!-- Ürünler -->
         <li class="menu-item {{ request()->routeIs('admin.urunler.*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fas fa-box-open"></i>
+                <i class="menu-icon tf-icons bx bx-box"></i>
                 <div>Ürünler</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('admin.urunler.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.urunler.index') }}" class="menu-link">Ürün Listesi</a>
+                    <a href="{{ route('admin.urunler.index') }}" class="menu-link">
+                        <div>Ürün Listesi</div>
+                    </a>
                 </li>
                 <li class="menu-item {{ request()->routeIs('admin.urunler.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.urunler.create') }}" class="menu-link">Ürün Ekle</a>
+                    <a href="{{ route('admin.urunler.create') }}" class="menu-link">
+                        <div>Ürün Ekle</div>
+                    </a>
                 </li>
             </ul>
         </li>
 
-        <!-- Kategoriler -->
         <li class="menu-item {{ request()->routeIs('admin.kategoriler.*') || request()->routeIs('admin.altkategoriler.*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fas fa-folder"></i>
+                <i class="menu-icon tf-icons bx bx-category"></i>
                 <div>Kategoriler</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('admin.kategoriler.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.kategoriler.index') }}" class="menu-link">Kategori Listesi</a>
+                    <a href="{{ route('admin.kategoriler.index') }}" class="menu-link">
+                        <div>Kategori Listesi</div>
+                    </a>
                 </li>
-                <li class="menu-item {{ request()->routeIs('admin.kategoriler.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.kategoriler.create') }}" class="menu-link">Kategori Ekle</a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.altkategoriler.*') ? 'active open' : '' }}">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <li class="menu-item {{ request()->routeIs('admin.altkategoriler.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.altkategoriler.index') }}" class="menu-link">
                         <div>Alt Kategoriler</div>
                     </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item {{ request()->routeIs('admin.altkategoriler.index') ? 'active' : '' }}">
-                            <a href="{{ route('admin.altkategoriler.index') }}" class="menu-link">Alt Kategori Listesi</a>
-                        </li>
-                        <li class="menu-item {{ request()->routeIs('admin.altkategoriler.create') ? 'active' : '' }}">
-                            <a href="{{ route('admin.altkategoriler.create') }}" class="menu-link">Alt Kategori Ekle</a>
-                        </li>
-                    </ul>
                 </li>
             </ul>
         </li>
 
-        <!-- Kriterler -->
         <li class="menu-item {{ request()->routeIs('admin.kriterler.*') || request()->routeIs('admin.kriterdegerleri.*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fas fa-tasks"></i>
-                <div>Kriterler</div>
+                <i class="menu-icon tf-icons bx bx-list-check"></i>
+                <div>Özellikler (Kriter)</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('admin.kriterler.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.kriterler.index') }}" class="menu-link">Kriter Listesi</a>
+                    <a href="{{ route('admin.kriterler.index') }}" class="menu-link">
+                        <div>Kriter Listesi</div>
+                    </a>
                 </li>
                 <li class="menu-item {{ request()->routeIs('admin.kriterdegerleri.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.kriterdegerleri.index') }}" class="menu-link">Kriter Değerleri</a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.kriterler.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.kriterler.create') }}" class="menu-link">Kriter Ekle</a>
+                    <a href="{{ route('admin.kriterdegerleri.index') }}" class="menu-link">
+                        <div>Kriter Değerleri</div>
+                    </a>
                 </li>
             </ul>
         </li>
 
-        <!-- Fiyatlandırma (YENİ) -->
         <li class="menu-item {{ request()->routeIs('admin.fiyatlar.*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fas fa-tags"></i>
+                <i class="menu-icon tf-icons bx bx-tag"></i>
                 <div>Fiyatlandırma</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('admin.fiyatlar.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.fiyatlar.index') }}" class="menu-link">Fiyat Listesi</a>
+                    <a href="{{ route('admin.fiyatlar.index') }}" class="menu-link">
+                        <div>Fiyat Listesi</div>
+                    </a>
                 </li>
                 <li class="menu-item {{ request()->routeIs('admin.fiyatlar.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.fiyatlar.create') }}" class="menu-link">Yeni Fiyat Ekle</a>
+                    <a href="{{ route('admin.fiyatlar.create') }}" class="menu-link">
+                        <div>Fiyat Oluştur</div>
+                    </a>
                 </li>
             </ul>
         </li>
 
-        <!-- Sihirbaz -->
-        <li class="menu-item {{ request()->routeIs('admin.uyumluluk.*') ? 'active open' : '' }}">
+        <li class="menu-item {{ request()->routeIs('admin.uyumluluk.*') || request()->routeIs('admin.urunler.uyumlu') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fas fa-magic"></i>
-                <div>Sihirbaz</div>
+                <i class="menu-icon tf-icons bx bx-desktop"></i>
+                <div>PC Toplama Sihirbazı</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('admin.urunler.uyumlu') ? 'active' : '' }}">
-                    <a href="{{ route('admin.urunler.uyumlu') }}" class="menu-link">Uyumlu Ürünler</a>
+                    <a href="{{ route('admin.urunler.uyumlu') }}" class="menu-link">
+                        <div>Uyumlu Ürünler</div>
+                    </a>
                 </li>
-                <li class="menu-item {{ request()->routeIs('admin.uyumluluk.*') ? 'active open' : '' }}">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <li class="menu-item {{ request()->routeIs('admin.uyumluluk.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.uyumluluk.index') }}" class="menu-link">
                         <div>Uyumluluk Kuralları</div>
                     </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item {{ request()->routeIs('admin.uyumluluk.index') ? 'active' : '' }}">
-                            <a href="" class="menu-link">Kural Listesi</a>
-                        </li>
-                        <li class="menu-item {{ request()->routeIs('admin.uyumluluk.create') ? 'active' : '' }}">
-                            <a href="" class="menu-link">Kural Düzenle</a>
-                        </li>
-                    </ul>
                 </li>
             </ul>
         </li>
 
-        <!-- 4. Satış (Siparişler) -->
-        <li class="menu-header small text-uppercase mt-3">Satış</li>
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Satış & Pazarlama</span>
+        </li>
+
         <li class="menu-item {{ request()->routeIs('admin.siparisler.*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fas fa-shopping-cart"></i>
+                <i class="menu-icon tf-icons bx bx-cart"></i>
                 <div>Siparişler</div>
-                <span class="badge badge-center rounded-pill bg-danger ms-auto" id="bekleyen-siparis-badge" style="display: none;">0</span>
+                <div class="badge bg-danger rounded-pill ms-auto" id="bekleyen-siparis-badge" style="display: none;">0</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('admin.siparisler.index') && !request('durum') ? 'active' : '' }}">
-                    <a href="{{ route('admin.siparisler.index') }}" class="menu-link">Tüm Siparişler</a>
+                    <a href="{{ route('admin.siparisler.index') }}" class="menu-link">
+                        <div>Tüm Siparişler</div>
+                    </a>
                 </li>
                 <li class="menu-item {{ request('durum') == 'beklemede' ? 'active' : '' }}">
                     <a href="{{ route('admin.siparisler.index', ['durum' => 'beklemede']) }}" class="menu-link">
-                        Bekleyen Siparişler
-                        <span class="badge bg-warning ms-2" id="bekleyen-count">0</span>
+                        <div>Bekleyenler</div>
+                        <span class="badge badge-center bg-label-warning ms-auto" id="bekleyen-count">0</span>
                     </a>
                 </li>
                 <li class="menu-item {{ request('durum') == 'onaylandi' ? 'active' : '' }}">
                     <a href="{{ route('admin.siparisler.index', ['durum' => 'onaylandi']) }}" class="menu-link">
-                        Onaylanan Siparişler
+                        <div>Onaylananlar</div>
                     </a>
                 </li>
             </ul>
         </li>
 
-        <!-- 5. Kampanya ve Kuponlar -->
-        <li class="menu-header small text-uppercase mt-3">Kampanya ve Kuponlar</li>
-        <li class="menu-item {{ request()->routeIs('admin.kampanyalar.*') ? 'active open' : '' }}">
+        <li class="menu-item {{ request()->routeIs('admin.kampanyalar.*') || request()->routeIs('admin.kuponlar.*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fas fa-percent"></i>
-                <div>Kampanyalar</div>
+                <i class="menu-icon tf-icons bx bx-gift"></i>
+                <div>Kampanyalar & Kupon</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('admin.kampanyalar.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.kampanyalar.index') }}" class="menu-link">Kampanya Listesi</a>
+                    <a href="{{ route('admin.kampanyalar.index') }}" class="menu-link">
+                        <div>Kampanyalar</div>
+                    </a>
                 </li>
-                <li class="menu-item {{ request()->routeIs('admin.kampanyalar.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.kampanyalar.create') }}" class="menu-link">Kampanya Oluştur</a>
+                <li class="menu-item {{ request()->routeIs('admin.kuponlar.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.kuponlar.index') }}" class="menu-link">
+                        <div>Kupon Kodları</div>
+                    </a>
                 </li>
             </ul>
         </li>
 
-        <li class="menu-item {{ request()->routeIs('admin.kuponlar.*') ? 'active open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fas fa-ticket-alt"></i>
-                <div>Kuponlar</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.kuponlar.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.kuponlar.index') }}" class="menu-link">Kupon Listesi</a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.kuponlar.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.kuponlar.create') }}" class="menu-link">Kupon Oluştur</a>
-                </li>
-            </ul>
-        </li>
-      <!-- Bayiler -->
         <li class="menu-item {{ request()->routeIs('admin.bayiler.*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons fas fa-users"></i>
-                <div>Bayiler</div>
+                <i class="menu-icon tf-icons bx bx-store-alt"></i>
+                <div>Bayi Yönetimi</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('admin.bayiler.basvurular') ? 'active' : '' }}">
-                    <a href="{{ route('admin.bayiler.basvurular') }}" class="menu-link">Başvurular</a>
+                    <a href="{{ route('admin.bayiler.basvurular') }}" class="menu-link">
+                        <div>Başvurular</div>
+                    </a>
                 </li>
                 <li class="menu-item {{ request()->routeIs('admin.bayiler.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.bayiler.index') }}" class="menu-link">Bayilerimiz</a>
+                    <a href="{{ route('admin.bayiler.index') }}" class="menu-link">
+                        <div>Bayi Listesi</div>
+                    </a>
                 </li>
             </ul>
         </li>
-
-
     </ul>
 </aside>
 
-<!-- Sidebar JS -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Menu toggle
-    document.querySelectorAll('.menu-toggle').forEach(toggle => {
-        toggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            let parent = toggle.closest('.menu-item');
-            parent.classList.toggle('open');
-            let submenu = parent.querySelector('.menu-sub');
-            if(submenu) {
-                submenu.style.display = parent.classList.contains('open') ? 'block' : 'none';
-            }
-        });
-    });
-
-    // Aktif submenu aç
-    document.querySelectorAll('.menu-item.active.open').forEach(item => {
-        const submenu = item.querySelector('.menu-sub');
-        if(submenu) submenu.style.display = 'block';
-        
-        // Parent menüleri de aç
-        let parentItem = item.closest('.menu-sub')?.closest('.menu-item');
-        while(parentItem) {
-            parentItem.classList.add('open');
-            const parentSubmenu = parentItem.querySelector(':scope > .menu-sub');
-            if(parentSubmenu) parentSubmenu.style.display = 'block';
-            parentItem = parentItem.closest('.menu-sub')?.closest('.menu-item');
-        }
-    });
-
-    // Bekleyen sipariş sayısı
+    // Bekleyen sipariş sayısı güncelleme fonksiyonu
     function updateBekleyenSiparisler() {
-        fetch('/admin/siparisler/bekleyen')
-            .then(res => res.json())
+        // Hata durumunda konsolu kirletmemek için sessizce geç
+        fetch("{{ route('admin.siparisler.bekleyen') }}")
+            .then(res => {
+                if (!res.ok) throw new Error('Network response was not ok');
+                return res.json();
+            })
             .then(data => {
                 const count = data.count || 0;
                 const badge = document.getElementById('bekleyen-siparis-badge');
                 const countElement = document.getElementById('bekleyen-count');
 
-                if(count > 0){
-                    badge.style.display = 'flex';
-                    badge.textContent = count;
-                    countElement.textContent = count;
-
-                    const previousCount = parseInt(localStorage.getItem('bekleyen_siparis_count') || '0');
-                    if(count > previousCount) {
-                        showDesktopNotification('Yeni Sipariş!', `${count} bekleyen sipariş var`);
+                if(badge) {
+                    if(count > 0){
+                        badge.style.display = 'flex'; // flex ile ortala
+                        badge.textContent = count;
+                    } else {
+                        badge.style.display = 'none';
                     }
-                    localStorage.setItem('bekleyen_siparis_count', count);
-                } else {
-                    badge.style.display = 'none';
-                    countElement.textContent = '0';
                 }
+                if(countElement) countElement.textContent = count;
             })
-            .catch(err => console.error(err));
-    }
-
-    function showDesktopNotification(title, body) {
-        if (!("Notification" in window)) return;
-        if (Notification.permission === "granted") {
-            new Notification(title, {body, icon:'/favicon.ico', badge:'/favicon.ico'});
-        } else if (Notification.permission !== "denied") {
-            Notification.requestPermission().then(permission => {
-                if(permission === "granted"){
-                    new Notification(title, {body, icon:'/favicon.ico'});
-                }
+            .catch(err => {
+                // Sessiz kal veya logla
+                // console.log('Sipariş badge güncellenemedi');
             });
-        }
     }
 
+    // Sayfa yüklendiğinde çalıştır
     updateBekleyenSiparisler();
+    
+    // Her 30 saniyede bir güncelle
     setInterval(updateBekleyenSiparisler, 30000);
-    document.addEventListener('visibilitychange', function(){
-        if(!document.hidden) updateBekleyenSiparisler();
-    });
 });
 </script>
-
-<style>
-/* Sidebar stil ve animasyon */
-.layout-menu .menu-item > .menu-link {
-    transition: all 0.3s ease;
-    color: #2C3E50;
-}
-.layout-menu .menu-item.active > .menu-link,
-.layout-menu .menu-item > .menu-link:hover {
-    background: linear-gradient(90deg,#2980B9,#6DD5FA);
-    color: #fff;
-}
-.menu-sub {
-    display: none;
-    padding-left: 1rem;
-}
-.menu-sub .menu-link {
-    font-size: 0.9rem;
-    padding-left: 1.5rem;
-}
-.menu-sub .menu-sub {
-    padding-left: 2rem;
-}
-.menu-sub .menu-sub .menu-link {
-    padding-left: 2.5rem;
-    font-size: 0.85rem;
-}
-.menu-header {
-    font-size: 0.75rem;
-    color: #6c757d;
-    padding-left: 1rem;
-    font-weight: 600;
-}
-
-/* Badge animasyonu */
-@keyframes pulse {
-    0%,100% {transform:scale(1);}
-    50% {transform:scale(1.1);}
-}
-#bekleyen-siparis-badge {
-    animation: pulse 2s infinite;
-}
-.badge {
-    font-size: 0.65rem;
-    padding: 0.25rem 0.5rem;
-}
-</style>

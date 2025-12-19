@@ -129,114 +129,117 @@ class UrunController extends Controller
     
 
     // Düzenleme formu
-    public function edit(Urun $urun)
-    {
-        $altkategoriler = AltKategori::with('kategori')->orderBy('alt_kategori_ad')->get();
-        $urun->load([
+   public function edit($id)
+{
+    try {
+        $urun = Urun::with([
             'kriterDegerleri.kriter', 
             'varyasyonlar.kriterDegerleri.kriter',
+            'altKategori.kategori',
             'altKategori.kriterler.degerler'
-        ]);
+        ])->findOrFail($id);
+        
+        $altkategoriler = AltKategori::with('kategori')->orderBy('alt_kategori_ad')->get();
         
         return view('admin.urunler.edit', compact('urun', 'altkategoriler'));
+    } catch (\Exception $e) {
+        return redirect()->route('admin.urunler.index')
+            ->with('error', 'Ürün bulunamadı: ' . $e->getMessage());
     }
+}
 
-    public function update(Request $request, Urun $urun)
-    {
-        $request->validate([
-            'alt_kategori_id' => 'required|exists:alt_kategoriler,id',
-            'urun_ad'         => 'required|string|max:255',
-            'marka'           => 'required|string|max:255',
-            'model'           => 'required|string|max:255',
-            'aciklama'        => 'nullable|string',
-            'resim_url'       => 'nullable|string',
-            'barkod_no'       => 'nullable|string|max:100',
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'alt_kategori_id' => 'required|exists:alt_kategoriler,id',
+        'urun_ad'         => 'required|string|max:255',
+        'marka'           => 'required|string|max:255',
+        'model'           => 'required|string|max:255',
+        'aciklama'        => 'nullable|string',
+        'resim_url'       => 'nullable|string',
+        'barkod_no'       => 'nullable|string|max:100',
+        'stok'            => 'required|integer|min:0',
+        'kriter_degerleri'=> 'nullable|array',
+        'varyasyonlar'    => 'nullable|array',
+    ]);
+
+    DB::beginTransaction();
+    try {
+        $urun = Urun::findOrFail($id);
         
-            'stok'            => 'required|integer|min:0',
-            'kriter_degerleri'=> 'nullable|array',
-            'varyasyonlar'    => 'nullable|array',
+        // Ana ürünü güncelle
+        $urun->update([
+            'alt_kategori_id' => $request->alt_kategori_id,
+            'urun_ad'         => $request->urun_ad,
+            'marka'           => $request->marka,
+            'model'           => $request->model,
+            'resim_url'       => $request->resim_url,
+            'barkod_no'       => $request->barkod_no,
+            'aciklama'        => $request->aciklama,
+            'stok'            => $request->stok,
         ]);
 
-        DB::beginTransaction();
-        try {
-            // Ana ürünü güncelle
-            $urun->update([
-                'alt_kategori_id' => $request->alt_kategori_id,
-                'urun_ad'         => $request->urun_ad,
-                'marka'           => $request->marka,
-                'model'           => $request->model,
-                'resim_url'       => $request->resim_url,
-                'barkod_no'       => $request->barkod_no,
-                'aciklama'        => $request->aciklama,
-                
-                'stok'            => $request->stok,
-            ]);
-
-            // Kriter değerlerini güncelle
-            $urun->kriterDegerleri()->detach();
-            if ($request->has('kriter_degerleri') && is_array($request->kriter_degerleri)) {
-                foreach ($request->kriter_degerleri as $kriterId => $degerId) {
-                    if ($degerId) {
-                        $urun->kriterDegerleri()->attach($degerId, ['kriter_id' => $kriterId]);
-                    }
+        // Kriter değerlerini güncelle
+        $urun->kriterDegerleri()->detach();
+        if ($request->has('kriter_degerleri') && is_array($request->kriter_degerleri)) {
+            foreach ($request->kriter_degerleri as $kriterId => $degerId) {
+                if ($degerId) {
+                    $urun->kriterDegerleri()->attach($degerId, ['kriter_id' => $kriterId]);
                 }
             }
+        }
 
-            // Eski varyasyonları sil
-            foreach ($urun->varyasyonlar as $eskiVaryasyon) {
-                UrunVaryasyonKriterDegeri::where('urun_varyasyon_id', $eskiVaryasyon->id)->delete();
-            }
-            $urun->varyasyonlar()->delete();
+        // Eski varyasyonları sil
+        foreach ($urun->varyasyonlar as $eskiVaryasyon) {
+            UrunVaryasyonKriterDegeri::where('urun_varyasyon_id', $eskiVaryasyon->id)->delete();
+        }
+        $urun->varyasyonlar()->delete();
 
-            // Yeni varyasyonları ekle - ANA ÜRÜN BİLGİLERİYLE
-            if ($request->has('varyasyonlar') && is_array($request->varyasyonlar)) {
-                foreach ($request->varyasyonlar as $index => $varyasyonData) {
-                    $varyasyonBarkod = $request->barkod_no 
-                        ? $request->barkod_no . '-V' . ($index + 1)
-                        : null;
+        // Yeni varyasyonları ekle
+        if ($request->has('varyasyonlar') && is_array($request->varyasyonlar)) {
+            foreach ($request->varyasyonlar as $index => $varyasyonData) {
+                $varyasyonBarkod = $request->barkod_no 
+                    ? $request->barkod_no . '-V' . ($index + 1)
+                    : null;
 
-                    $varyasyon = $urun->varyasyonlar()->create([
-                        // Ana ürün bilgilerini kopyala
-                        'urun_ad'   => $request->urun_ad,
-                        'marka'     => $request->marka,
-                        'model'     => $request->model,
-                        'aciklama'  => $request->aciklama,
-                        'resim_url' => $request->resim_url,
-                        'barkod_no' => $varyasyonBarkod,
-                        // Varyasyona özgü bilgiler
-                        
-                        'stok'      => $varyasyonData['stok'],
-                        
-                    ]);
+                $varyasyon = $urun->varyasyonlar()->create([
+                    'urun_ad'   => $request->urun_ad,
+                    'marka'     => $request->marka,
+                    'model'     => $request->model,
+                    'aciklama'  => $request->aciklama,
+                    'resim_url' => $request->resim_url,
+                    'barkod_no' => $varyasyonBarkod,
+                    'stok'      => $varyasyonData['stok'],
+                ]);
 
-                    if (isset($varyasyonData['kriter_degerleri']) && is_array($varyasyonData['kriter_degerleri'])) {
-                        foreach ($varyasyonData['kriter_degerleri'] as $kriterId => $degerId) {
-                            if ($degerId) {
-                                UrunVaryasyonKriterDegeri::create([
-                                    'urun_varyasyon_id' => $varyasyon->id,
-                                    'kriter_id'         => $kriterId,
-                                    'kriter_deger_id'   => $degerId,
-                                ]);
-                            }
+                if (isset($varyasyonData['kriter_degerleri']) && is_array($varyasyonData['kriter_degerleri'])) {
+                    foreach ($varyasyonData['kriter_degerleri'] as $kriterId => $degerId) {
+                        if ($degerId) {
+                            UrunVaryasyonKriterDegeri::create([
+                                'urun_varyasyon_id' => $varyasyon->id,
+                                'kriter_id'         => $kriterId,
+                                'kriter_deger_id'   => $degerId,
+                            ]);
                         }
                     }
                 }
             }
-
-            // Uyumluluğu güncelle
-            $this->syncUyumluluk($urun);
-
-            DB::commit();
-            return redirect()->route('admin.urunler.index')
-                ->with('success', 'Ürün başarıyla güncellendi.');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Ürün güncellenirken hata oluştu: ' . $e->getMessage());
         }
+
+        // Uyumluluğu güncelle
+        $this->syncUyumluluk($urun);
+
+        DB::commit();
+        return redirect()->route('admin.urunler.index')
+            ->with('success', 'Ürün başarıyla güncellendi.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Ürün güncellenirken hata oluştu: ' . $e->getMessage());
     }
+}
 
    public function destroy(Urun $urun)
     {
@@ -511,5 +514,17 @@ class UrunController extends Controller
         'message' => 'Fiyat başarıyla eklendi',
         'satis_fiyati' => $urun->satis_fiyati
     ]);
+}
+
+public function show($id)
+{
+    // Ürünü ve ilişkili tüm verileri çekiyoruz
+    $urun = Urun::with([
+        'altKategori.kategori', 
+        'fiyatlar', 
+        'varyasyonlar' // İlişkili kriter değerlerini view içinde çekeceğiz veya modelde tanımlıysa buraya ekleyebilirsiniz
+    ])->findOrFail($id);
+
+    return view('admin.urunler.show', compact('urun'));
 }
 }

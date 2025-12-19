@@ -1502,7 +1502,7 @@ body {
                 @endguest
                 </div>
         </div>
-    </div>
+        </div>
 </div>
 
 <nav class="main-navbar">
@@ -1753,9 +1753,9 @@ body {
                     @guest
                     <li class="mobile-nav-item mt-3">
                          <a href="{{ route('login') }}" class="btn-modern btn-primary w-100">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Giriş Yap
-                        </a>
+                             <i class="fas fa-sign-in-alt"></i>
+                             Giriş Yap
+                         </a>
                     </li>
                      <li class="mobile-nav-item">
                         <a href="{{ route('register') }}" class="btn-modern btn-warning w-100">

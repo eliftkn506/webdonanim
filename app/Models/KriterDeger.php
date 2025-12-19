@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\LogsAdminActivity;
+use App\Models\UrunKriterDegeri;
 
 class KriterDeger extends Model
 {
@@ -22,11 +23,17 @@ class KriterDeger extends Model
         return $this->belongsTo(AltKategori::class, 'alt_kategori_id');
     }
 
-    // Kriter değeri ürünlerle pivot
+    // Kriter değeri ürünlerle pivot (önceden var)
     public function urunler()
     {
         return $this->belongsToMany(Urun::class, 'urun_kriter_degerleri', 'kriter_deger_id', 'urun_id')
                     ->withPivot('kriter_id')
                     ->withTimestamps();
+    }
+
+    // YENİ: Ürün kriter değerleri ilişkisi (count için gerekli)
+    public function urunKriterDegerleri()
+    {
+        return $this->hasMany(UrunKriterDegeri::class, 'kriter_deger_id');
     }
 }

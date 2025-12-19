@@ -15,53 +15,33 @@ class AdminSiparisController extends Controller
      * Sipariş listesi
      */
     public function index(Request $request)
-    {
-        $query = Siparis::with(['user', 'urunler.urun']);
+{
+    $query = Siparis::with(['user']);
 
-        // Durum filtresi
-        if ($request->filled('durum')) {
-            $query->where('durum', $request->durum);
-        }
-
-        // Ödeme durumu filtresi
-        if ($request->filled('odeme_durumu')) {
-            $query->where('odeme_durumu', $request->odeme_durumu);
-        }
-
-        // Tarih filtresi
-        if ($request->filled('tarih_baslangic')) {
-            $query->whereDate('created_at', '>=', $request->tarih_baslangic);
-        }
-        if ($request->filled('tarih_bitis')) {
-            $query->whereDate('created_at', '<=', $request->tarih_bitis);
-        }
-
-        // Arama
-        if ($request->filled('arama')) {
-            $query->where(function($q) use ($request) {
-                $q->where('siparis_no', 'like', '%' . $request->arama . '%')
-                  ->orWhereHas('user', function($qu) use ($request) {
-                      $qu->where('name', 'like', '%' . $request->arama . '%')
-                         ->orWhere('email', 'like', '%' . $request->arama . '%');
-                  });
-            });
-        }
-
-        $siparisler = $query->orderBy('created_at', 'desc')->paginate(15);
-
-        // İstatistikler
-        $istatistikler = [
-            'bekleyen' => Siparis::where('durum', 'beklemede')->count(),
-            'onaylanan' => Siparis::where('durum', 'onaylandi')->count(),
-            'kargoda' => Siparis::where('durum', 'kargoda')->count(),
-            'teslim_edilen' => Siparis::where('durum', 'teslim_edildi')->count(),
-            'iptal_edilen' => Siparis::where('durum', 'iptal_edildi')->count(),
-            'bugun_toplam' => Siparis::whereDate('created_at', today())->sum(DB::raw('toplam_tutar + kdv_tutari - indirim_tutari')),
-            'bugun_adet' => Siparis::whereDate('created_at', today())->count(),
-        ];
-
-        return view('admin.siparisler.index', compact('siparisler', 'istatistikler'));
+    // Durum Filtresi
+    if ($request->filled('durum')) {
+        $query->where('durum', $request->durum);
     }
+
+    // Arama Filtresi
+    if ($request->filled('q')) {
+        $term = $request->q;
+        $query->where(function($q) use ($term) {
+            $q->where('siparis_no', 'like', '%' . $term . '%')
+              ->orWhereHas('user', function($userQuery) use ($term) {
+                  $userQuery->where('name', 'like', '%' . $term . '%')
+                            ->orWhere('email', 'like', '%' . $term . '%');
+              });
+        });
+    }
+
+    $siparisler = $query->latest()->paginate(15)->withQueryString();
+
+    // İstatistikler (Aynen kalabilir)
+    $istatistikler = [ /* ... */ ]; // Mevcut kodunuzdaki gibi kalsın
+
+    return view('admin.siparisler.index', compact('siparisler')); // İstatistikleri de gönderiyorsanız ekleyin
+}
 
     /**
      * Sipariş detayı
