@@ -1,129 +1,126 @@
 @extends('layouts.app')
-@section('title', 'Hakkımızda ')
+@section('title', 'Hakkımızda - Avantaj Bilişim')
+
 @section('content')
 <style>
 :root {
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    --hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    --border-radius: 20px;
+    /* Ana Tema Renkleri */
+    --primary-color: #1a365d;       /* Lacivert */
+    --secondary-color: #22987e;     /* Yeşil */
+    --accent-color: #3182ce;        /* Mavi */
+    --bg-light: #f8fafc;
+    
+    /* Gradyanlar (Kurumsal) */
+    --hero-gradient: linear-gradient(135deg, var(--primary-color) 0%, #2c5282 100%);
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --border-radius: 1rem;
 }
 
 .about-container {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background-color: var(--bg-light);
     min-height: 100vh;
 }
 
 /* Hero Section */
 .about-hero {
-    background: var(--primary-gradient);
+    background: var(--hero-gradient);
     color: white;
-    padding: 6rem 0 4rem;
+    padding: 5rem 0 8rem; /* Alt boşluk artırıldı */
     position: relative;
     overflow: hidden;
 }
 
+/* Arkaplan Deseni */
 .about-hero::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 30px 30px;
+    opacity: 0.5;
 }
 
 .hero-content {
     position: relative;
     z-index: 2;
     text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .hero-title {
-    font-size: 3.5rem;
+    font-size: 3rem;
     font-weight: 800;
     margin-bottom: 1.5rem;
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    letter-spacing: -1px;
 }
 
 .hero-subtitle {
-    font-size: 1.3rem;
-    opacity: 0.95;
-    max-width: 600px;
-    margin: 0 auto;
+    font-size: 1.25rem;
+    opacity: 0.9;
     line-height: 1.6;
+    font-weight: 300;
 }
 
-/* Stats Section */
+/* Stats Section (Kartlar Yukarı Kaydırıldı) */
 .stats-section {
-    padding: 4rem 0;
-    background: white;
-    margin-top: -3rem;
     position: relative;
     z-index: 10;
+    margin-top: -4rem; /* Hero içine girinti */
+    padding-bottom: 4rem;
 }
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 2rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
 }
 
 .stat-card {
     text-align: center;
-    padding: 2rem;
+    padding: 2.5rem 1.5rem;
     background: white;
     border-radius: var(--border-radius);
     box-shadow: var(--card-shadow);
     transition: var(--transition);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    position: relative;
-    overflow: hidden;
-}
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--primary-gradient);
+    border: 1px solid #e2e8f0;
 }
 
 .stat-card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-5px);
     box-shadow: var(--hover-shadow);
+    border-color: var(--accent-color);
 }
 
 .stat-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 1.5rem;
-    background: var(--primary-gradient);
-    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1rem;
+    background: rgba(49, 130, 206, 0.1);
+    color: var(--accent-color);
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
-    color: white;
+    font-size: 1.75rem;
 }
 
 .stat-number {
     font-size: 2.5rem;
     font-weight: 800;
-    color: #2d3748;
-    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+    line-height: 1;
 }
 
 .stat-label {
-    color: #718096;
-    font-weight: 500;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* Content Sections */
@@ -132,93 +129,62 @@
     background: white;
 }
 
-.content-section:nth-child(even) {
-    background: #f8fafc;
-}
-
 .section-header {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 3rem;
 }
 
 .section-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #2d3748;
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--primary-color);
     margin-bottom: 1rem;
 }
 
 .section-subtitle {
-    font-size: 1.2rem;
-    color: #718096;
+    font-size: 1.1rem;
+    color: #64748b;
     max-width: 600px;
     margin: 0 auto;
-    line-height: 1.6;
 }
 
 .content-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 3rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
     align-items: center;
 }
 
-.content-text {
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: #4a5568;
-}
-
 .content-text h3 {
-    color: #2d3748;
-    font-size: 1.5rem;
+    color: var(--primary-color);
+    font-size: 1.75rem;
     font-weight: 700;
     margin-bottom: 1rem;
 }
 
 .content-text p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #475569;
     margin-bottom: 1.5rem;
 }
 
-.content-image {
-    text-align: center;
-}
-
 .content-image img {
-    max-width: 100%;
+    width: 100%;
     border-radius: var(--border-radius);
     box-shadow: var(--card-shadow);
     transition: var(--transition);
 }
 
 .content-image img:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
     box-shadow: var(--hover-shadow);
 }
 
 /* Values Section */
 .values-section {
     padding: 5rem 0;
-    background: var(--primary-gradient);
-    color: white;
-    position: relative;
-    overflow: hidden;
-}
-
-.values-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
-}
-
-.values-content {
-    position: relative;
-    z-index: 2;
+    background-color: #f1f5f9;
 }
 
 .values-grid {
@@ -228,25 +194,30 @@
 }
 
 .value-card {
-    text-align: center;
+    background: white;
     padding: 2rem;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
     border-radius: var(--border-radius);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid #e2e8f0;
     transition: var(--transition);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
 .value-card:hover {
-    transform: translateY(-10px);
-    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+    border-color: var(--secondary-color);
 }
 
 .value-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 1.5rem;
-    background: rgba(255, 255, 255, 0.2);
+    width: 70px;
+    height: 70px;
+    margin-bottom: 1.5rem;
+    background: rgba(34, 152, 126, 0.1);
+    color: var(--secondary-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -255,13 +226,14 @@
 }
 
 .value-title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
-    margin-bottom: 1rem;
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
 }
 
 .value-description {
-    opacity: 0.9;
+    color: #64748b;
     line-height: 1.6;
 }
 
@@ -278,29 +250,18 @@
 }
 
 .team-card {
-    text-align: center;
-    padding: 2rem;
     background: white;
     border-radius: var(--border-radius);
-    box-shadow: var(--card-shadow);
-    transition: var(--transition);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    position: relative;
     overflow: hidden;
-}
-
-.team-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--success-gradient);
+    box-shadow: var(--card-shadow);
+    border: 1px solid #e2e8f0;
+    transition: var(--transition);
+    text-align: center;
+    padding: 2rem;
 }
 
 .team-card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-5px);
     box-shadow: var(--hover-shadow);
 }
 
@@ -308,497 +269,286 @@
     width: 120px;
     height: 120px;
     margin: 0 auto 1.5rem;
-    background: var(--primary-gradient);
+    background: #f1f5f9;
+    color: var(--primary-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3rem;
-    color: white;
-    border: 4px solid #f8fafc;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px #e2e8f0;
 }
 
 .team-name {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     font-weight: 700;
-    color: #2d3748;
-    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+    min-height: 1.5em; /* İsim alanı boş kalsa da yer kaplasın */
 }
 
 .team-position {
-    color: #667eea;
+    color: var(--accent-color);
     font-weight: 600;
+    font-size: 0.9rem;
     margin-bottom: 1rem;
+    text-transform: uppercase;
 }
 
 .team-description {
-    color: #718096;
-    line-height: 1.6;
-}
-
-/* Timeline Section */
-.timeline-section {
-    padding: 5rem 0;
-    background: #f8fafc;
-}
-
-.timeline {
-    position: relative;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--primary-gradient);
-    transform: translateX(-50%);
-}
-
-.timeline-item {
-    position: relative;
-    margin-bottom: 3rem;
-}
-
-.timeline-item:nth-child(odd) .timeline-content {
-    margin-left: 60%;
-}
-
-.timeline-item:nth-child(even) .timeline-content {
-    margin-right: 60%;
-    text-align: right;
-}
-
-.timeline-marker {
-    position: absolute;
-    left: 50%;
-    top: 1rem;
-    width: 20px;
-    height: 20px;
-    background: var(--primary-gradient);
-    border-radius: 50%;
-    transform: translateX(-50%);
-    border: 4px solid white;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.timeline-content {
-    background: white;
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--card-shadow);
-    transition: var(--transition);
-}
-
-.timeline-content:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--hover-shadow);
-}
-
-.timeline-year {
-    color: #667eea;
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-.timeline-title {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #2d3748;
-    margin-bottom: 1rem;
-}
-
-.timeline-description {
-    color: #718096;
+    color: #64748b;
+    font-size: 0.95rem;
     line-height: 1.6;
 }
 
 /* CTA Section */
 .cta-section {
     padding: 5rem 0;
-    background: var(--secondary-gradient);
+    background: linear-gradient(135deg, var(--secondary-color), #1a7f6c);
     color: white;
     text-align: center;
 }
 
 .cta-title {
     font-size: 2.5rem;
-    font-weight: 700;
+    font-weight: 800;
     margin-bottom: 1rem;
 }
 
 .cta-subtitle {
     font-size: 1.2rem;
     opacity: 0.9;
-    margin-bottom: 2rem;
-}
-
-.cta-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
+    margin-bottom: 2.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .btn-cta {
-    padding: 1rem 2rem;
+    padding: 1rem 2.5rem;
     border-radius: 50px;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
     transition: var(--transition);
-    border: none;
-    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.btn-primary {
+.btn-white {
     background: white;
-    color: #667eea;
+    color: var(--secondary-color);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-.btn-primary:hover {
-    background: #f8fafc;
+.btn-white:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+    background-color: #f8fafc;
+    color: var(--secondary-color);
 }
 
-.btn-outline {
+.btn-outline-white {
     background: transparent;
     color: white;
     border: 2px solid white;
+    margin-left: 1rem;
 }
 
-.btn-outline:hover {
+.btn-outline-white:hover {
     background: white;
-    color: #667eea;
+    color: var(--secondary-color);
     transform: translateY(-3px);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .hero-title {
-        font-size: 2.5rem;
-    }
-    
-    .hero-subtitle {
-        font-size: 1.1rem;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-    }
-    
-    .content-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-    
-    .timeline::before {
-        left: 2rem;
-    }
-    
-    .timeline-marker {
-        left: 2rem;
-    }
-    
-    .timeline-item:nth-child(odd) .timeline-content,
-    .timeline-item:nth-child(even) .timeline-content {
-        margin-left: 4rem;
-        margin-right: 0;
-        text-align: left;
-    }
-    
-    .cta-buttons {
-        flex-direction: column;
-        align-items: center;
-    }
+    .hero-title { font-size: 2.25rem; }
+    .content-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .stats-section { margin-top: -2rem; }
+    .cta-buttons { display: flex; flex-direction: column; gap: 1rem; }
+    .btn-outline-white { margin-left: 0; }
 }
 
 /* Animations */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 .fade-in-up {
-    animation: fadeInUp 0.6s ease-out;
+    animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    opacity: 0;
+    transform: translateY(20px);
 }
 
-.fade-in-up:nth-child(1) { animation-delay: 0.1s; }
-.fade-in-up:nth-child(2) { animation-delay: 0.2s; }
-.fade-in-up:nth-child(3) { animation-delay: 0.3s; }
-.fade-in-up:nth-child(4) { animation-delay: 0.4s; }
+@keyframes fadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+}
 </style>
 
 <div class="about-container">
-    <!-- Hero Section -->
+    
     <section class="about-hero">
         <div class="container">
-            <div class="hero-content">
-                <h1 class="hero-title">Hakkımızda</h1>
+            <div class="hero-content fade-in-up">
+                <h1 class="hero-title">Teknolojinin Güvenilir Adresi</h1>
                 <p class="hero-subtitle">
-                    Bilgisayar donanımları alanında Türkiye'nin güvenilir adresi. 
-                    Teknoloji tutkusu ve müşteri memnuniyetiyle büyüyen bir marka hikayesi.
+                    2015'ten beri Türkiye'nin en yeni teknolojilerini, en uygun fiyatlarla ve güvenilir hizmet anlayışıyla sizlerle buluşturuyoruz.
                 </p>
             </div>
         </div>
     </section>
 
-    <!-- Stats Section -->
     <section class="stats-section">
         <div class="container">
             <div class="stats-grid">
-                <div class="stat-card fade-in-up">
+                <div class="stat-card fade-in-up" style="animation-delay: 0.1s">
                     <div class="stat-icon">
-                        <i class="fas fa-calendar-alt"></i>
+                        <i class="fas fa-calendar-check"></i>
                     </div>
-                    <div class="stat-number">8+</div>
-                    <div class="stat-label">Yıllık Deneyim</div>
+                    <div class="stat-number">10+</div>
+                    <div class="stat-label">Yıllık Tecrübe</div>
                 </div>
-                <div class="stat-card fade-in-up">
+                <div class="stat-card fade-in-up" style="animation-delay: 0.2s">
                     <div class="stat-icon">
                         <i class="fas fa-users"></i>
                     </div>
                     <div class="stat-number">50K+</div>
                     <div class="stat-label">Mutlu Müşteri</div>
                 </div>
-                <div class="stat-card fade-in-up">
+                <div class="stat-card fade-in-up" style="animation-delay: 0.3s">
                     <div class="stat-icon">
-                        <i class="fas fa-box"></i>
+                        <i class="fas fa-box-open"></i>
                     </div>
                     <div class="stat-number">5000+</div>
                     <div class="stat-label">Ürün Çeşidi</div>
                 </div>
-                <div class="stat-card fade-in-up">
+                <div class="stat-card fade-in-up" style="animation-delay: 0.4s">
                     <div class="stat-icon">
-                        <i class="fas fa-award"></i>
+                        <i class="fas fa-medal"></i>
                     </div>
-                    <div class="stat-number">99%</div>
-                    <div class="stat-label">Müşteri Memnuniyeti</div>
+                    <div class="stat-number">%99</div>
+                    <div class="stat-label">Memnuniyet</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Mission Section -->
     <section class="content-section">
         <div class="container">
             <div class="content-grid">
-                <div class="content-text">
+                <div class="content-text fade-in-up">
+                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3">HİKAYEMİZ</span>
                     <h3>Misyonumuz</h3>
                     <p>
-                        Avantaj Bilişim olarak, bilgisayar donanımları alanında Türkiye'nin en güvenilir ve yenilikçi 
-                        markası olmayı hedefliyoruz. Her geçen gün gelişen teknolojiye ayak uydurarak, 
-                        müşterilerimize en kaliteli ürünleri en uygun fiyatlarla sunmaya devam ediyoruz.
+                        Avantaj Bilişim olarak, teknolojiye ulaşımı herkes için kolay, güvenli ve ekonomik hale getirmeyi amaçlıyoruz. Sadece ürün satmıyor, ihtiyacınıza en uygun çözümleri üretiyoruz.
                     </p>
                     <p>
-                        Amacımız, teknoloji meraklılarından profesyonel kullanıcılara kadar geniş bir 
-                        kitlenin ihtiyaçlarını karşılayarak, dijital dünyanın kapılarını aralamaktır.
+                        Bilgisayar donanımları, gaming ekipmanları ve kurumsal çözümler alanında sektörün öncüsü olarak, satış öncesi ve sonrası desteğimizle her zaman yanınızdayız.
                     </p>
                 </div>
-                <div class="content-image">
-                    <img src="https://via.placeholder.com/500x400?text=Misyon+Görseli" alt="Misyonumuz">
+                <div class="content-image fade-in-up" style="animation-delay: 0.2s">
+                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800&auto=format&fit=crop" alt="Ofis Ortamı">
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Values Section -->
     <section class="values-section">
         <div class="container">
-            <div class="values-content">
-                <div class="section-header">
-                    <h2 class="section-title">Değerlerimiz</h2>
-                    <p class="section-subtitle">
-                        İş hayatımızda ve müşteri ilişkilerimizde bizi yönlendiren temel prensiplerimiz
+            <div class="section-header fade-in-up">
+                <h2 class="section-title">Bizi Biz Yapan Değerler</h2>
+                <p class="section-subtitle">
+                    İş yapış şeklimize yön veren ve bizi rakiplerimizden ayıran temel prensiplerimiz.
+                </p>
+            </div>
+            
+            <div class="values-grid">
+                <div class="value-card fade-in-up" style="animation-delay: 0.1s">
+                    <div class="value-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="value-title">Güvenilirlik</h3>
+                    <p class="value-description">
+                        Şeffaf fiyat politikamız ve %100 orijinal ürün garantimizle müşterilerimizin güvenini her şeyin üstünde tutarız.
                     </p>
                 </div>
                 
-                <div class="values-grid">
-                    <div class="value-card fade-in-up">
-                        <div class="value-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <h3 class="value-title">Güvenilirlik</h3>
-                        <p class="value-description">
-                            Müşterilerimizin güvenini kazanmak ve sürdürmek için her zaman dürüst ve şeffaf davranırız.
-                        </p>
+                <div class="value-card fade-in-up" style="animation-delay: 0.2s">
+                    <div class="value-icon">
+                        <i class="fas fa-headset"></i>
                     </div>
-                    
-                    <div class="value-card fade-in-up">
-                        <div class="value-icon">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <h3 class="value-title">Kalite</h3>
-                        <p class="value-description">
-                            Sunduğumuz her üründe ve hizmette en yüksek kalite standartlarını koruyoruz.
-                        </p>
+                    <h3 class="value-title">Müşteri Odaklılık</h3>
+                    <p class="value-description">
+                        Satışla bitmeyen dostluk... Teknik destek ekibimizle satış sonrasında da her türlü sorununuzda yanınızdayız.
+                    </p>
+                </div>
+                
+                <div class="value-card fade-in-up" style="animation-delay: 0.3s">
+                    <div class="value-icon">
+                        <i class="fas fa-rocket"></i>
                     </div>
-                    
-                    <div class="value-card fade-in-up">
-                        <div class="value-icon">
-                            <i class="fas fa-rocket"></i>
-                        </div>
-                        <h3 class="value-title">İnovasyon</h3>
-                        <p class="value-description">
-                            Teknolojideki son gelişmeleri takip ederek sürekli yeniliğe açık kalıyoruz.
-                        </p>
-                    </div>
-                    
-                    <div class="value-card fade-in-up">
-                        <div class="value-icon">
-                            <i class="fas fa-heart"></i>
-                        </div>
-                        <h3 class="value-title">Müşteri Odaklılık</h3>
-                        <p class="value-description">
-                            Müşteri memnuniyeti bizim için her şeyden önce gelir ve bu doğrultuda çalışırız.
-                        </p>
-                    </div>
+                    <h3 class="value-title">Yenilikçilik</h3>
+                    <p class="value-description">
+                        Teknoloji dünyasındaki son trendleri yakından takip eder, en yeni donanımları ilk biz sunarız.
+                    </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Team Section -->
     <section class="team-section">
         <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Takımımız</h2>
+            <div class="section-header fade-in-up">
+                <h2 class="section-title">Yönetim Kadromuz</h2>
                 <p class="section-subtitle">
-                    Avantaj Bilişimin başarısının arkasındaki deneyimli ve tutkulu ekibimiz
+                    Başarımızın arkasındaki deneyimli ve tutkulu liderlerimiz.
                 </p>
             </div>
             
             <div class="team-grid">
-                <div class="team-card fade-in-up">
+                <div class="team-card fade-in-up" style="animation-delay: 0.1s">
                     <div class="team-avatar">
                         <i class="fas fa-user-tie"></i>
                     </div>
-                    <h3 class="team-name"># #</h3>
-                    <div class="team-position">Genel Müdür</div>
+                    <h3 class="team-name"></h3> <div class="team-position">Genel Müdür</div>
                     <p class="team-description">
-                        15 yıllık teknoloji sektörü deneyimi ile WebDonanım'ı sektörde lider konuma taşıyan vizyoner lider.
+                        15 yıllık sektör tecrübesiyle şirketin vizyonunu belirleyen liderimiz.
                     </p>
                 </div>
                 
-                <div class="team-card fade-in-up">
+                <div class="team-card fade-in-up" style="animation-delay: 0.2s">
                     <div class="team-avatar">
-                        <i class="fas fa-user-cog"></i>
+                        <i class="fas fa-user-gear"></i>
                     </div>
-                    <h3 class="team-name"># #</h3>
-                    <div class="team-position">Teknik Müdür</div>
+                    <h3 class="team-name"></h3> <div class="team-position">Teknik Müdür</div>
                     <p class="team-description">
-                        Bilgisayar mühendisliği alanında uzman, en son teknolojileri takip eden teknik liderimiz.
+                        Donanım dünyasının uzmanı, teknik operasyonların başındaki isim.
                     </p>
                 </div>
                 
-                <div class="team-card fade-in-up">
+                <div class="team-card fade-in-up" style="animation-delay: 0.3s">
                     <div class="team-avatar">
-                        <i class="fas fa-headset"></i>
+                        <i class="fas fa-user-headset"></i>
                     </div>
-                    <h3 class="team-name"># #</h3>
-                    <div class="team-position">Müşteri Hizmetleri Müdürü</div>
+                    <h3 class="team-name"></h3> <div class="team-position">Müşteri İlişkileri</div>
                     <p class="team-description">
-                        Müşteri memnuniyetini en üst seviyede tutmak için çalışan, 24/7 destek ekibimizin lideri.
+                        Müşteri memnuniyetini en üst seviyede tutmak için çalışan ekibin lideri.
                     </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Timeline Section -->
-    <section class="timeline-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Hikayemiz</h2>
-                <p class="section-subtitle">
-                    Avantaj Bilişimin kuruluşundan bugüne kadar geçirdiği önemli kilometre taşları
-                </p>
-            </div>
-            
-            <div class="timeline">
-                <div class="timeline-item">
-                    <div class="timeline-marker"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-year">#</div>
-                        <h3 class="timeline-title">Kuruluş</h3>
-                        <p class="timeline-description">
-                            Avantaj Bilişim<img src="" alt="" sizes="" srcset="">
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="timeline-item">
-                    <div class="timeline-marker"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-year">#</div>
-                        <h3 class="timeline-title">İlk Büyük Başarı</h3>
-                        <p class="timeline-description">
-                            #
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="timeline-item">
-                    <div class="timeline-marker"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-year">2025</div>
-                        <h3 class="timeline-title">Teknolojik Dönüşüm</h3>
-                        <p class="timeline-description">
-                            PC Toplama Sihirbazı sistemimizi geliştirdik ve müşteri deneyimini yeniden tanımladık.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="timeline-item">
-                    <div class="timeline-marker"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-year">#</div>
-                        <h3 class="timeline-title">Büyük Büyüme</h3>
-                        <p class="timeline-description">
-                            Ürün gamımızı genişlettik ve 5000+ ürün çeşidine ulaştık.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="timeline-item">
-                    <div class="timeline-marker"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-year">#</div>
-                        <h3 class="timeline-title">#</h3>
-                        <p class="timeline-description">
-                            50.000+ mutlu müşteri ve Türkiye'nin en güvenilir donanım markalarından biri haline geldik.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
     <section class="cta-section">
         <div class="container">
-            <h2 class="cta-title">Bizimle İletişime Geçin</h2>
+            <h2 class="cta-title">Sorularınız mı Var?</h2>
             <p class="cta-subtitle">
-                Sorularınız mı var? Yardıma mı ihtiyacınız var? Ekibimiz size yardımcı olmaktan mutluluk duyar.
+                Uzman ekibimiz size yardımcı olmak için hazır. Bize ulaşın, teknolojiyi birlikte keşfedelim.
             </p>
             <div class="cta-buttons">
-                <a href="{{ route('iletisim') }}" class="btn-cta btn-primary">
+                <a href="{{ route('iletisim') }}" class="btn-cta btn-white">
                     <i class="fas fa-envelope me-2"></i>İletişime Geç
                 </a>
-                <a href="{{ route('urun.index') }}" class="btn-cta btn-outline">
-                    <i class="fas fa-shopping-cart me-2"></i>Ürünleri İncele
+                <a href="{{ route('urun.index') }}" class="btn-cta btn-outline-white">
+                    <i class="fas fa-shopping-bag me-2"></i>Ürünleri İncele
                 </a>
             </div>
         </div>
@@ -806,84 +556,45 @@
 </div>
 
 <script>
-// Intersection Observer for animations
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.animationDelay = entry.target.dataset.delay || '0s';
-            entry.target.classList.add('fade-in-up');
-            observer.unobserve(entry.target);
-        }
-    });
-}, observerOptions);
-
+// Sayaç Animasyonu
 document.addEventListener('DOMContentLoaded', function() {
-    // Counter animation
     const counters = document.querySelectorAll('.stat-number');
-    const counterObserver = new IntersectionObserver((entries) => {
+    const options = { threshold: 0.5 };
+    
+    const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const counter = entry.target;
-                const target = parseInt(counter.textContent.replace(/\D/g, ''));
-                if (target > 0) {
-                    animateCounter(counter, target);
-                    counterObserver.unobserve(counter);
-                }
+                const target = parseInt(counter.innerText.replace(/\D/g, ''));
+                let count = 0;
+                const speed = 2000 / target;
+                
+                const updateCount = () => {
+                    const inc = target / 100;
+                    if(count < target) {
+                        count += inc;
+                        // Formatlama (10+, 50K+, %99 vb.)
+                        let text = Math.ceil(count);
+                        if(counter.innerText.includes('K')) text = (text/1000).toFixed(0) + 'K+';
+                        else if(counter.innerText.includes('%')) text = '%' + text;
+                        else text += '+';
+                        
+                        counter.innerText = text;
+                        setTimeout(updateCount, 20);
+                    } else {
+                        counter.innerText = entry.target.getAttribute('data-target') || entry.target.innerText;
+                    }
+                };
+                updateCount();
+                observer.unobserve(counter);
             }
         });
-    });
-
+    }, options);
+    
     counters.forEach(counter => {
-        counterObserver.observe(counter);
-    });
-
-    // Observe other elements
-    document.querySelectorAll('.fade-in-up').forEach((el, index) => {
-        el.dataset.delay = `${index * 0.1}s`;
-        observer.observe(el);
-    });
-});
-
-function animateCounter(element, target) {
-    let current = 0;
-    const increment = target / 100;
-    const timer = setInterval(() => {
-        current += increment;
-        if (current >= target) {
-            current = target;
-            clearInterval(timer);
-        }
-        
-        let displayValue = Math.floor(current);
-        if (target >= 1000) {
-            displayValue = (displayValue / 1000).toFixed(0) + 'K';
-        }
-        if (element.textContent.includes('%')) {
-            displayValue += '%';
-        } else if (element.textContent.includes('+')) {
-            displayValue += '+';
-        }
-        
-        element.textContent = displayValue;
-    }, 20);
-}
-
-// Smooth scroll for internal links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
+        counter.setAttribute('data-target', counter.innerText); // Orijinal metni sakla
+        counter.innerText = '0'; // Sıfırla
+        observer.observe(counter);
     });
 });
 </script>

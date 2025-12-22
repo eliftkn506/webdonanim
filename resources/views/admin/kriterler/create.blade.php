@@ -32,7 +32,7 @@
                     <button type="submit" class="btn btn-success">
                         <i class="bx bx-plus me-1"></i> Kaydet
                     </button>
-                    <a href="{{ route('admin.kriterler.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('admin.kriterdegerleri.index') }}" class="btn btn-secondary">
                         <i class="bx bx-arrow-back me-1"></i> Geri
                     </a>
                 </div>

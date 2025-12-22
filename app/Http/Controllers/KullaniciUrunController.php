@@ -8,21 +8,19 @@ use App\Models\Kategori;
 use App\Models\AltKategori;
 use App\Models\Kriter;
 use App\Models\KriterDeger;
+use App\Models\Degerlendirme;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Auth;
 
 class KullaniciUrunController extends Controller
 {
     /**
      * Ürün sorgusunu Request filtrelere göre oluşturur.
-     * @param Request $request
-     * @param array $excludeFilters keys to ignore (e.g. ['marka','kriterler'])
-     * @return \Illuminate\Database\Eloquent\Builder
      */
     private function buildUrunQuery(Request $request, array $excludeFilters = [])
     {
@@ -37,7 +35,7 @@ class KullaniciUrunController extends Controller
                 'urunKriterDegerleri.kriterDeger',
                 'fiyatlar' => fn($q) => $q->wherePivot('baslangic_tarihi', '<=', now())
                       ->where(fn($sq) => $sq->whereNull('urun_fiyat_urun.bitis_tarihi')
-                                           ->orWhere('urun_fiyat_urun.bitis_tarihi', '>=', now()))
+                                            ->orWhere('urun_fiyat_urun.bitis_tarihi', '>=', now()))
             ]);
         }
 
@@ -66,29 +64,31 @@ class KullaniciUrunController extends Controller
             $query->whereIn('model', $modeller);
         }
 
-        // KRİTİK ARAMA DÜZELTMESİ (Q): Tüm arama koşullarını tek where(function) içinde toplayıp OR'luyoruz.
+        // ARAMA SORGUSU
         if ($has('q')) {
-            $q = $requestData['q'];
-            $query->where(function($sq) use ($q) {
-                // Temel Ürün alanlarında arama (İlk koşul WHERE'dir, sonra OR)
-                $sq->where('urun_ad', 'like', "%{$q}%")
-                   ->orWhere('marka', 'like', "%{$q}%")
-                   ->orWhere('model', 'like', "%{$q}%");
+            $searchTerm = $requestData['q']; 
+            
+            $query->where(function($sq) use ($searchTerm) {
+                $sq->where('urun_ad', 'like', "%{$searchTerm}%")
+                   ->orWhere('marka', 'like', "%{$searchTerm}%")
+                   ->orWhere('model', 'like', "%{$searchTerm}%");
                    
-                // İlişkili alanlarda arama (OR WHERE HAS)
-                // Bu çağrılar, Query Builder'ın orWhereExists yapısı ile uyumludur.
-                $sq->orWhereHas('altKategori.kategori', fn($q) => $q->where('kategori_ad', 'like', "%{$q}%"));
-                $sq->orWhereHas('altKategori', fn($q) => $q->where('alt_kategori_ad', 'like', "%{$q}%"));
+                $sq->orWhereHas('altKategori.kategori', function($subQuery) use ($searchTerm) {
+                    $subQuery->where('kategori_ad', 'like', "%{$searchTerm}%");
+                });
+
+                $sq->orWhereHas('altKategori', function($subQuery) use ($searchTerm) {
+                    $subQuery->where('alt_kategori_ad', 'like', "%{$searchTerm}%");
+                });
             });
         }
 
-        // Kriterler: AND ilişkisi (Tablo adları açıkça belirtilmeli)
+        // Kriterler
         if ($has('kriterler')) {
             $kriterler = $requestData['kriterler'];
             if (is_array($kriterler)) {
                 foreach ($kriterler as $kriterId => $degerIds) {
                     $degerIds = is_array($degerIds) ? $degerIds : [$degerIds]; 
-                    
                     if (!empty($degerIds)) {
                         $query->whereHas('kriterDegerleri', fn($q) => $q
                             ->where('urun_kriter_degerleri.kriter_id', $kriterId)
@@ -131,7 +131,7 @@ class KullaniciUrunController extends Controller
     }
 
     /**
-     * Apply sorting to the query 
+     * Sıralama işlemleri
      */
     private function applySorting($query, Request $request)
     {
@@ -140,7 +140,6 @@ class KullaniciUrunController extends Controller
         if ($sort === 'price_asc' || $sort === 'price_desc') {
             $direction = $sort === 'price_asc' ? 'asc' : 'desc';
 
-            // DÜZELTME: urun_fiyatlar tablosunu kullan
             $priceSub = \App\Models\UrunFiyat::select('maliyet')
                 ->from('urun_fiyatlar', 'urun_fiyat')
                 ->join('urun_fiyat_urun', 'urun_fiyat.fiyat_id', '=', 'urun_fiyat_urun.fiyat_id')
@@ -165,7 +164,7 @@ class KullaniciUrunController extends Controller
     }
 
     /* ---------------------------------------------------------
-     * Public listing methods
+     * Public Listeleme Metotları
      * --------------------------------------------------------- */
 
     public function index(Request $request)
@@ -255,23 +254,28 @@ class KullaniciUrunController extends Controller
     public function incele($id, Request $request)
     {
         try {
-             $urun = Urun::with([
+            // 1. Ürünü, İlişkili Verileri ve ONAYLI DEĞERLENDİRMELERİ Çek
+            $urun = Urun::with([
                 'altKategori.kategori', 
                 'urunKriterDegerleri.kriter', 
                 'urunKriterDegerleri.kriterDeger',
                 'fiyatlar' => fn($q) => $q->wherePivot('baslangic_tarihi', '<=', now())
-                          ->where(fn($sq) => $sq->whereNull('urun_fiyat_urun.bitis_tarihi')
-                                ->orWhere('urun_fiyat_urun.bitis_tarihi', '>=', now()))
-                          ->latest('urun_fiyat_urun.baslangic_tarihi')
+                                          ->where(fn($sq) => $sq->whereNull('urun_fiyat_urun.bitis_tarihi')
+                                                                ->orWhere('urun_fiyat_urun.bitis_tarihi', '>=', now()))
+                                          ->latest('urun_fiyat_urun.baslangic_tarihi'),
+                // TÜM YORUMLARI ÇEKİYORUZ (onay filtresi kaldırıldı)
+                'degerlendirmeler' => fn($q) => $q->with('user')->latest() 
             ])->findOrFail($id);
 
             $user = auth()->user();
             
+            // Fiyat Hesaplamaları
             $satisFiyati = $urun->getFiyatForUser($user);
             $standartFiyat = $urun->getStandartFiyat();
             $isBayi = $user && ($user->isBayi() ?? false);
             $bayiFiyat = $isBayi ? $urun->getBayiFiyat() : null;
 
+            // Kampanya
             $kampanya = DB::table('kampanya_indirim')
                 ->where('urun_id', $urun->id)
                 ->where('aktif', 1)
@@ -286,12 +290,13 @@ class KullaniciUrunController extends Controller
 
             $isFavorite = $user ? $urun->isFavoriByUser($user) : false;
             
+            // Benzer Ürünler
             $benzerUrunler = collect();
             if ($urun->alt_kategori_id) {
                 $benzerUrunler = Urun::with(['fiyatlar' => fn($q) => $q->wherePivot('baslangic_tarihi', '<=', now())
-                          ->where(fn($sq) => $sq->whereNull('urun_fiyat_urun.bitis_tarihi')
-                                ->orWhere('urun_fiyat_urun.bitis_tarihi', '>=', now()))
-                          ->latest('urun_fiyat_urun.baslangic_tarihi')])
+                                          ->where(fn($sq) => $sq->whereNull('urun_fiyat_urun.bitis_tarihi')
+                                                                ->orWhere('urun_fiyat_urun.bitis_tarihi', '>=', now()))
+                                          ->latest('urun_fiyat_urun.baslangic_tarihi')])
                 ->where('alt_kategori_id', $urun->alt_kategori_id)
                 ->where('id', '!=', $urun->id)
                 ->limit(8)
@@ -299,19 +304,79 @@ class KullaniciUrunController extends Controller
             }
 
             $adet = $request->input('adet', 1);
+            
+            // Layout hatasını önlemek için boş koleksiyon (ZORUNLU)
+            $urunler = collect(); 
 
-            return view('kullanici.urunler.index', compact(
+            // --- DEĞERLENDİRME İSTATİSTİKLERİ ---
+            // Tüm yorumlar üzerinden hesaplama yapıyoruz
+            $yorumSayisi = $urun->degerlendirmeler ? $urun->degerlendirmeler->count() : 0;
+            $ortalamaPuan = ($yorumSayisi > 0) ? $urun->degerlendirmeler->avg('puan') : 0;
+            
+            // Yıldız dağılımı (5 yıldız kaç tane, 4 kaç tane vs.)
+            $yildizDagilimi = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+            if($urun->degerlendirmeler) {
+                foreach($urun->degerlendirmeler as $d) {
+                    if(isset($yildizDagilimi[$d->puan])) {
+                        $yildizDagilimi[$d->puan]++;
+                    }
+                }
+            }
+
+            // DOĞRU VIEW DOSYASINA YÖNLENDİRME
+            return view('kullanici.urunler.incele', compact(
                 'urun', 'adet', 'benzerUrunler', 'isFavorite',
-                'satisFiyati', 'standartFiyat', 'isBayi', 'bayiFiyat', 'kampanya', 'indirimliFiyat'
+                'satisFiyati', 'standartFiyat', 'isBayi', 'bayiFiyat', 'kampanya', 'indirimliFiyat',
+                'urunler', 'yorumSayisi', 'ortalamaPuan', 'yildizDagilimi'
             ));
+
         } catch (\Exception $e) {
             Log::error('Ürün detay hatası: ' . $e->getMessage());
+            // Hata durumunda index'e yönlendir
             return redirect()->route('urun.index')->with('error', 'Ürün bilgileri yüklenirken bir hata oluştu.');
         }
     }
 
     /**
-     * Get filter data (categories, alt categories, brands, models, kriterler, price range)
+     * YENİ: Değerlendirme Kaydetme Metodu
+     */
+    public function degerlendirmeYap(Request $request, $id)
+    {
+        // 1. Giriş Kontrolü
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Yorum yapmak için giriş yapmalısınız.');
+        }
+
+        // 2. Doğrulama
+        $validator = Validator::make($request->all(), [
+            'puan' => 'required|integer|min:1|max:5',
+            'yorum' => 'required|string|min:3|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput()->with('error', 'Lütfen puan verin ve yorum alanını boş bırakmayın.');
+        }
+
+        try {
+            // 3. Kayıt (Onay = 1 yani otomatik onaylı)
+            Degerlendirme::create([
+                'user_id' => Auth::id(),
+                'urun_id' => $id,
+                'puan' => $request->input('puan'),
+                'yorum' => $request->input('yorum'),
+                'onay' => 1 
+            ]);
+
+            return redirect()->back()->with('success', 'Değerlendirmeniz başarıyla yayınlandı.');
+
+        } catch (\Exception $e) {
+            Log::error('Yorum kaydetme hatası: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Bir hata oluştu, lütfen tekrar deneyin.');
+        }
+    }
+
+    /**
+     * Filtre verilerini getir (kategoriler, markalar, vb.)
      */
     private function getFilterData(Request $request, $kategoriId = null, $altKategoriId = null)
     {
@@ -358,7 +423,6 @@ class KullaniciUrunController extends Controller
 
                      $kriterler = Cache::remember($cacheKey, 60, function() use ($effectiveAltKategoriId, $filteredUrunIds) {
                         return Kriter::with(['degerler' => function($query) use ($filteredUrunIds) {
-                            // KRİTİK DÜZELTME: MSSQL UYUMLU JOIN VE GROUP BY
                             $query->select('kriter_degerleri.*')
                                 ->join('urun_kriter_degerleri', 'urun_kriter_degerleri.kriter_deger_id', '=', 'kriter_degerleri.id')
                                 ->selectRaw('COUNT(urun_kriter_degerleri.urun_id) as urun_count')
@@ -379,7 +443,6 @@ class KullaniciUrunController extends Controller
             // Fiyat Aralığı
             $priceRange = $filteredQuery->clone()
                 ->join('urun_fiyat_urun', 'urunler.id', '=', 'urun_fiyat_urun.urun_id')
-                // DÜZELTME: urun_fiyatlar tablosunu kullan
                 ->join('urun_fiyatlar as urun_fiyat', 'urun_fiyat_urun.fiyat_id', '=', 'urun_fiyat.fiyat_id')
                 ->where('urun_fiyat.fiyat_turu', 'standart')
                 ->where(fn($q) => $q->whereNull('urun_fiyat_urun.bitis_tarihi')
@@ -461,7 +524,6 @@ class KullaniciUrunController extends Controller
 
              $kriterler = Cache::remember($cacheKey, 60, function() use ($altKategoriId, $filteredUrunIds) {
                 return Kriter::with(['degerler' => function($q) use ($filteredUrunIds) {
-                    // KRİTİK DÜZELTME: MSSQL UYUMLU JOIN VE GROUP BY
                     $q->select('kriter_degerleri.*')
                         ->join('urun_kriter_degerleri', 'urun_kriter_degerleri.kriter_deger_id', '=', 'kriter_degerleri.id')
                         ->selectRaw('COUNT(urun_kriter_degerleri.urun_id) as urun_count')
@@ -476,7 +538,6 @@ class KullaniciUrunController extends Controller
                 ->filter(fn($k) => $k->degerler->count() > 0)
                 ->values();
              });
-
 
             return response()->json($kriterler);
         } catch (\Exception $e) {
@@ -515,7 +576,6 @@ class KullaniciUrunController extends Controller
 
                 return ['markalar' => $markalar, 'modeller' => $modeller];
              });
-
 
             return response()->json($data);
         } catch (\Exception $e) {

@@ -1,83 +1,40 @@
-@extends('layouts.admin')
-
-@section('title', 'Kriter Değeri Düzenle - Admin Panel')
+@extends('admin.layouts.master')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-py-4">
-    <h4 class="fw-bold py-3 mb-4">Kriter Değeri Düzenle</h4>
-
-    <div class="card mb-4">
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Değer Düzenle</h6>
+        </div>
         <div class="card-body">
-            <form action="{{ route('admin.kriterdegerleri.update', $kriterDeger) }}" method="POST">
 
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            {{-- DÜZELTME: admin.kriterdegerleri.update --}}
+            <form action="{{ route('admin.kriterdegerleri.update', $kriterDeger->id) }}" method="POST">
                 @csrf
                 @method('PUT')
 
-                <!-- Alt Kategori -->
-                <div class="mb-3">
-                    <label for="alt_kategori_id" class="form-label">Alt Kategori</label>
-                    <select name="alt_kategori_id" id="alt_kategori_id" class="form-select" required>
-                        @foreach($altkategoriler as $altkategori)
-                            <option value="{{ $altkategori->id }}" {{ $kriterDeger->alt_kategori_id == $altkategori->id ? 'selected' : '' }}>
-                                {{ $altkategori->alt_kategori_ad }}
-                            </option>
-                        @endforeach
-                    </select>
+                <div class="form-group mb-3">
+                    <label for="deger">Değer Adı</label>
+                    <input type="text" name="deger" class="form-control" id="deger" value="{{ $kriterDeger->deger }}" required>
                 </div>
 
-                <!-- Kriter -->
-                <div class="mb-3">
-                    <label for="kriter_id" class="form-label">Kriter</label>
-                    <select name="kriter_id" id="kriter_id" class="form-select" required>
-                        @foreach($kriterler as $kriter)
-                            <option value="{{ $kriter->id }}" {{ $kriterDeger->kriter_id == $kriter->id ? 'selected' : '' }}>
-                                {{ $kriter->kriter_ad }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Değer -->
-                <div class="mb-3">
-                    <label for="deger" class="form-label">Değer</label>
-                    <input type="text" name="deger" value="{{ $kriterDeger->deger }}" class="form-control" required>
-                </div>
-
-                <div class="text-end">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bx bx-save me-1"></i> Güncelle
-                    </button>
-                    <a href="{{ route('admin.kriterdegerleri.index') }}" class="btn btn-secondary">
-                        <i class="bx bx-arrow-back me-1"></i> Geri
-                    </a>
-                </div>
+                <button type="submit" class="btn btn-primary">Güncelle</button>
+                
+                {{-- DÜZELTME: İptal butonu --}}
+                <a href="{{ route('admin.kriterdegerleri.index', $kriterDeger->kriter_id) }}" class="btn btn-secondary">İptal</a>
             </form>
+
         </div>
     </div>
 </div>
-
-<script>
-document.getElementById('alt_kategori_id').addEventListener('change', function() {
-    let altKategoriId = this.value;
-    let kriterSelect = document.getElementById('kriter_id');
-    let selectedKriterId = "{{ $kriterDeger->kriter_id }}";
-
-    kriterSelect.innerHTML = '<option>Yükleniyor...</option>';
-
-    if (altKategoriId) {
-        fetch('/admin/kriterdegerleri/kriterler/' + altKategoriId)
-            .then(response => response.json())
-            .then(data => {
-                let options = '<option value="">Seçiniz</option>';
-                data.forEach(function(kriter) {
-                    let selected = (kriter.id == selectedKriterId) ? 'selected' : '';
-                    options += `<option value="${kriter.id}" ${selected}>${kriter.kriter_ad}</option>`;
-                });
-                kriterSelect.innerHTML = options;
-            });
-    } else {
-        kriterSelect.innerHTML = '<option value="">Önce alt kategori seçin</option>';
-    }
-});
-</script>
 @endsection

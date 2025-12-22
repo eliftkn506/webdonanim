@@ -288,4 +288,31 @@ public function getFiyatForUser($user = null): ?float
     {
         return $this->stok > 0;
     }
+
+
+    //degerlendirme
+  
+
+public function degerlendirmeler()
+{
+    return $this->hasMany(Degerlendirme::class, 'urun_id');
+}
+
+// Onaylı yorumları getiren scope
+public function onayliDegerlendirmeler()
+{
+    return $this->hasMany(Degerlendirme::class, 'urun_id')->where('onay', true)->latest();
+}
+
+// Ortalama puanı hesaplayan accessor
+public function getOrtalamaPuanAttribute()
+{
+    return $this->onayliDegerlendirmeler()->avg('puan') ?? 0;
+}
+
+// Toplam yorum sayısı
+public function getYorumSayisiAttribute()
+{
+    return $this->onayliDegerlendirmeler()->count();
+}
 }

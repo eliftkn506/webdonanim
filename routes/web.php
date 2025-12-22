@@ -4,17 +4,18 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
-// Controller importları
+// ===================== CONTROLLER IMPORTLARI =====================
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\AltKategoriController;
 use App\Http\Controllers\Admin\KriterController;
 use App\Http\Controllers\Admin\KriterDegerController;
-use App\Http\Controllers\Admin\UyumlulukKuraliController; // YENİ EKLENDİ
+use App\Http\Controllers\Admin\UyumlulukKuraliController;
 use App\Http\Controllers\Admin\UrunController;
 use App\Http\Controllers\Admin\KampanyaIndirimController;
 use App\Http\Controllers\Admin\AdminSiparisController;
+use App\Http\Controllers\Admin\DegerlendirmeController;
 use App\Http\Controllers\WizardController;
 use App\Http\Controllers\KullaniciUrunController;
 use App\Http\Controllers\KullaniciController;
@@ -25,7 +26,7 @@ use App\Http\Controllers\SiparisController;
 use App\Http\Controllers\FaturaController;
 use App\Http\Controllers\OdemeController;
 use App\Models\FavoriUrun;
-use App\Http\Controllers\Admin\KuponController;
+use App\Http\Controllers\Admin\KuponController; // Kupon Controller
 use App\Http\Controllers\Admin\UrunFiyatController;
 use App\Http\Controllers\Admin\BayiController;
 use App\Http\Controllers\BayiBasvuruController;
@@ -40,7 +41,7 @@ Auth::routes();
 Route::get('/bayi-basvuru', [BayiBasvuruController::class, 'showForm'])->name('bayi.basvuru.form');
 Route::post('/bayi-basvuru', [BayiBasvuruController::class, 'submit'])->name('bayi.basvuru.submit');
 
-// ===================== ÜRÜNLER (Kullanıcı) =====================
+// ===================== ÜRÜNLER (Kullanıcı Arayüzü) =====================
 Route::get('/urunler', [KullaniciUrunController::class, 'index'])->name('urun.index');
 Route::get('/urunler/ara', [KullaniciUrunController::class, 'ara'])->name('urun.ara');
 Route::get('/urunler/kategori/{id}', [KullaniciUrunController::class, 'kategori'])->name('urun.kategori');
@@ -70,10 +71,13 @@ Route::get('/sepet/sayisi', function() {
     ]);
 })->name('sepet.sayisi');
 
-// ===================== KULLANICI (AUTH GEREKLİ) =====================
+// ===================== KULLANICI İŞLEMLERİ (AUTH GEREKLİ) =====================
 Route::middleware(['auth'])->group(function () {
     Route::get('/profil', [KullaniciController::class, 'profil'])->name('profil');
     Route::get('/kuponlarim', [KullaniciController::class, 'kuponlarim'])->name('kuponlarim');
+
+    // --- DEĞERLENDİRME YAP (Kullanıcı Tarafı) ---
+    Route::post('/urun/{id}/degerlendirme', [KullaniciUrunController::class, 'degerlendirmeYap'])->name('urun.degerlendirme');
 
     // Konfigürasyon işlemleri
     Route::delete('/kullanici/konfig/{id}', [KullaniciController::class, 'sil'])->name('konfig.sil');
@@ -163,47 +167,68 @@ Route::post('/iletisim', [SayfaController::class, 'iletisimGonder'])->name('ilet
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
 
-    // Ürünler
+    // --- DEĞERLENDİRME YÖNETİMİ ---
+    Route::get('/degerlendirmeler', [DegerlendirmeController::class, 'index'])->name('degerlendirmeler.index');
+    Route::post('/degerlendirmeler/{id}/onayla', [DegerlendirmeController::class, 'onayla'])->name('degerlendirmeler.onayla');
+    Route::delete('/degerlendirmeler/{id}/sil', [DegerlendirmeController::class, 'sil'])->name('degerlendirmeler.sil');
+    Route::post('/degerlendirmeler/{id}/cevapla', [DegerlendirmeController::class, 'cevapla'])->name('degerlendirmeler.cevapla');
+    Route::delete('/degerlendirmeler/{id}/cevap-sil', [DegerlendirmeController::class, 'cevapSil'])->name('degerlendirmeler.cevapSil');
+
+    // --- KATEGORİ VE ALT KATEGORİ YÖNETİMİ ---
+    Route::resource('kategoriler', KategoriController::class)
+         ->parameters(['kategoriler' => 'kategori']);
+    
+    Route::get('kategoriler/{kategori}/alt-kategoriler', [AltKategoriController::class, 'index'])->name('kategoriler.altkategoriler');
+    Route::get('kategoriler/{kategori}/alt-kategoriler/create', [AltKategoriController::class, 'create'])->name('kategoriler.altkategoriler.create');
+    Route::resource('altkategoriler', AltKategoriController::class)->except(['index', 'create']);
+
+    // --- KRİTER VE DEĞER YÖNETİMİ ---
+    Route::resource('kriterler', KriterController::class)
+         ->except(['create']) 
+         ->parameters(['kriterler' => 'kriter']);
+
+    Route::get('altkategoriler/{altKategori}/kriterler', [KriterController::class, 'index'])->name('altkategoriler.kriterler');
+    Route::get('altkategoriler/{altKategori}/kriterler/create', [KriterController::class, 'create'])->name('altkategoriler.kriterler.create');
+
+    // Kriter Değerleri (Kritere Bağlı)
+    Route::controller(KriterDegerController::class)->group(function () {
+        Route::get('/kriter-degerleri', 'index')->name('kriterdegerleri.index'); 
+        Route::get('/kriterler/{kriter}/degerler/create', 'create')->name('kriterdegerleri.create');
+        Route::post('/kriter-degerleri/store', 'store')->name('kriterdegerleri.store');
+        Route::get('/kriter-degerleri/{kriterDeger}/edit', 'edit')->name('kriterdegerleri.edit');
+        Route::put('/kriter-degerleri/{kriterDeger}', 'update')->name('kriterdegerleri.update');
+        Route::delete('/kriter-degerleri/{kriterDeger}', 'destroy')->name('kriterdegerleri.destroy');
+    });
+
+    // --- ÜRÜN YÖNETİMİ ---
     Route::get('urunler/uyumlu', [UrunController::class, 'uyumluUrunler'])->name('urunler.uyumlu');
     Route::resource('urunler', UrunController::class);
+    
     Route::get('urunler/kriterler/{altKategoriId}', [UrunController::class, 'getKriterlerByAltKategori'])
         ->name('urunler.getKriterlerByAltKategori');
 
-    // Kategoriler
-    Route::resource('kategoriler', KategoriController::class);
-    Route::resource('altkategoriler', AltKategoriController::class);
-
-    // Kriterler
-    Route::resource('kriterler', KriterController::class);
-    Route::resource('kriterdegerleri', KriterDegerController::class);
-    Route::get('kriterdegerleri/kriterler/{altKategoriId}', [KriterDegerController::class, 'getKriterlerByAltKategori'])
-        ->name('kriterdegerleri.getKriterlerByAltKategori');
-
-    // =========================================================
-    // Uyumluluk Kuralları (YENİ EKLENEN KISIM)
-    // =========================================================
+    // --- UYUMLULUK KURALLARI ---
     Route::resource('uyumluluk', UyumlulukKuraliController::class);
     Route::get('uyumluluk/kriterler/{altKategoriId}', [UyumlulukKuraliController::class, 'getKriterler'])
         ->name('uyumluluk.kriterler');
     Route::post('uyumluluk/yeniden-hesapla', [UyumlulukKuraliController::class, 'yenidenHesaplaTumunu'])
         ->name('uyumluluk.yeniden-hesapla');
-    // =========================================================
 
-    // Kampanyalar
+    // --- KAMPANYA YÖNETİMİ ---
     Route::resource('kampanyalar', KampanyaIndirimController::class);
 
-    // Siparişler
+    // --- KUPON YÖNETİMİ (YENİ EKLENDİ) ---
+    Route::resource('kuponlar', KuponController::class);
+    Route::get('kuponlar/kullanici-ara', [KuponController::class, 'kullaniciAra'])->name('kuponlar.kullanici-ara');
+    Route::post('kuponlar/otomatik-ata', [KuponController::class, 'kuralBazliKuponlariAta'])->name('kuponlar.otomatik-ata');
+
+    // --- SİPARİŞ YÖNETİMİ ---
     Route::resource('siparisler', AdminSiparisController::class);
     Route::get('siparisler/bekleyen', [AdminSiparisController::class, 'bekleyen'])->name('siparisler.bekleyen');
     Route::post('siparisler/{id}/durum-guncelle', [AdminSiparisController::class, 'durumGuncelle'])
         ->name('siparisler.durumGuncelle');
 
-    // Kuponlar tanımı
-    Route::resource('kuponlar', KuponController::class);
-    Route::get('kuponlar/kullanici-ara', [KuponController::class, 'kullaniciAra'])->name('kuponlar.kullanici-ara');
-    Route::post('kuponlar/otomatik-ata', [KuponController::class, 'kuralBazliKuponlariAta'])->name('kuponlar.otomatik-ata');
-
-    // Fiyat CRUD İşlemleri
+    // --- FİYAT YÖNETİMİ ---
     Route::resource('fiyatlar', UrunFiyatController::class)->except(['show']);
     Route::post('fiyatlar/preview', [UrunFiyatController::class, 'preview'])->name('fiyatlar.preview');
     Route::get('urunler/{urun}/fiyat-ata', [UrunFiyatController::class, 'assignToUrun'])->name('urunler.fiyat.assign');
@@ -211,10 +236,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::delete('urunler/{urun}/fiyat/{fiyat}', [UrunFiyatController::class, 'removeAssignment'])->name('urunler.fiyat.remove');
     Route::get('fiyatlar/{fiyat}/hesapla', [UrunFiyatController::class, 'hesaplaFiyat'])->name('fiyatlar.hesapla');
 
-    // Bayiler
+    // --- BAYİ YÖNETİMİ ---
     Route::prefix('bayiler')->name('bayiler.')->group(function () {
-        Route::get('/basvurular', [BayiController::class, 'basvurular'])->name('basvurular'); // Önce başvurular
-        Route::get('/', [BayiController::class, 'index'])->name('index'); // Sonra liste
+        Route::get('/basvurular', [BayiController::class, 'basvurular'])->name('basvurular'); 
+        Route::get('/', [BayiController::class, 'index'])->name('index'); 
         Route::get('/{basvuru}', [BayiController::class, 'show'])->name('show');
         Route::post('/{basvuru}/onayla', [BayiController::class, 'approve'])->name('approve');
         Route::post('/{basvuru}/reddet', [BayiController::class, 'reject'])->name('reject');

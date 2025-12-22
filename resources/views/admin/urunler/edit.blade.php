@@ -1,4 +1,3 @@
-
 @extends('layouts.admin')
 
 @section('title', 'Ürün Düzenle')
@@ -47,7 +46,7 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.urunler.update', ['urunler' => $urun->id]) }}" method="POST" id="urunForm">
+    <form action="{{ route('admin.urunler.update', ['urunler' => $urun->id]) }}" method="POST" id="urunForm" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         
@@ -95,6 +94,7 @@
                         <div class="row g-3">
                             @foreach($urun->altKategori->kriterler as $kriter)
                                 @php
+                                    // belongsToMany ilişkisi olduğu için pivot verisine bakıyoruz
                                     $secilenDeger = $urun->kriterDegerleri->firstWhere('pivot.kriter_id', $kriter->id);
                                 @endphp
                                 <div class="col-md-6">
@@ -137,6 +137,7 @@
                                         <div class="row g-2 mb-3">
                                             @foreach($urun->altKategori->kriterler as $kriter)
                                                 @php
+                                                    // Varyasyonun pivot tablosundan değeri buluyoruz
                                                     $varyasyonKriter = \App\Models\UrunVaryasyonKriterDegeri::where('urun_varyasyon_id', $varyasyon->id)
                                                         ->where('kriter_id', $kriter->id)->first();
                                                 @endphp
@@ -216,25 +217,26 @@
 
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="card-title mb-0">Medya</h5>
+                        <h5 class="card-title mb-0">Ürün Görseli</h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label class="form-label">Resim URL</label>
-                            <input type="text" name="resim_url" id="resim_url_input" class="form-control" value="{{ old('resim_url', $urun->resim_url) }}" placeholder="https://...">
+                            <label class="form-label">Fotoğraf Yükle</label>
+                            <input type="file" name="resim" id="resim_input" class="form-control" accept="image/png, image/jpeg, image/jpg, image/webp">
+                            <div class="form-text text-muted small">Maksimum 2MB. (jpg, png, webp)</div>
                         </div>
-                        <div class="border rounded d-flex align-items-center justify-content-center bg-light" style="height: 200px; overflow: hidden;">
+                        <div class="border rounded d-flex align-items-center justify-content-center bg-light position-relative" style="height: 250px; overflow: hidden;">
                             @if($urun->resim_url)
-                                <img id="image_preview" src="{{ $urun->resim_url }}" alt="Önizleme" style="max-width: 100%; max-height: 100%;" class="d-block">
+                                <img id="image_preview" src="{{ asset($urun->resim_url) }}" alt="Önizleme" style="max-width: 100%; max-height: 100%;" class="d-block">
                                 <div id="no_image_placeholder" class="text-center text-muted" style="display: none;">
-                                    <i class="bx bx-image fs-1"></i>
-                                    <div class="small mt-1">Resim Yok</div>
+                                    <i class="bx bx-cloud-upload fs-1"></i>
+                                    <div class="small mt-1">Görsel Seçilmedi</div>
                                 </div>
                             @else
                                 <img id="image_preview" src="" alt="Önizleme" style="display: none; max-width: 100%; max-height: 100%;">
                                 <div id="no_image_placeholder" class="text-center text-muted">
-                                    <i class="bx bx-image fs-1"></i>
-                                    <div class="small mt-1">Resim Yok</div>
+                                    <i class="bx bx-cloud-upload fs-1"></i>
+                                    <div class="small mt-1">Görsel Seçilmedi</div>
                                 </div>
                             @endif
                         </div>
@@ -259,25 +261,31 @@
     document.addEventListener('DOMContentLoaded', function() {
         // PHP'den gelen kriter verisi
         let kriterlerData = @json($urun->altKategori->kriterler ?? []);
+        // Mevcut varyasyon sayısını alarak ID çakışmasını önleyelim
         let varyasyonSayac = {{ $urun->varyasyonlar->count() + 100 }}; 
         
         const varyasyonContainer = document.getElementById('varyasyonlar-container');
         const emptyState = document.getElementById('varyasyon-empty-state');
 
-        // Resim Önizleme
-        const imgInput = document.getElementById('resim_url_input');
+        // Resim Önizleme (Dosya Yükleme için)
+        const imgInput = document.getElementById('resim_input');
         const imgPrev = document.getElementById('image_preview');
         const noImgPlace = document.getElementById('no_image_placeholder');
         
-        if(imgInput && imgPrev) {
-            imgInput.addEventListener('input', function() {
-                if(this.value) {
-                    imgPrev.src = this.value;
-                    imgPrev.style.display = 'block';
-                    if(noImgPlace) noImgPlace.style.display = 'none';
+        if(imgInput) {
+            imgInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if(file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imgPrev.src = e.target.result;
+                        imgPrev.style.display = 'block';
+                        if(noImgPlace) noImgPlace.style.display = 'none';
+                    }
+                    reader.readAsDataURL(file);
                 } else {
-                    imgPrev.style.display = 'none';
-                    if(noImgPlace) noImgPlace.style.display = 'block';
+                    // Dosya seçimi iptal edilirse eski resme dönmeyebilir, boş kalabilir
+                    // İstenirse eski resim URL'si bir değişkende tutulup geri yüklenebilir
                 }
             });
         }
@@ -329,6 +337,7 @@
                         </div>
                     </div>
                 `;
+                
                 varyasyonContainer.appendChild(varyasyonCard);
             });
         }

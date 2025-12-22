@@ -9,21 +9,19 @@ use App\Models\Kategori;
 
 class AltKategoriController extends Controller
 {
-    // Listeleme
-    public function index()
+    // Belirli bir kategoriye ait alt kategorileri listele
+    public function index(Kategori $kategori)
     {
-        $altKategoriler = AltKategori::with('kategori')->get();
-        return view('admin.altkategoriler.index', compact('altKategoriler'));
+        $altKategoriler = $kategori->altKategoriler; // İlişki tanımlı olmalı hasMany
+        return view('admin.altkategoriler.index', compact('kategori', 'altKategoriler'));
     }
 
-    // Ekleme formu
-    public function create()
+    // Belirli bir kategori için ekleme formu
+    public function create(Kategori $kategori)
     {
-        $kategoriler = Kategori::all();
-        return view('admin.altkategoriler.create', compact('kategoriler'));
+        return view('admin.altkategoriler.create', compact('kategori'));
     }
 
-    // Yeni alt kategori kaydet
     public function store(Request $request)
     {
         $request->validate([
@@ -33,33 +31,30 @@ class AltKategoriController extends Controller
 
         AltKategori::create($request->all());
 
-        return redirect()->route('admin.altkategoriler.index')->with('success', 'Alt kategori başarıyla eklendi.');
+        return redirect()->route('admin.kategoriler.altkategoriler', $request->kategori_id)
+            ->with('success', 'Alt kategori eklendi.');
     }
 
-    // Düzenleme formu
     public function edit(AltKategori $altkategoriler)
     {
-        $kategoriler = Kategori::all();
-        return view('admin.altkategoriler.edit', compact('altkategoriler', 'kategoriler'));
+        // Edit işleminde tüm kategorileri seçtirebiliriz veya kısıtlayabiliriz.
+        // Basitlik adına sadece isim değiştiriyoruz, kategori değişimi karmaşık olabilir.
+        return view('admin.altkategoriler.edit', compact('altkategoriler'));
     }
 
-    // Güncelle
     public function update(Request $request, AltKategori $altkategoriler)
     {
-        $request->validate([
-            'kategori_id' => 'required|exists:kategoriler,id',
-            'alt_kategori_ad' => 'required|string|max:255',
-        ]);
+        $request->validate(['alt_kategori_ad' => 'required|string|max:255']);
+        $altkategoriler->update(['alt_kategori_ad' => $request->alt_kategori_ad]);
 
-        $altkategoriler->update($request->all());
-
-        return redirect()->route('admin.altkategoriler.index')->with('success', 'Alt kategori başarıyla güncellendi.');
+        return redirect()->route('admin.kategoriler.altkategoriler', $altkategoriler->kategori_id)
+            ->with('success', 'Güncellendi.');
     }
 
-    // Sil
     public function destroy(AltKategori $altkategoriler)
     {
+        $parentId = $altkategoriler->kategori_id;
         $altkategoriler->delete();
-        return redirect()->route('admin.altkategoriler.index')->with('success', 'Alt kategori başarıyla silindi.');
+        return redirect()->route('admin.kategoriler.altkategoriler', $parentId)->with('success', 'Silindi.');
     }
 }

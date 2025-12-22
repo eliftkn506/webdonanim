@@ -1,52 +1,29 @@
 @extends('layouts.admin')
-
-@section('title', 'Yeni Alt Kategori Ekle - Admin Panel')
+@section('title', 'Alt Kategori Ekle')
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-py-4">
-    <h4 class="fw-bold py-3 mb-4">Yeni Alt Kategori Ekle</h4>
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Kategori: {{ $kategori->kategori_ad }} /</span> Yeni Alt Kategori</h4>
 
-    <!-- Hata Mesajları -->
-    @if($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <div class="card mb-4">
+    <div class="card">
         <div class="card-body">
             <form action="{{ route('admin.altkategoriler.store') }}" method="POST">
                 @csrf
+                <input type="hidden" name="kategori_id" value="{{ $kategori->id }}">
 
-                <!-- Kategori Seç -->
                 <div class="mb-3">
-                    <label for="kategori_id" class="form-label">Kategori Seç</label>
-                    <select name="kategori_id" id="kategori_id" class="form-select" required>
-                        <option value="">-- Kategori Seç --</option>
-                        @foreach($kategoriler as $kategori)
-                            <option value="{{ $kategori->id }}">{{ $kategori->kategori_ad }}</option>
-                        @endforeach
-                    </select>
+                    <label class="form-label">Üst Kategori</label>
+                    <input type="text" class="form-control" value="{{ $kategori->kategori_ad }}" disabled>
                 </div>
 
-                <!-- Alt Kategori Adı -->
                 <div class="mb-3">
-                    <label for="alt_kategori_ad" class="form-label">Alt Kategori Adı</label>
-                    <input type="text" name="alt_kategori_ad" id="alt_kategori_ad" class="form-control" placeholder="Alt kategori adını giriniz" value="{{ old('alt_kategori_ad') }}" required>
+                    <label class="form-label">Alt Kategori Adı</label>
+                    <input type="text" name="alt_kategori_ad" class="form-control" placeholder="Örn: Laptop, Televizyon" required autofocus>
                 </div>
 
-                <!-- Butonlar -->
                 <div class="text-end">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bx bx-plus me-1"></i> Kaydet
-                    </button>
-                    <a href="{{ route('admin.altkategoriler.index') }}" class="btn btn-secondary">
-                        <i class="bx bx-arrow-back me-1"></i> Geri
-                    </a>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                    <a href="{{ route('admin.kategoriler.altkategoriler', $kategori->id) }}" class="btn btn-label-secondary">İptal</a>
                 </div>
             </form>
         </div>

@@ -40,4 +40,6 @@ class UrunVaryasyonKriterDegeri extends Model
     {
         return $this->belongsTo(KriterDeger::class, 'kriter_deger_id');
     }
+
+    
 }

@@ -1,320 +1,478 @@
 @extends('layouts.app')
-@section('title', 'Ana Sayfa ')
+@section('title', 'Ana Sayfa - Teknoloji Dünyası')
 
 @section('content')
 
+<style>
+    /* --- 1. HERO SLIDER (FULL WIDTH - TAM GENİŞLİK) --- */
+    .hero-wrapper-fluid {
+        position: relative;
+        /* Kenar boşluklarını kaldırdık, tam ekran yaptık */
+        width: 100%;
+        overflow: hidden;
+        margin-bottom: 3rem;
+    }
+    .carousel-item {
+        /* Yükseklik artırıldı, daha sinematik */
+        height: 650px;
+        background-color: #0f172a;
+    }
+    
+    /* Görsel Zoom Animasyonu */
+    .hero-image-container {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden;
+    }
+    .hero-image-container img {
+        width: 100%; height: 100%; object-fit: cover;
+        /* Zoom animasyonu */
+        animation: zoomEffect 25s infinite alternate;
+    }
+    @keyframes zoomEffect {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.15); }
+    }
 
-<div class="container"> <section class="hero-carousel"> <div id="heroCarousel" class="carousel slide carousel-fade h-100" data-bs-ride="carousel" data-bs-interval="5000">
-            
-            <div class="carousel-indicators">
-                @for($i = 0; $i < 5; $i++)
-                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ $i }}"
-                            class="{{ $i == 0 ? 'active' : '' }}" aria-label="Slide {{ $i + 1 }}"></button>
-                @endfor
-            </div>
+    /* Slider İçerik Alanı - Tam ekran olsa da yazı ortalı kalsın diye */
+    .hero-content-inner {
+        max-width: 1400px; /* İçerik çok yayılmasın */
+        margin: 0 auto;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        position: relative;
+        padding: 0 1.5rem;
+        z-index: 5;
+    }
 
-            <div class="carousel-inner">
-                @for($i = 1; $i <= 5; $i++)
-                <div class="carousel-item {{ $i == 1 ? 'active' : '' }}">
-                    <img src="{{ asset('resimler/slide'.$i.'.png') }}"
-                         alt="Teknoloji Slider {{ $i }}"
-                         onerror="this.src='https://via.placeholder.com/1920x600.png?text=Slide+Resmi+Bulunamadı';">
-                </div>
-                @endfor
-            </div>
+    /* Animasyonlar */
+    .hero-content-animate { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.215, 0.610, 0.355, 1.000); }
+    .carousel-item.active .hero-content-animate { opacity: 1; transform: translateY(0); }
+    
+    .delay-1 { transition-delay: 0.2s; }
+    .delay-2 { transition-delay: 0.4s; }
+    .delay-3 { transition-delay: 0.6s; }
 
-            <div class="hero-content-wrapper"> <div class="hero-content fade-in">
-                    <div class="hero-badge">
-                        <i class="fas fa-bolt me-2"></i>Türkiye'nin Teknoloji Merkezi
-                    </div>
-                    <h1 class="hero-title">
-                        Teknolojinin <span style="color: var(--warning-color);">Gücünü</span><br> Keşfedin
-                    </h1>
-                    <p class="hero-subtitle">
-                        En son teknoloji ürünleri, profesyonel hizmet ve rekabetçi fiyatlarla
-                        dijital dünyanın kapılarını açıyoruz.
-                    </p>
-                    <div class="hero-buttons">
-                        <a href="{{ route('urun.index') }}" class="btn-hero btn-primary-hero">
-                            <i class="fas fa-laptop"></i>Ürünleri İncele
-                        </a>
-                        <a href="{{ route('wizard.index') }}" class="btn-hero btn-secondary-hero">
-                            <i class="fas fa-cogs"></i>PC Toplama
-                        </a>
-                    </div>
-                </div>
-            </div>
+    /* Butonlar */
+    .btn-hero-primary {
+        background: linear-gradient(135deg, var(--warning-color), #f59e0b); 
+        color: white; border: none; padding: 14px 40px; font-weight: 700; border-radius: 50px;
+        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4); transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .btn-hero-primary:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(245, 158, 11, 0.6); color: white; }
+    
+    .btn-hero-glass {
+        background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3);
+        color: white; padding: 14px 40px; font-weight: 700; border-radius: 50px; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .btn-hero-glass:hover { background: white; color: var(--primary-color); transform: translateY(-3px); }
 
-            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Önceki</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Sonraki</span>
-            </button>
+    /* --- 2. FEATURES (HİZMET KUTULARI) --- */
+    .feature-box {
+        background: white; padding: 2rem 1.5rem; border-radius: 16px;
+        border: 1px solid #f1f5f9; transition: all 0.3s ease;
+        display: flex; flex-direction: column; align-items: center; text-align: center; gap: 15px; height: 100%;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    }
+    .feature-box:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); border-color: transparent; }
+    .feature-icon-circle {
+        width: 70px; height: 70px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem; margin-bottom: 5px;
+        transition: transform 0.3s;
+    }
+    .feature-box:hover .feature-icon-circle { transform: scale(1.1) rotate(5deg); }
+
+    /* --- 3. KATEGORİ KARTLARI --- */
+    .cat-card-modern {
+        display: block; position: relative; overflow: hidden; border-radius: 20px; height: 300px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: transform 0.3s ease;
+    }
+    .cat-card-modern:hover { transform: translateY(-5px); box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
+    .cat-card-modern img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .cat-card-modern:hover img { transform: scale(1.1); }
+    .cat-overlay {
+        position: absolute; inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+        display: flex; flex-direction: column; justify-content: flex-end; padding: 2rem; color: white;
+    }
+
+    /* --- 4. ÜRÜN KARTLARI --- */
+    .product-card-modern {
+        background: white; border: 1px solid #f1f5f9; border-radius: 20px;
+        overflow: hidden; transition: all 0.3s ease; position: relative; height: 100%;
+        display: flex; flex-direction: column;
+    }
+    .product-card-modern:hover { border-color: transparent; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1); transform: translateY(-8px); }
+    
+    .pcm-badge {
+        position: absolute; top: 15px; left: 15px; z-index: 2;
+        padding: 6px 14px; border-radius: 30px; font-size: 0.75rem; font-weight: 800; color: white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15); text-transform: uppercase;
+    }
+    .badge-hot { background: linear-gradient(45deg, #ff416c, #ff4b2b); }
+    .badge-new { background: linear-gradient(45deg, #4facfe, #00f2fe); }
+
+    .pcm-image-wrapper {
+        position: relative; height: 260px; padding: 30px; background: radial-gradient(circle, #f8fafc 0%, #f1f5f9 100%);
+        display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .pcm-image-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.4s ease; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.05)); }
+    .product-card-modern:hover .pcm-image-wrapper img { transform: scale(1.1) translateY(-5px); }
+
+    .pcm-actions {
+        position: absolute; right: 15px; top: 15px; display: flex; flex-direction: column; gap: 10px;
+        opacity: 0; transform: translateX(20px); transition: all 0.3s ease;
+    }
+    .product-card-modern:hover .pcm-actions { opacity: 1; transform: translateX(0); }
+    
+    .pcm-btn {
+        width: 42px; height: 42px; border-radius: 50%; background: white; border: none;
+        color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+        transition: 0.2s; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .pcm-btn:hover { background: var(--primary-color); color: white; transform: scale(1.1); }
+
+    .pcm-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
+    .pcm-title {
+        font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; line-height: 1.4;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 46px;
+    }
+    .pcm-title a { color: var(--text-primary); text-decoration: none; transition: 0.2s; }
+    .pcm-title a:hover { color: var(--accent-color); }
+    
+    .pcm-price { font-size: 1.4rem; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; }
+    
+    .pcm-add-btn {
+        width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #f1f5f9;
+        background: transparent; font-weight: 700; color: var(--text-primary); margin-top: 15px;
+        transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem;
+    }
+    .pcm-add-btn:hover { background: var(--primary-color); border-color: var(--primary-color); color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+    /* --- 5. HAREKETLİ MARKA BANDI --- */
+    .brands-slider-area {
+        background: white; padding: 50px 0; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9;
+        overflow: hidden; position: relative; margin-bottom: 0;
+    }
+    .brands-slider-track {
+        display: flex; width: calc(200px * 14); animation: scrollBrands 40s linear infinite;
+    }
+    .brand-slide {
+        width: 200px; display: flex; align-items: center; justify-content: center; opacity: 0.6; transition: 0.3s;
+    }
+    .brand-slide:hover { opacity: 1; }
+    .brand-slide i {
+        font-size: 4rem; color: #cbd5e1; transition: all 0.3s ease;
+    }
+    .brand-slide:hover i { color: var(--primary-color); transform: scale(1.1); }
+
+    @keyframes scrollBrands { 0% { transform: translateX(0); } 100% { transform: translateX(calc(-200px * 7)); } }
+
+    /* Başlıklar */
+    .section-header-modern { text-align: center; margin-bottom: 3.5rem; }
+    .section-header-modern h2 { font-weight: 800; font-size: 2.5rem; color: var(--text-primary); margin-bottom: 0.75rem; letter-spacing: -1px; }
+    .section-header-modern p { color: var(--text-secondary); max-width: 600px; margin: 0 auto; font-size: 1.1rem; }
+
+    @media (max-width: 991px) {
+        .carousel-item { height: 500px; }
+        .hero-content-inner { justify-content: center; text-align: center; }
+        .col-lg-7 { padding: 0 !important; }
+        .d-flex.gap-3 { justify-content: center; }
+        .hero-title { font-size: 2.5rem !important; }
+    }
+</style>
+
+<section class="hero-wrapper-fluid">
+    <div id="heroCarousel" class="carousel slide carousel-fade h-100" data-bs-ride="carousel" data-bs-interval="6000">
+        <div class="carousel-indicators gap-2 mb-5">
+            @for($i = 0; $i < 3; $i++)
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ $i }}" class="{{ $i == 0 ? 'active' : '' }}" style="width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; background-color: transparent; opacity: 0.7; transition: 0.3s;"></button>
+            @endfor
         </div>
-    </section>
-</div> <section class="features-section">
-    <div class="container">
-        <div class="row g-4">
-            <div class="col-lg-3 col-md-6">
-                <div class="feature-card fade-in-up">
-                    <div class="feature-icon">
-                        <i class="fas fa-shipping-fast"></i>
-                    </div>
-                    <h3 class="feature-title">Hızlı Teslimat</h3>
-                    <p class="feature-description">
-                        Türkiye geneline hızlı ve güvenli teslimat ile ürününüz kısa sürede elinizde.
-                    </p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="feature-card fade-in-up" style="animation-delay: 0.1s">
-                    <div class="feature-icon">
-                        <i class="fas fa-award"></i>
-                    </div>
-                    <h3 class="feature-title">Kalite Garantisi</h3>
-                    <p class="feature-description">
-                        Sadece orijinal ve garantili ürünler. Kaliteden ödün vermiyoruz.
-                    </p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="feature-card fade-in-up" style="animation-delay: 0.2s">
-                    <div class="feature-icon">
-                        <i class="fas fa-headset"></i>
-                    </div>
-                    <h3 class="feature-title">7/24 Destek</h3>
-                    <p class="feature-description">
-                        Uzman ekibimiz her zaman yanınızda. Teknik destek ve danışmanlık hizmeti.
-                    </p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="feature-card fade-in-up" style="animation-delay: 0.3s">
-                    <div class="feature-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <h3 class="feature-title">Güvenli Alışveriş</h3>
-                    <p class="feature-description">
-                        SSL sertifikası ve güvenli ödeme sistemleri ile alışverişiniz tamamen güvende.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
-<section class="stats-section">
-    <div class="container">
-        <div class="row g-4">
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-item fade-in-up">
-                    <div class="stat-number" data-count="5000">0</div>
-                    <div class="stat-label">Ürün Çeşidi</div>
+        <div class="carousel-inner h-100">
+            <div class="carousel-item active">
+                <div class="hero-image-container">
+                    <img src="{{ asset('resimler/slide1.png') }}" onerror="this.src='https://images.unsplash.com/photo-1624705002806-5d72df19c2df?q=80&w=2070&auto=format&fit=crop'" alt="Gaming">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.6) 50%, rgba(15,23,42,0.2) 100%);"></div>
+                </div>
+                <div class="hero-content-inner">
+                    <div class="col-lg-7 text-white">
+                        <div class="hero-content-animate delay-1">
+                            <span class="badge bg-danger px-3 py-2 mb-4" style="letter-spacing: 2px; box-shadow: 0 0 20px rgba(220,38,38,0.5);">OYUN CANAVARI</span>
+                        </div>
+                        <h1 class="display-3 fw-bolder mb-4 hero-content-animate delay-2 hero-title" style="line-height: 1.1;">
+                            Sınırları Zorlayan <br> <span style="color: var(--warning-color); text-shadow: 0 0 30px rgba(245,158,11,0.5);">Performans</span>
+                        </h1>
+                        <p class="lead mb-5 hero-content-animate delay-3" style="opacity: 0.9; max-width: 600px; font-size: 1.25rem;">
+                            RTX 40 Serisi ekran kartları ve sıvı soğutmalı sistemlerle oyunun kurallarını yeniden yazın.
+                        </p>
+                        <div class="d-flex gap-3 hero-content-animate delay-3">
+                            <a href="{{ route('urun.index') }}" class="btn-hero-primary">
+                                Hemen İncele
+                            </a>
+                            <a href="{{ route('wizard.index') }}" class="btn-hero-glass">
+                                <i class="fas fa-microchip me-2"></i> PC Topla
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-item fade-in-up" style="animation-delay: 0.1s">
-                    <div class="stat-number" data-count="50000">0</div>
-                    <div class="stat-label">Mutlu Müşteri</div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-item fade-in-up" style="animation-delay: 0.2s">
-                    <div class="stat-number" data-count="24">0</div>
-                    <div class="stat-label">Saat Destek</div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="stat-item fade-in-up" style="animation-delay: 0.3s">
-                    <div class="stat-number" data-count="99">0</div>
-                    <div class="stat-label">% Müşteri Memnuniyeti</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
-<section class="products-section" id="urunler">
-    <div class="container">
-        <div class="section-header fade-in-up">
-            <div class="section-badge">
-                <i class="fas fa-star me-2"></i>Öne Çıkan Ürünler
+            <div class="carousel-item">
+                <div class="hero-image-container">
+                    <img src="{{ asset('resimler/slide2.png') }}" onerror="this.src='https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?q=80&w=2070&auto=format&fit=crop'" alt="Teknoloji">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.6) 50%, rgba(15,23,42,0.2) 100%);"></div>
+                </div>
+                <div class="hero-content-inner">
+                    <div class="col-lg-7 text-white">
+                        <div class="hero-content-animate delay-1">
+                            <span class="badge bg-info text-dark px-3 py-2 mb-4" style="letter-spacing: 2px;">KURUMSAL ÇÖZÜMLER</span>
+                        </div>
+                        <h1 class="display-3 fw-bolder mb-4 hero-content-animate delay-2 hero-title" style="line-height: 1.1;">
+                            İşinizi Geleceğe <br> <span style="color: #63b3ed;">Taşıyın</span>
+                        </h1>
+                        <p class="lead mb-5 hero-content-animate delay-3" style="opacity: 0.9; max-width: 600px; font-size: 1.25rem;">
+                            Yüksek performanslı iş istasyonları ve sunucu çözümleriyle verimliliğinizi maksimuma çıkarın.
+                        </p>
+                        <div class="d-flex gap-3 hero-content-animate delay-3">
+                            <a href="{{ route('urun.kategori', 1) }}" class="btn-hero-primary">
+                                Fırsatları Gör
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <h2 class="section-title">En Popüler Teknoloji Ürünleri</h2>
-            <p class="section-subtitle">
-                Teknoloji tutkunları için özenle seçilmiş, en yeni ve en popüler ürünleri keşfedin.
-                Kalite, performans ve fiyat avantajı bir arada.
-            </p>
+
+            <div class="carousel-item">
+                <div class="hero-image-container">
+                    <img src="{{ asset('resimler/slide3.png') }}" onerror="this.src='https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=2070&auto=format&fit=crop'" alt="Ekipman">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.6) 50%, rgba(15,23,42,0.2) 100%);"></div>
+                </div>
+                <div class="hero-content-inner">
+                    <div class="col-lg-7 text-white">
+                        <div class="hero-content-animate delay-1">
+                            <span class="badge bg-success px-3 py-2 mb-4" style="letter-spacing: 2px;">PROFESYONEL EKİPMAN</span>
+                        </div>
+                        <h1 class="display-3 fw-bolder mb-4 hero-content-animate delay-2 hero-title" style="line-height: 1.1;">
+                            Setup'ını <br> <span style="color: #68d391;">Tamamla</span>
+                        </h1>
+                        <p class="lead mb-5 hero-content-animate delay-3" style="opacity: 0.9; max-width: 600px; font-size: 1.25rem;">
+                            Mekanik klavyeler, ultra hafif mouse'lar ve stüdyo kalitesinde mikrofonlar.
+                        </p>
+                        <div class="d-flex gap-3 hero-content-animate delay-3">
+                            <a href="{{ route('urun.kategori', 8) }}" class="btn-hero-primary">
+                                Alışverişe Başla
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
-        <div class="products-grid">
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev" style="width: 5%; opacity: 0.5;">
+            <span class="carousel-control-prev-icon" aria-hidden="true" style="width: 3rem; height: 3rem; background-color: rgba(255,255,255,0.1); border-radius: 50%; backdrop-filter: blur(5px);"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next" style="width: 5%; opacity: 0.5;">
+            <span class="carousel-control-next-icon" aria-hidden="true" style="width: 3rem; height: 3rem; background-color: rgba(255,255,255,0.1); border-radius: 50%; backdrop-filter: blur(5px);"></span>
+        </button>
+    </div>
+</section>
+
+<div class="container">
+
+    <section class="mb-5 fade-in-up" style="animation-delay: 0.2s;">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-box">
+                    <div class="feature-icon-circle" style="background: #eff6ff; color: #3b82f6;">
+                        <i class="fas fa-truck-fast"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1 fs-5">Hızlı Teslimat</h6>
+                        <small class="text-secondary">Aynı gün kargoda</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-box">
+                    <div class="feature-icon-circle" style="background: #f0fdf4; color: #22c55e;">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1 fs-5">Güvenli Ödeme</h6>
+                        <small class="text-secondary">256-bit SSL Koruma</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-box">
+                    <div class="feature-icon-circle" style="background: #fffbeb; color: #f59e0b;">
+                        <i class="fas fa-rotate-left"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1 fs-5">Kolay İade</h6>
+                        <small class="text-secondary">14 gün cayma hakkı</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-box">
+                    <div class="feature-icon-circle" style="background: #fef2f2; color: #ef4444;">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1 fs-5">7/24 Destek</h6>
+                        <small class="text-secondary">Uzman teknik ekip</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div> <section class="py-5 mb-5" style="background-color: #f8fafc;">
+    <div class="container">
+        <div class="section-header-modern fade-in-up">
+            <h2>Popüler Kategoriler</h2>
+            <p>İhtiyacınız olan donanımı en iyi markalarla keşfedin.</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            @php
+                $cats = [
+                    ['id' => 1, 'icon' => 'microchip', 'name' => 'İşlemciler', 'sub' => 'Intel & AMD'],
+                    ['id' => 2, 'icon' => 'memory', 'name' => 'Ekran Kartı', 'sub' => 'NVIDIA & Radeon'],
+                    ['id' => 3, 'icon' => 'hdd', 'name' => 'Depolama', 'sub' => 'SSD & HDD'],
+                    ['id' => 4, 'icon' => 'desktop', 'name' => 'Anakartlar', 'sub' => 'Tüm Soketler'],
+                    ['id' => 5, 'icon' => 'bolt', 'name' => 'Güç Kaynağı', 'sub' => '80+ Gold'],
+                    ['id' => 7, 'icon' => 'tv', 'name' => 'Monitörler', 'sub' => '144Hz & IPS'],
+                ];
+            @endphp
+
+            @foreach($cats as $cat)
+            <div class="col-lg-2 col-md-4 col-6 fade-in-up" style="animation-delay: {{ $loop->index * 0.1 }}s;">
+                <a href="{{ route('urun.kategori', $cat['id']) }}" class="cat-card-modern h-100">
+                    <img src="https://source.unsplash.com/random/400x500?tech,{{$cat['icon']}}" onerror="this.src='https://via.placeholder.com/400x500?text={{$cat['name']}}'" alt="{{ $cat['name'] }}">
+                    <div class="cat-overlay">
+                        <i class="fas fa-{{ $cat['icon'] }} mb-2 fs-3 text-warning"></i>
+                        <h5 class="fw-bold mb-1">{{ $cat['name'] }}</h5>
+                        <p class="m-0 small opacity-75">{{ $cat['sub'] }}</p>
+                    </div>
+                </a>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    
+    <section class="mb-5" id="urunler">
+        <div class="section-header-modern fade-in-up">
+            <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary px-3 py-2 mb-3">FIRSATLAR</span>
+            <h2>Haftanın Yıldız Ürünleri</h2>
+            <p>En çok satan ve yüksek puanlı ürünleri sizin için seçtik.</p>
+        </div>
+
+        <div class="row g-4">
             @forelse($urunler ?? [] as $index => $urun)
-            <div class="product-card fade-in-up" style="animation-delay: {{ $index * 0.05 }}s">
-                @if($loop->index < 3)
-                <div class="product-badge">
-                    <i class="fas fa-fire me-1"></i>YENİ
-                </div>
-                @endif
-                
-                <div class="product-image">
-                    <a href="{{ route('urun.incele', $urun->id) }}">
-                         <img src="{{ $urun->resim_url ?? 'https://via.placeholder.com/400x300.png?text=Urun+Resmi' }}"
-                             alt="{{ $urun->urun_ad }}"
-                             loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="product-info">
-                    <div class="product-brand">{{ $urun->marka ?? 'Teknoloji' }}</div>
-                    <h3 class="product-name">
-                        <a href="{{ route('urun.incele', $urun->id) }}">{{ $urun->urun_ad }}</a>
-                    </h3>
-                    <div class="product-price">₺{{ number_format($urun->fiyat, 2, ',', '.') }}</div>
-                    
-                    <div class="product-actions">
-                        <a href="{{ route('urun.incele', $urun->id) }}" class="btn-product btn-outline-product">
-                            <i class="fas fa-eye me-1"></i>İncele
+            <div class="col-lg-3 col-md-6 col-sm-6 fade-in-up" style="animation-delay: {{ $index * 0.05 }}s">
+                <div class="product-card-modern">
+                    @if($loop->index < 2)
+                        <div class="pcm-badge badge-hot"><i class="fas fa-fire me-1"></i>ÇOK SATAN</div>
+                    @elseif($loop->index == 2)
+                        <div class="pcm-badge badge-new"><i class="fas fa-star me-1"></i>YENİ</div>
+                    @endif
+
+                    <div class="pcm-image-wrapper">
+                        <a href="{{ route('urun.incele', $urun->id) }}">
+                            <img src="{{ $urun->resim_url ?? 'https://via.placeholder.com/400x400.png?text=Urun' }}" alt="{{ $urun->urun_ad }}" loading="lazy">
                         </a>
-                        <button class="btn-product btn-primary-product" onclick="sepeteEkle({{ $urun->id }})">
-                            <i class="fas fa-cart-plus me-1"></i>Sepete Ekle
+                        <div class="pcm-actions">
+                            <button class="pcm-btn" onclick="sepeteEkle({{ $urun->id }})" title="Sepete Ekle" data-bs-toggle="tooltip">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                            <a href="{{ route('urun.incele', $urun->id) }}" class="pcm-btn" title="İncele">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="pcm-content">
+                        <div class="pcm-category">{{ $urun->marka ?? 'GENEL' }}</div>
+                        <h3 class="pcm-title">
+                            <a href="{{ route('urun.incele', $urun->id) }}">{{ $urun->urun_ad }}</a>
+                        </h3>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="text-warning small me-2">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-muted small" style="font-size: 0.8rem;">(24 Yorum)</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-end mt-auto">
+                            <div class="pcm-price">₺{{ number_format($urun->fiyat, 2, ',', '.') }}</div>
+                        </div>
+                        <button class="pcm-add-btn" onclick="sepeteEkle({{ $urun->id }})">
+                            <i class="fas fa-basket-shopping"></i> Sepete Ekle
                         </button>
                     </div>
                 </div>
             </div>
             @empty
-            @for($i = 0; $i < 8; $i++)
-            <div class="product-card">
-                <div class="product-image loading-shimmer" style="height: 220px;"></div>
-                <div class="product-info">
-                    <div class="product-brand loading-shimmer" style="height: 20px; width: 50%; margin-bottom: 10px; border-radius: 4px;"></div>
-                    <div class="product-name loading-shimmer" style="height: 44px; margin-bottom: 15px; border-radius: 4px;"></div>
-                    <div class="product-price loading-shimmer" style="height: 35px; width: 70%; margin-bottom: 20px; border-radius: 4px;"></div>
-                    <div class="product-actions">
-                        <div class="btn-product loading-shimmer" style="height: 45px; border-radius: 8px;"></div>
-                        <div class="btn-product loading-shimmer" style="height: 45px; border-radius: 8px;"></div>
+                @for($i = 0; $i < 4; $i++)
+                <div class="col-lg-3 col-md-6">
+                    <div class="product-card-modern bg-light border-0 h-100 d-flex align-items-center justify-content-center">
+                        <div class="spinner-border text-muted" role="status"></div>
                     </div>
                 </div>
-            </div>
-            @endfor
+                @endfor
             @endforelse
         </div>
-        
-        <div class="text-center fade-in-up">
-            <a href="{{ route('urun.index') }}" class="btn-hero btn-primary-hero" style="background: var(--accent-color);">
-                <i class="fas fa-arrow-right me-2"></i>Tüm Ürünleri Görüntüle
+
+        <div class="text-center mt-5">
+            <a href="{{ route('urun.index') }}" class="btn btn-outline-primary rounded-pill px-5 py-3 fw-bold border-2">
+                Tüm Ürünleri Görüntüle <i class="fas fa-arrow-right ms-2"></i>
             </a>
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="categories-section">
-    <div class="container">
-        <div class="section-header fade-in-up">
-            <div class="section-badge">
-                <i class="fas fa-layer-group me-2"></i>Kategoriler
+    <section class="my-5 fade-in-up">
+        <div class="position-relative rounded-4 overflow-hidden p-5 text-white text-center" 
+             style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);">
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.1; background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
+            <div class="position-relative z-1">
+                <h2 class="display-5 fw-bold mb-3">Hayalindeki Bilgisayarı Topla</h2>
+                <p class="lead mb-4 mx-auto" style="max-width: 700px; color: rgba(255,255,255,0.9);">
+                    Parçaların uyumluluğu konusunda endişelenme. Akıllı PC toplama sihirbazımız ile saniyeler içinde birbiriyle tam uyumlu sistemini oluştur.
+                </p>
+                <a href="{{ route('wizard.index') }}" class="btn btn-warning btn-lg rounded-pill px-5 fw-bold text-dark" style="box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+                    <i class="fas fa-magic me-2"></i>Sihirbazı Başlat
+                </a>
             </div>
-            <h2 class="section-title">Ürün Kategorilerimiz</h2>
-            <p class="section-subtitle">
-                Bilgisayar bileşenlerinden aksesuarlara kadar geniş ürün yelpazemizle
-                teknoloji ihtiyaçlarınızın tamamını karşılıyoruz.
-            </p>
         </div>
+    </section>
+
+</div> <section class="brands-slider-area fade-in-up">
+    <div class="container text-center mb-4">
+        <h5 class="text-muted fw-bold text-uppercase" style="letter-spacing: 2px;">Resmi İş Ortaklarımız</h5>
+    </div>
+    
+    <div class="brands-slider-track">
+        <div class="brand-slide"><i class="fab fa-apple"></i></div>
+        <div class="brand-slide"><i class="fab fa-windows"></i></div>
+        <div class="brand-slide"><i class="fab fa-android"></i></div>
+        <div class="brand-slide"><i class="fab fa-google"></i></div>
+        <div class="brand-slide"><i class="fab fa-amazon"></i></div>
+        <div class="brand-slide"><i class="fas fa-microchip"></i></div>
+        <div class="brand-slide"><i class="fas fa-server"></i></div>
         
-        <div class="categories-grid">
-            <div class="category-card fade-in-up" onclick="window.location.href='{{ route('urun.kategori',1) }}'">
-                <div class="category-background"></div>
-                <div class="category-content">
-                    <i class="fas fa-microchip category-icon"></i>
-                    <h3 class="category-name">İşlemciler</h3>
-                    <p class="category-count">Intel & AMD Seçenekleri</p>
-                </div>
-            </div>
-            
-            <div class="category-card fade-in-up" onclick="window.location.href='{{ route('urun.kategori',2) }}'" style="animation-delay: 0.1s">
-                <div class="category-background"></div>
-                <div class="category-content">
-                    <i class="fas fa-memory category-icon"></i>
-                    <h3 class="category-name">Ekran Kartları</h3>
-                    <p class="category-count">NVIDIA & AMD</p>
-                </div>
-            </div>
-            
-            <div class="category-card fade-in-up" onclick="window.location.href='{{ route('urun.kategori',3) }}'" style="animation-delay: 0.2s">
-                <div class="category-background"></div>
-                <div class="category-content">
-                    <i class="fas fa-hdd category-icon"></i>
-                    <h3 class="category-name">Depolama</h3>
-                    <p class="category-count">SSD & HDD Çözümleri</p>
-                </div>
-            </div>
-            
-            <div class="category-card fade-in-up" onclick="window.location.href='{{ route('urun.kategori',4) }}'" style="animation-delay: 0.3s">
-                <div class="category-background"></div>
-                <div class="category-content">
-                    <i class="fas fa-desktop category-icon"></i>
-                    <h3 class="category-name">Anakartlar</h3>
-                    <p class="category-count">Tüm Soket Tipleri</p>
-                </div>
-            </div>
-            
-            <div class="category-card fade-in-up" onclick="window.location.href='{{ route('urun.kategori',5) }}'" style="animation-delay: 0.4s">
-                <div class="category-background"></div>
-                <div class="category-content">
-                    <i class="fas fa-bolt category-icon"></i>
-                    <h3 class="category-name">Güç Kaynakları</h3>
-                    <p class="category-count">Modüler & Standart</p>
-                </div>
-            </div>
-            
-            <div class="category-card fade-in-up" onclick="window.location.href='{{ route('urun.kategori',6) }}'" style="animation-delay: 0.5s">
-                <div class="category-background"></div>
-                <div class="category-content">
-                    <i class="fas fa-fan category-icon"></i>
-                    <h3 class="category-name">Soğutma</h3>
-                    <p class="category-count">Hava & Su Soğutma</p>
-                </div>
-            </div>
-            
-            <div class="category-card fade-in-up" onclick="window.location.href='{{ route('urun.kategori',7) }}'" style="animation-delay: 0.6s">
-                <div class="category-background"></div>
-                <div class="category-content">
-                    <i class="fas fa-tv category-icon"></i>
-                    <h3 class="category-name">Monitörler</h3>
-                    <p class="category-count">Gaming & Profesyonel</p>
-                </div>
-            </div>
-            
-            <div class="category-card fade-in-up" onclick="window.location.href='{{ route('urun.kategori',8) }}'" style="animation-delay: 0.7s">
-                <div class="category-background"></div>
-                <div class="category-content">
-                    <i class="fas fa-keyboard category-icon"></i>
-                    <h3 class="category-name">Aksesuarlar</h3>
-                    <p class="category-count">Klavye, Mouse & Daha Fazlası</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="newsletter-section">
-    <div class="container">
-        <div class="newsletter-content fade-in-up">
-            <h2 class="newsletter-title">Teknolojiden Haberdar Olun</h2>
-            <p class="newsletter-subtitle">
-                Yeni ürünler, özel kampanyalar ve teknoloji haberlerinden ilk siz haberdar olun.
-                E-posta listemize katılın ve avantajları kaçırmayın.
-            </p>
-            
-            <form class="newsletter-form">
-                <input type="email" class="newsletter-input" placeholder="E-posta adresiniz..." required>
-                <button type="submit" class="newsletter-button">
-                    <i class="fas fa-paper-plane me-2"></i>Abone Ol
-                </button>
-            </form>
-        </div>
+        <div class="brand-slide"><i class="fab fa-apple"></i></div>
+        <div class="brand-slide"><i class="fab fa-windows"></i></div>
+        <div class="brand-slide"><i class="fab fa-android"></i></div>
+        <div class="brand-slide"><i class="fab fa-google"></i></div>
+        <div class="brand-slide"><i class="fab fa-amazon"></i></div>
+        <div class="brand-slide"><i class="fas fa-microchip"></i></div>
+        <div class="brand-slide"><i class="fas fa-server"></i></div>
     </div>
 </section>
 
@@ -324,6 +482,12 @@
 <script>
 // Sepete Ekleme Fonksiyonu
 function sepeteEkle(urunId) {
+    const btn = event.currentTarget;
+    const originalContent = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
     fetch(`/sepet/ekle/${urunId}`, {
         method: 'POST',
         headers: {
@@ -335,66 +499,33 @@ function sepeteEkle(urunId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showToast('Ürün sepetinize eklendi!', 'success');
-            document.getElementById('cartCount').textContent = data.cart_count;
-            updateCartDropdown(data.cart_item, urunId);
+            showToast('Ürün başarıyla sepete eklendi!', 'success');
+            const cartCountElement = document.getElementById('cartCount');
+            if(cartCountElement) {
+                cartCountElement.textContent = data.cart_count;
+                cartCountElement.style.transform = 'scale(1.5)';
+                setTimeout(() => cartCountElement.style.transform = 'scale(1)', 300);
+            }
+            if(typeof updateCartDropdown === 'function') {
+                updateCartDropdown(data.cart_item, urunId);
+            }
+            btn.classList.add('btn-success', 'text-white');
+            btn.innerHTML = '<i class="fas fa-check"></i> Eklendi';
         } else {
-            showToast(data.message || 'Bir hata oluştu', 'error');
+            showToast(data.message || 'Hata oluştu', 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showToast('Sunucu hatası oluştu', 'error');
+        showToast('Sunucu hatası', 'error');
+    })
+    .finally(() => {
+        setTimeout(() => {
+            btn.innerHTML = originalContent;
+            btn.classList.remove('btn-success', 'text-white');
+            btn.disabled = false;
+        }, 2000);
     });
-}
-
-// Sepet dropdown'ını güncelleyen yardımcı fonksiyon
-function updateCartDropdown(item, urunId) {
-    const cartItemsContainer = document.getElementById('cartItems');
-    const emptyCartMessage = cartItemsContainer.querySelector('.cart-empty');
-    
-    if (emptyCartMessage) {
-        emptyCartMessage.remove();
-    }
-    
-    let cartFooter = document.querySelector('.cart-dropdown .cart-footer');
-    if (!cartFooter) {
-        cartFooter = document.createElement('div');
-        cartFooter.className = 'cart-footer';
-        cartFooter.innerHTML = `
-            <a href="{{ route('sepet.index') }}" class="btn-modern btn-primary w-100">
-                <i class="fas fa-shopping-bag me-2"></i>Sepete Git
-            </a>
-        `;
-        document.getElementById('cartDropdown').appendChild(cartFooter);
-    }
-
-    let existingItem = cartItemsContainer.querySelector(`.cart-item[data-id="${urunId}"]`);
-    if (existingItem) {
-        if (item.adet && item.fiyat) {
-             existingItem.querySelector('.cart-item-details').textContent = 
-                `${item.adet} adet × ₺${parseFloat(item.fiyat).toLocaleString('tr-TR', {minimumFractionDigits: 2})}`;
-        }
-    } else {
-        const newItem = document.createElement('div');
-        newItem.className = 'cart-item';
-        newItem.setAttribute('data-id', urunId);
-        newItem.innerHTML = `
-            <div class="cart-item-image">
-                <i class="fas fa-microchip"></i>
-            </div>
-            <div class="cart-item-info">
-                <div class="cart-item-name">${item.urun_ad}</div>
-                <div class="cart-item-details">
-                    ${item.adet} adet × ₺${parseFloat(item.fiyat).toLocaleString('tr-TR', {minimumFractionDigits: 2})}
-                </div>
-            </div>
-            <button class="cart-item-remove" onclick="removeFromCart(${urunId})">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        cartItemsContainer.appendChild(newItem);
-    }
 }
 </script>
 @endpush

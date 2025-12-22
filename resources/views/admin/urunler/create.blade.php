@@ -22,7 +22,7 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.urunler.store') }}" method="POST" id="urunForm">
+    <form action="{{ route('admin.urunler.store') }}" method="POST" id="urunForm" enctype="multipart/form-data">
         @csrf
         <div class="row">
             <div class="col-12 col-lg-8">
@@ -63,7 +63,7 @@
                         </div>
                         <div class="card-body pt-3">
                             <div class="row g-3" id="kriterler-container">
-                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -128,18 +128,19 @@
 
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="card-title mb-0">Medya</h5>
+                        <h5 class="card-title mb-0">Ürün Görseli</h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label class="form-label">Resim URL</label>
-                            <input type="text" name="resim_url" id="resim_url_input" class="form-control" value="{{ old('resim_url') }}" placeholder="https://...">
+                            <label class="form-label">Fotoğraf Yükle</label>
+                            <input type="file" name="resim" id="resim_input" class="form-control" accept="image/png, image/jpeg, image/jpg, image/webp">
+                            <div class="form-text text-muted small">Maksimum 2MB. (jpg, png, webp)</div>
                         </div>
-                        <div class="border rounded d-flex align-items-center justify-content-center bg-light" style="height: 200px; overflow: hidden;">
+                        <div class="border rounded d-flex align-items-center justify-content-center bg-light position-relative" style="height: 250px; overflow: hidden;">
                             <img id="image_preview" src="" alt="Önizleme" style="max-width: 100%; max-height: 100%; display: none;" class="d-block">
                             <div id="no_image_placeholder" class="text-center text-muted">
-                                <i class="bx bx-image fs-1"></i>
-                                <div class="small mt-1">Resim Yok</div>
+                                <i class="bx bx-cloud-upload fs-1"></i>
+                                <div class="small mt-1">Görsel Seçilmedi</div>
                             </div>
                         </div>
                     </div>
@@ -168,26 +169,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const varyasyonBtn = document.getElementById('ekle-varyasyon');
 
     // Resim Önizleme
-    const imgInput = document.getElementById('resim_url_input');
+    const imgInput = document.getElementById('resim_input');
     const imgPrev = document.getElementById('image_preview');
     const noImgPlace = document.getElementById('no_image_placeholder');
 
-    imgInput.addEventListener('input', function() {
-        if(this.value) {
-            imgPrev.src = this.value;
-            imgPrev.style.display = 'block';
-            noImgPlace.style.display = 'none';
-        } else {
-            imgPrev.style.display = 'none';
-            noImgPlace.style.display = 'block';
-        }
-    });
+    if(imgInput) {
+        imgInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imgPrev.src = e.target.result;
+                    imgPrev.style.display = 'block';
+                    if(noImgPlace) noImgPlace.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                imgPrev.style.display = 'none';
+                if(noImgPlace) noImgPlace.style.display = 'block';
+            }
+        });
+    }
 
     // Alt Kategori Değişimi
     document.getElementById('alt_kategori').addEventListener('change', function() {
         const altKategoriId = this.value;
         
-        // Alanları temizle
         kriterContainer.innerHTML = '';
         kriterWrapper.classList.add('d-none');
         varyasyonContainer.innerHTML = '';
@@ -204,10 +211,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     kriterlerData = data;
                     
                     if(data.length > 0) {
-                        // Kriterleri Göster
                         kriterWrapper.classList.remove('d-none');
                         varyasyonBtn.disabled = false;
-                        emptyState.style.display = 'none'; // Boş durumu gizle
+                        emptyState.style.display = 'none';
 
                         data.forEach(kriter => {
                             const options = kriter.degerler.map(d => `<option value="${d.id}">${d.deger}</option>`).join('');
@@ -224,7 +230,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             kriterContainer.appendChild(col);
                         });
                     } else {
-                        // Kriter yoksa varyasyon eklenemez uyarısı
                         emptyState.style.display = 'block';
                         emptyState.querySelector('h6').innerText = "Bu kategoride kriter yok.";
                         emptyState.querySelector('p').innerText = "Varyasyon oluşturmak için kategorinin kriterleri olmalıdır.";
@@ -243,7 +248,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const varyasyonCard = document.createElement('div');
         varyasyonCard.className = 'card border mb-3 shadow-sm position-relative';
         
-        // Kriter Selectlerini Hazırla
         const kriterInputs = kriterlerData.map(kriter => {
             const options = kriter.degerler.map(d => `<option value="${d.id}">${d.deger}</option>`).join('');
             return `
@@ -265,11 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="bx bx-trash"></i>
                     </button>
                 </div>
-                
-                <div class="row g-2">
-                    ${kriterInputs}
-                </div>
-                
+                <div class="row g-2">${kriterInputs}</div>
                 <div class="row g-2 mt-2 pt-2 border-top bg-light rounded mx-0">
                     <div class="col-md-12 p-2">
                         <label class="form-label small fw-bold">Varyasyon Stoğu</label>
