@@ -4,40 +4,42 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Urun;
+use App\Models\Kategori;
+use App\Models\Slider;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        // Öne çıkan ürünler (son eklenen 8 ürün)
-        $urunler = Urun::with('altKategori')
-            ->latest()
-            ->take(8)
-            ->get();
-        
-        return view('home', compact('urunler'));
+        // Aktif sliderları getir
+        $sliders = Slider::where('status', 1)->orderBy('order', 'asc')->get();
+
+        // Kategorileri getir
+        $kategoriler = Kategori::take(6)->get();
+
+        // Ürünleri fiyat ilişkileriyle birlikte getir (₺0,00 hatasını önler)
+        $urunler = Urun::with(['altKategori', 'fiyatlar' => function($query) {
+            $query->wherePivot('baslangic_tarihi', '<=', now())
+                  ->where(function($sq) {
+                      $sq->whereNull('urun_fiyat_urun.bitis_tarihi')
+                         ->orWhere('urun_fiyat_urun.bitis_tarihi', '>=', now());
+                  });
+        }])->latest()->take(8)->get();
+
+        return view('home', compact('urunler', 'kategoriler', 'sliders'));
     }
 
-    // ARAMA FONKSİYONU (Bunu ekleyin)
     public function ara(Request $request)
     {
-        // Formdan gelen 'q' parametresini al (name="q" olduğu için)
         $aranan = $request->input('q');
-
-        // Eğer arama boşsa anasayfaya yönlendir
         if (empty($aranan)) {
             return redirect()->route('home');
         }
 
-        // Veritabanında arama yap
-        // HATA BURADAYDI: ->get() veya ->paginate() kullanılmazsa "Builder" hatası verir.
         $urunler = Urun::where('urun_ad', 'LIKE', "%{$aranan}%")
-            ->orWhere('aciklama', 'LIKE', "%{$aranan}%") // İsterseniz açıklamada da aratabilirsiniz
-            ->orWhere('marka', 'LIKE', "%{$aranan}%")   // İsterseniz markada da aratabilirsiniz
-            ->get(); // <-- BU KISIM ÇOK ÖNEMLİ (Sorguyu çalıştırır)
+            ->orWhere('marka', 'LIKE', "%{$aranan}%")
+            ->get();
 
-        // Sonuçları göstermek için bir view'a gönder (örneğin urunler.index veya ozel bir arama sayfası)
-        // Eğer ayrı bir arama sayfası yoksa, ürün listeleme sayfasını kullanabiliriz.
-        return view('urunler.index', compact('urunler', 'aranan'));
+        return view('kullanici.urunler.index', compact('urunler', 'aranan'));
     }
 }

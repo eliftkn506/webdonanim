@@ -18,12 +18,20 @@
 
     <div class="card mb-4">
         <div class="card-body">
-            <form action="{{ route('admin.kategoriler.store') }}" method="POST">
+            {{-- ÖNEMLİ: enctype eklendi --}}
+            <form action="{{ route('admin.kategoriler.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="mb-3">
                     <label class="form-label">Kategori Adı</label>
                     <input type="text" name="kategori_ad" class="form-control" placeholder="Kategori adını giriniz" required>
+                </div>
+
+                {{-- Resim Alanı --}}
+                <div class="mb-3">
+                    <label class="form-label">Kategori Görseli</label>
+                    <input type="file" name="image" class="form-control" accept="image/*">
+                    <div class="form-text">İzin verilen formatlar: jpg, jpeg, png. Maks: 2MB</div>
                 </div>
 
                 <div class="text-end">

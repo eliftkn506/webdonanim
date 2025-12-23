@@ -26,7 +26,7 @@
         <li class="menu-item {{ request()->routeIs('admin.urunler.*') || request()->routeIs('admin.degerlendirmeler.*') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-box"></i>
-                <div>Ürün Yönetimi</div>
+                <div data-i18n="Product Management">Ürün Yönetimi</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('admin.urunler.index') ? 'active' : '' }}">
@@ -39,7 +39,6 @@
                         <div>Ürün Ekle</div>
                     </a>
                 </li>
-                
                 <li class="menu-item {{ request()->routeIs('admin.degerlendirmeler.index') ? 'active' : '' }}">
                     <a href="{{ route('admin.degerlendirmeler.index') }}" class="menu-link">
                         <div>Değerlendirmeler</div>
@@ -54,7 +53,7 @@
                         @endif
                     </a>
                 </li>
-                </ul>
+            </ul>
         </li>
 
         <li class="menu-item {{ request()->routeIs('admin.kategoriler.*') || request()->routeIs('admin.altkategoriler.*') ? 'active open' : '' }}">
@@ -68,7 +67,6 @@
                         <div>Kategori Listesi</div>
                     </a>
                 </li>
-               
             </ul>
         </li>
 
@@ -91,6 +89,25 @@
             </ul>
         </li>
 
+        <li class="menu-item {{ request()->routeIs('admin.kuponlar.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-purchase-tag"></i>
+                <div>Kupon Yönetimi</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.kuponlar.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.kuponlar.index') }}" class="menu-link">
+                        <div>Kupon Listesi</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.kuponlar.create') ? 'active' : '' }}">
+                    <a href="{{ route('admin.kuponlar.create') }}" class="menu-link">
+                        <div>Yeni Kupon Ekle</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <li class="menu-item {{ request()->routeIs('admin.kampanyalar.*') ? 'active' : '' }}">
             <a href="{{ route('admin.kampanyalar.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-gift"></i>
@@ -103,6 +120,29 @@
                 <i class="menu-icon tf-icons bx bx-store-alt"></i>
                 <div>Bayiler</div>
             </a>
+        </li>
+
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Site Yönetimi</span>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.sliders.*') || request()->routeIs('admin.pages.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-layout"></i>
+                <div>CMS Yönetimi</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.sliders.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.sliders.index') }}" class="menu-link">
+                        <div>Slider Yönetimi</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.pages.index') }}" class="menu-link">
+                        <div>Sayfa Yönetimi</div>
+                    </a>
+                </li>
+            </ul>
         </li>
 
     </ul>

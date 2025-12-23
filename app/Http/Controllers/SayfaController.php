@@ -4,17 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use App\Models\Page;
 
 class SayfaController extends Controller
 {
     public function hakkimizda()
     {
-        return view('sayfalar.hakkimizda');
+        $page = Page::where('slug', 'hakkimizda')->firstOrFail();
+        return view('sayfalar.hakkimizda', compact('page'));
     }
     
     public function iletisim()
     {
-        return view('sayfalar.iletisim');
+        $page = Page::where('slug', 'iletisim')->firstOrFail();
+        return view('sayfalar.iletisim', compact('page'));
     }
     
     public function iletisimGonder(Request $request)

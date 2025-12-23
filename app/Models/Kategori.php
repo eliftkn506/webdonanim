@@ -8,7 +8,9 @@ use App\Traits\LogsAdminActivity;
 class Kategori extends Model
 {
     protected $table = 'kategoriler';
-    protected $fillable = ['kategori_ad'];
+    protected $fillable = ['kategori_ad','name',
+    'slug',
+    'image',];
 
     // Bir kategori birden fazla alt kategoriye sahip olabilir
     public function altKategoriler()

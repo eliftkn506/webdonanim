@@ -30,6 +30,8 @@ use App\Http\Controllers\Admin\KuponController; // Kupon Controller
 use App\Http\Controllers\Admin\UrunFiyatController;
 use App\Http\Controllers\Admin\BayiController;
 use App\Http\Controllers\BayiBasvuruController;
+use App\Http\Controllers\Admin\SliderController;
+use App\Http\Controllers\Admin\PageController;
 
 // ===================== ANASAYFA =====================
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -166,6 +168,16 @@ Route::post('/iletisim', [SayfaController::class, 'iletisimGonder'])->name('ilet
 // ===================== ADMIN PANEL =====================
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
+    Route::resource('sliders', SliderController::class);
+
+   // Admin Rotaları Grubu İçinde
+Route::get('pages', [PageController::class, 'index'])->name('pages.index');
+Route::get('pages/create', [PageController::class, 'create'])->name('pages.create'); // YENİ
+Route::post('pages/store', [PageController::class, 'store'])->name('pages.store');    // YENİ
+Route::get('pages/{slug}/edit', [PageController::class, 'edit'])->name('pages.edit');
+Route::put('pages/{slug}/update', [PageController::class, 'update'])->name('pages.update');
+
+    
 
     // --- DEĞERLENDİRME YÖNETİMİ ---
     Route::get('/degerlendirmeler', [DegerlendirmeController::class, 'index'])->name('degerlendirmeler.index');

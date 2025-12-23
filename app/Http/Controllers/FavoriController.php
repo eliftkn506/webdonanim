@@ -10,115 +10,47 @@ use App\Models\Urun;
 
 class FavoriController extends Controller
 {
-    /**
-     * Favorilere ekle/çıkar (Toggle) - Ana fonksiyon
-     */
-    public function toggle(Request $request)
+   public function toggle(Request $request)
     {
         if (!Auth::check()) {
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Bu işlem için giriş yapmanız gerekiyor.',
-                    'redirect' => route('login')
-                ], 401);
-            }
-            return redirect()->route('login')->with('message', 'Favorilere eklemek için giriş yapmalısınız.');
+            return response()->json(['success' => false, 'message' => 'Giriş yapmalısınız.'], 401);
         }
 
-        try {
-            $urunId = $request->input('urun_id');
-            $kullaniciId = Auth::id();
+        $urunId = $request->input('urun_id');
+        $kullanici = Auth::user();
 
-            // Validation
-            $request->validate([
-                'urun_id' => 'required|integer|exists:urunler,id'
+        // Ürünü bul
+        $urun = Urun::find($urunId);
+        if (!$urun) {
+            return response()->json(['success' => false, 'message' => 'Ürün bulunamadı.'], 404);
+        }
+
+        // Favori kontrolü - Model üzerinden (Otomatik tablo adını kullanır)
+        $favori = FavoriUrun::where('user_id', $kullanici->id)
+                            ->where('urun_id', $urunId)
+                            ->first();
+
+        if ($favori) {
+            $favori->delete();
+            return response()->json([
+                'success' => true,
+                'action' => 'removed',
+                'message' => 'Favorilerden çıkarıldı.'
             ]);
-
-            Log::info('Favori toggle isteği', [
+        } else {
+            // Model fillable alanlarına göre kayıt
+            FavoriUrun::create([
+                'user_id' => $kullanici->id,
                 'urun_id' => $urunId,
-                'kullanici_id' => $kullaniciId,
-                'request_data' => $request->all()
-            ]);
-
-            // Ürünün varlığını kontrol et
-            $urun = Urun::find($urunId);
-            if (!$urun) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ürün bulunamadı.'
-                ], 404);
-            }
-
-            // Favori durumunu kontrol et
-            $favori = FavoriUrun::where('user_id', $kullaniciId)
-                                ->where('urun_id', $urunId)
-                                ->first();
-
-            if ($favori) {
-                // Favorilerden çıkar
-                $favori->delete();
-                Log::info("Ürün favorilerden çıkarıldı", [
-                    'urun_id' => $urunId, 
-                    'kullanici_id' => $kullaniciId,
-                    'urun_ad' => $urun->urun_ad
-                ]);
-                
-                return response()->json([
-                    'success' => true,
-                    'action' => 'removed',
-                    'message' => 'Ürün favorilerden çıkarıldı.',
-                    'is_favorite' => false
-                ]);
-            } else {
-                // Favorilere ekle - Database'deki TÜM gerekli sütunlara değer ver
-                $favoriData = [
-                    'user_id' => $kullaniciId,
-                    'ad_soyad' => Auth::user()->name ?? Auth::user()->email ?? 'Kullanıcı',
-                    'urun_id' => $urunId,
-                    'urun_ad' => $urun->urun_ad
-                ];
-
-                $yeniFavori = FavoriUrun::create($favoriData);
-
-                Log::info("Ürün favorilere eklendi", [
-                    'urun_id' => $urunId, 
-                    'kullanici_id' => $kullaniciId,
-                    'urun_ad' => $urun->urun_ad,
-                    'favori_id' => $yeniFavori->id
-                ]);
-
-                return response()->json([
-                    'success' => true,
-                    'action' => 'added',
-                    'message' => 'Ürün favorilere eklendi.',
-                    'is_favorite' => true,
-                    'favori_id' => $yeniFavori->id
-                ]);
-            }
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Favori toggle validation hatası', [
-                'errors' => $e->errors(),
-                'input' => $request->all()
-            ]);
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Geçersiz ürün ID.'
-            ], 422);
-
-        } catch (\Exception $e) {
-            Log::error('Favori toggle genel hatası: ' . $e->getMessage(), [
-                'urun_id' => $request->input('urun_id'),
-                'kullanici_id' => Auth::id(),
-                'error_trace' => $e->getTraceAsString()
+                'urun_ad' => $urun->urun_ad,
+                'ad_soyad' => $kullanici->name // Modelinizdeki eksik alan buradaydı
             ]);
 
             return response()->json([
-                'success' => false,
-                'message' => 'İşlem sırasında bir hata oluştu: ' . $e->getMessage()
-            ], 500);
+                'success' => true,
+                'action' => 'added',
+                'message' => 'Favorilere eklendi.'
+            ]);
         }
     }
 

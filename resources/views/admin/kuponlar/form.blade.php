@@ -221,10 +221,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const query = e.target.value;
                 if(query.length < 2) return;
 
-                fetch(`/admin/kuponlar/kullanici-ara?q=${encodeURIComponent(query)}`)
+                // URL'yi route helper ile garantiye alıyoruz
+                fetch(`{{ route('admin.kuponlar.kullanici-ara') }}?q=${encodeURIComponent(query)}`)
                     .then(res => res.json())
                     .then(data => {
-                        // Mevcut seçili olanları sakla
                         const selectedValues = Array.from(selectBox.selectedOptions).map(opt => ({
                             val: opt.value, 
                             text: opt.text
@@ -232,13 +232,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         selectBox.innerHTML = '';
                         
-                        // Seçilileri geri ekle
                         selectedValues.forEach(item => {
                             const opt = new Option(item.text, item.val, true, true);
                             selectBox.add(opt);
                         });
 
-                        // Yeni sonuçları ekle (zaten ekli değilse)
                         data.forEach(user => {
                             if(!selectedValues.some(sv => sv.val == user.id)) {
                                 const text = `${user.name} (${user.email})`;

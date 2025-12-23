@@ -2,8 +2,10 @@
 @section('title', 'Ürünler Filtrele')
 
 @section('content')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <style>
-/* Stil kodları aynı kalıyor */
+/* Stil kodları */
 :root {
     --primary: #2563eb;
     --primary-dark: #1e40af;
@@ -16,7 +18,7 @@
     --light: #f8fafc;
     --border: #e2e8f0;
 }
-/* ... (Tüm CSS kodunuz buraya gelecektir) ... */
+
 body {
     font-family: 'Inter', system-ui, sans-serif;
     background: var(--light);
@@ -368,6 +370,11 @@ body {
     border-color: var(--primary);
 }
 
+.action-btn.active {
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
 .product-info {
     padding: 1.25rem;
     flex: 1;
@@ -403,41 +410,6 @@ body {
 
 .product-title a:hover {
     color: var(--primary);
-}
-
-.product-criteria {
-    margin-bottom: 1rem;
-}
-
-.criteria-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.criteria-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.85rem;
-    color: var(--secondary);
-    margin-bottom: 0.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--light);
-}
-.criteria-list li:last-child {
-    border-bottom: 0;
-    margin-bottom: 0;
-}
-
-.criteria-list strong {
-    font-weight: 500;
-    color: var(--dark);
-    margin-right: 0.5rem;
-    white-space: nowrap;
-}
-.criteria-list span {
-    text-align: right;
 }
 
 .price-section {
@@ -497,12 +469,6 @@ body {
     color: var(--dark);
 }
 
-.installment-text {
-    font-size: 0.8125rem;
-    color: var(--secondary);
-    margin-top: 0.5rem;
-}
-
 .cart-section {
     display: flex;
     gap: 0.75rem;
@@ -540,14 +506,6 @@ body {
     font-size: 0.875rem;
     color: var(--dark);
 }
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-input[type=number] {
-    -moz-appearance: textfield;
-}
 
 .add-cart-btn {
     flex: 1;
@@ -572,6 +530,12 @@ input[type=number] {
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
+.add-cart-btn:disabled {
+    background: #10b981;
+    color: white;
+    cursor: not-allowed;
+}
+
 .btn-incele {
     display: flex;
     align-items: center;
@@ -593,84 +557,10 @@ input[type=number] {
     color: white;
 }
 
-.empty-state {
-    grid-column: 1/-1;
-    text-align: center;
-    padding: 4rem 2rem;
-    background: white;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-}
-.empty-icon {
-    font-size: 4rem;
-    color: var(--secondary);
-    opacity: 0.3;
-    margin-bottom: 1rem;
-}
-
 .pagination-wrapper {
     margin-top: 2.5rem;
     display: flex;
     justify-content: center;
-}
-.pagination {
-    display: flex;
-    gap: 0.5rem;
-}
-.page-link {
-    padding: 0.625rem 1rem;
-    border: 1px solid var(--border);
-    background: white;
-    color: var(--dark);
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-}
-.page-link:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-}
-.page-link.active {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-    font-weight: 600;
-}
-
-@media (max-width: 1024px) {
-    .main-container {
-        grid-template-columns: 1fr;
-    }
-    .filter-sidebar {
-        position: static;
-        margin-bottom: 2rem;
-        max-height: none;
-    }
-}
-@media (max-width: 768px) {
-    .products-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-    }
-    .product-image-wrapper {
-        height: 180px;
-    }
-    .products-header {
-        flex-direction: column;
-        gap: 1rem;
-    }
-}
-@media (max-width: 480px) {
-    .products-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    .main-container {
-        grid-template-columns: 1fr;
-    }
 }
 </style>
 
@@ -707,17 +597,13 @@ input[type=number] {
     <aside class="filter-sidebar">
         <div class="filter-header">
             <h3 class="filter-title">🔍 Filtreler</h3>
-            {{-- Temizle butonunu ana ürünler sayfasına yönlendir (eğer arama varsa q parametresini koru) --}}
             <a href="{{ route('urun.index') . (request('q') ? '?q=' . request('q') : '') }}" class="filter-clear">Temizle</a>
         </div>
 
         <form method="GET" id="filterForm">
-            {{-- Search Query ve Sort alanlarını gizli input olarak ekle --}}
             @if(request('q'))
                 <input type="hidden" name="q" value="{{ request('q') }}">
             @endif
-            
-            {{-- Sort alanını gizli tutmak yerine, sıralama formu ile hallediyoruz. Yine de tutabiliriz. --}}
             <input type="hidden" name="sort" value="{{ request('sort') }}" id="sort_field_hidden">
             
             <div class="filter-section">
@@ -737,7 +623,6 @@ input[type=number] {
                 <div class="filter-section-title">📂 Alt Kategori</div>
                 <select name="alt_kategori_id" class="filter-select auto-submit-select" id="alt_kategori_select">
                     <option value="">Tümü</option>
-                    {{-- Alt kategoriler JavaScript ile doldurulacak, mevcut seçili olan Blade ile render ediliyor --}}
                     @foreach($altKategoriler ?? [] as $alt)
                         <option value="{{ $alt->id }}" 
                                 {{ (request('alt_kategori_id') == $alt->id) || (isset($altKategori) && $altKategori->id == $alt->id) ? 'selected' : '' }}>
@@ -753,7 +638,6 @@ input[type=number] {
                     @if(!empty($markalar))
                         @foreach($markalar as $marka)
                             @php
-                                // Laravel'in request helper'ı ile markanın seçili olup olmadığını kontrol et
                                 $checked = is_array(request('marka')) ? in_array($marka, request('marka')) : ($marka == request('marka'));
                             @endphp
                             <div class="checkbox-item">
@@ -774,7 +658,6 @@ input[type=number] {
                     @if(!empty($modeller))
                         @foreach($modeller as $model)
                             @php
-                                // Laravel'in request helper'ı ile modelin seçili olup olmadığını kontrol et
                                 $checked = is_array(request('model')) ? in_array($model, request('model')) : ($model == request('model'));
                             @endphp
                             <div class="checkbox-item">
@@ -790,7 +673,6 @@ input[type=number] {
             </div>
 
             <div id="dynamic_kriter_filters">
-                {{-- Kriterler Alt Kategori seçildiğinde Controller'dan yüklenecek --}}
                 @if(!empty($kriterler) && $kriterler->count() > 0)
                     @foreach($kriterler as $kriter)
                         <div class="filter-section">
@@ -819,34 +701,9 @@ input[type=number] {
 
             <div class="filter-section">
                 <div class="filter-section-title">💰 Fiyat Aralığı</div>
-                <small class="text-muted d-block mb-2">₺{{ number_format($minFiyat ?? 0, 0) }} - ₺{{ number_format($maxFiyat ?? 10000, 0) }}</small>
                 <div class="price-inputs">
-                    <input type="number" name="min_fiyat" placeholder="Min" class="price-input" value="{{ request('min_fiyat') }}" min="0" max="{{ $maxFiyat ?? 10000 }}">
-                    <input type="number" name="max_fiyat" placeholder="Max" class="price-input" value="{{ request('max_fiyat') }}" min="0" max="{{ $maxFiyat ?? 10000 }}">
-                </div>
-            </div>
-
-            <div class="filter-section">
-                <div class="filter-section-title">📦 Stok Durumu</div>
-                <div class="checkbox-list">
-                    <div class="checkbox-item">
-                        <label>
-                            <input type="radio" name="stok_durumu" value="hepsi" {{ !request('stok_durumu') || request('stok_durumu') == 'hepsi' ? 'checked' : '' }} class="auto-submit-radio">
-                            Hepsi
-                        </label>
-                    </div>
-                    <div class="checkbox-item">
-                        <label>
-                            <input type="radio" name="stok_durumu" value="var" {{ request('stok_durumu') == 'var' ? 'checked' : '' }} class="auto-submit-radio">
-                            Stokta Var
-                        </label>
-                    </div>
-                    <div class="checkbox-item">
-                        <label>
-                            <input type="radio" name="stok_durumu" value="yok" {{ request('stok_durumu') == 'yok' ? 'checked' : '' }} class="auto-submit-radio">
-                            Stokta Yok
-                        </label>
-                    </div>
+                    <input type="number" name="min_fiyat" placeholder="Min" class="price-input" value="{{ request('min_fiyat') }}">
+                    <input type="number" name="max_fiyat" placeholder="Max" class="price-input" value="{{ request('max_fiyat') }}">
                 </div>
             </div>
 
@@ -863,30 +720,17 @@ input[type=number] {
             </div>
             <div class="products-sort">
                 <form method="GET" id="sortForm" class="products-sort">
-                    {{-- Mevcut filtreleri gizli input olarak ekle --}}
-                    @foreach(request()->except(['sort', '_token', 'page']) as $key => $value)
+                    @foreach(request()->except(['sort', 'page']) as $key => $value)
                         @if(is_array($value))
-                            @foreach($value as $subKey => $subValue)
-                                @if(is_array($subValue))
-                                    @foreach($subValue as $v)
-                                        <input type="hidden" name="{{ $key }}[{{ $subKey }}][]" value="{{ $v }}">
-                                    @endforeach
-                                @else
-                                    {{-- Marka/Model durumunda --}}
-                                    <input type="hidden" name="{{ $key }}[]" value="{{ $subValue }}">
-                                @endif
-                            @endforeach
-                        @elseif(!empty($value))
+                            @foreach($value as $v) <input type="hidden" name="{{ $key }}[]" value="{{ $v }}"> @endforeach
+                        @else
                             <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                         @endif
                     @endforeach
-
                     <select name="sort" class="sort-select" onchange="this.form.submit()">
-                        <option value="newest" {{ request('sort') == 'newest' || !request('sort') ? 'selected' : '' }}>En Yeni</option>
+                        <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>En Yeni</option>
                         <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Ucuzdan Pahalıya</option>
                         <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Pahalıdan Ucuza</option>
-                        <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>A-Z Sıralama</option>
-                        <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Z-A Sıralama</option>
                     </select>
                 </form>
             </div>
@@ -896,491 +740,206 @@ input[type=number] {
             @forelse($urunler as $urun)
                 @php
                     $user = auth()->user();
-                    
-                    // Fiyat ve indirim hesaplamaları
-                    $satisFiyati = $urun->getFiyatForUser($user) ?? 0; 
-                    $standartFiyat = $urun->getStandartFiyat() ?? 0; 
-                    $isBayi = $user && ($user->isBayi() ?? false); 
-                    $bayiFiyat = $isBayi ? ($urun->getBayiFiyat() ?? null) : null; 
+                    $satisFiyati = $urun->getFiyatForUser($user) ?? 0;
+                    $standartFiyat = $urun->getStandartFiyat() ?? 0;
+                    $isBayi = $user && $user->isBayi();
+                    $bayiFiyat = $isBayi ? $urun->getBayiFiyat() : null;
 
-                    $kampanya = DB::table('kampanya_indirim')
-                        ->where('urun_id', $urun->id)
-                        ->where('aktif', 1)
-                        ->where('baslangic_tarihi', '<=', now())
-                        ->where('bitis_tarihi', '>=', now())
-                        ->first();
+                    $kampanya = DB::table('kampanya_indirim')->where('urun_id', $urun->id)->where('aktif', 1)->where('baslangic_tarihi', '<=', now())->where('bitis_tarihi', '>=', now())->first();
+                    $indirimliFiyat = ($kampanya && $satisFiyati > 0) ? $satisFiyati * (1 - $kampanya->indirim_orani / 100) : $satisFiyati;
                     
-                    $indirimliFiyat = $satisFiyati; 
-                    if($kampanya && $satisFiyati > 0) {
-                        $indirimliFiyat = $satisFiyati * (1 - $kampanya->indirim_orani / 100);
+                    // FAVORİ KONTROLÜ DÜZELTİLDİ (Hatanın kaynağı burasıydı)
+                    $isFav = false;
+                    if($user) {
+                        $isFav = DB::table('favoriUrunler')->where('user_id', $user->id)->where('urun_id', $urun->id)->exists();
                     }
-
-                    $gosterimFiyati = $isBayi && $bayiFiyat ? $bayiFiyat : $indirimliFiyat; 
                 @endphp
 
                 <div class="product-card">
                     <div class="product-image-wrapper">
-                        <img src="{{ $urun->resim_url ? asset($urun->resim_url) : 'https://via.placeholder.com/300x300?text=Ürün' }}" 
-                             alt="{{ $urun->urun_ad }}" 
-                             class="product-image">
-                        
+                        <img src="{{ $urun->resim_url ? asset($urun->resim_url) : 'https://via.placeholder.com/300x300' }}" class="product-image">
                         <div class="product-actions">
-                            <button class="action-btn" onclick="toggleFavorite({{ $urun->id }})">
-                                <i class="far fa-heart"></i>
+                            <button class="action-btn {{ $isFav ? 'active' : '' }}" onclick="toggleFavorite({{ $urun->id }}, this)">
+                                <i class="{{ $isFav ? 'fas' : 'far' }} fa-heart"></i>
                             </button>
-                            <a href="{{ route('urun.incele', $urun->id) }}" class="action-btn">
-                                <i class="fas fa-search-plus"></i>
-                            </a>
+                            <a href="{{ route('urun.incele', $urun->id) }}" class="action-btn"><i class="fas fa-search-plus"></i></a>
                         </div>
                     </div>
 
                     <div class="product-info">
-                        @if($urun->marka)
-                            <div class="product-brand">{{ $urun->marka }}</div>
-                        @endif
-                        
-                        <h3 class="product-title">
-                            <a href="{{ route('urun.incele', $urun->id) }}">{{ $urun->urun_ad }}</a>
-                        </h3>
-
-                        <div class="product-criteria">
-                            @if($urun->urunKriterDegerleri->count() > 0)
-                            <ul class="criteria-list">
-                                @foreach($urun->urunKriterDegerleri->take(3) as $kd)
-                                    @if($kd->kriter && $kd->kriterDeger)
-                                    <li>
-                                        <strong>{{ $kd->kriter->kriter_ad }}</strong>
-                                        <span>{{ $kd->kriterDeger->deger }}</span>
-                                    </li>
-                                    @endif
-                                @endforeach
-                            </ul>
-                            @endif
-                        </div>
+                        @if($urun->marka) <div class="product-brand">{{ $urun->marka }}</div> @endif
+                        <h3 class="product-title"><a href="{{ route('urun.incele', $urun->id) }}">{{ $urun->urun_ad }}</a></h3>
 
                         <div class="price-section">
                             <div class="price-wrapper">
                                 @if($satisFiyati > 0)
                                     @if($isBayi && $bayiFiyat && $standartFiyat > $bayiFiyat)
                                         <span class="current-price discounted">₺{{ number_format($bayiFiyat, 2, ',', '.') }}</span>
-                                        <div class="price-discount">
-                                            <span class="original-price">₺{{ number_format($standartFiyat, 2, ',', '.') }}</span>
-                                            <span class="discount-badge bayi">Bayi Fiyatı</span>
-                                        </div>
+                                        <div class="price-discount"><span class="original-price">₺{{ number_format($standartFiyat, 2, ',', '.') }}</span> <span class="discount-badge bayi">Bayi</span></div>
                                     @elseif($kampanya)
                                         <span class="current-price discounted">₺{{ number_format($indirimliFiyat, 2, ',', '.') }}</span>
-                                        <div class="price-discount">
-                                            <span class="original-price">₺{{ number_format($satisFiyati, 2, ',', '.') }}</span>
-                                            <span class="discount-badge">-%{{ $kampanya->indirim_orani }}</span>
-                                        </div>
+                                        <div class="price-discount"><span class="original-price">₺{{ number_format($satisFiyati, 2, ',', '.') }}</span> <span class="discount-badge">-%{{ $kampanya->indirim_orani }}</span></div>
                                     @else
                                         <span class="current-price">₺{{ number_format($satisFiyati, 2, ',', '.') }}</span>
                                     @endif
-                                    
-                                    @if($gosterimFiyati > 1000)
-                                        <div class="installment-text">
-                                            {{ number_format($gosterimFiyati / 12, 0) }} ₺'den başlayan taksitle
-                                        </div>
-                                    @endif
                                 @else
-                                    <span class="no-price-text">Fiyat Yok</span>
+                                    <span class="no-price-text">Fiyat İçin Arayınız</span>
                                 @endif
                             </div>
 
-                            @if($satisFiyati > 0)
+                            @if($satisFiyati > 0 && $urun->stok > 0)
                                 <div class="cart-section">
                                     <div class="qty-selector">
                                         <button class="qty-btn" onclick="decreaseQty({{ $urun->id }})">−</button>
-                                        <input type="number" class="qty-input" id="qty_{{ $urun->id }}" value="1" min="1" max="99">
+                                        <input type="number" class="qty-input" id="qty_{{ $urun->id }}" value="1" min="1" max="{{ $urun->stok }}" readonly>
                                         <button class="qty-btn" onclick="increaseQty({{ $urun->id }})">+</button>
                                     </div>
-                                    <button class="add-cart-btn" onclick="addToCart({{ $urun->id }})">
-                                        <i class="fas fa-shopping-cart"></i> Sepete Ekle
+                                    <button class="add-cart-btn" onclick="addToCart({{ $urun->id }}, this)">
+                                        <i class="fas fa-shopping-cart"></i> EKLE
                                     </button>
                                 </div>
                             @else
-                                <a href="{{ route('urun.incele', $urun->id) }}" class="btn-incele">
-                                    Detayları İncele
-                                </a>
+                                <a href="{{ route('urun.incele', $urun->id) }}" class="btn-incele">İncele</a>
                             @endif
                         </div>
                     </div>
                 </div>
             @empty
-                <div class="empty-state">
-                    <div class="empty-icon"><i class="fas fa-inbox"></i></div>
-                    <h3>Ürün Bulunamadı</h3>
-                    <p>Aradığınız kriterlere uygun ürün bulunmamaktadır.</p>
-                </div>
+                <div class="text-center py-5 w-100"><h3>Ürün Bulunamadı</h3></div>
             @endforelse
         </div>
 
-        @if($urunler->hasPages())
-            <div class="pagination-wrapper">
-                <div class="pagination">
-                    {{ $urunler->links('pagination::bootstrap-4') }}
-                </div>
-            </div>
-        @endif
+        <div class="pagination-wrapper">
+            {{ $urunler->appends(request()->all())->links('pagination::bootstrap-4') }}
+        </div>
     </section>
 </div>
 
+<div class="modal fade" id="loginModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 p-5 text-center shadow-lg">
+            <div class="mb-4 text-warning"><i class="fas fa-user-lock fa-4x"></i></div>
+            <h3 class="fw-bold">Giriş Yapmalısınız</h3>
+            <p class="text-muted">Bu işlemi yapabilmek için lütfen hesabınıza giriş yapın.</p>
+            <div class="d-grid gap-2 mt-4">
+                <a href="{{ route('login') }}" class="btn btn-primary py-3 rounded-3 fw-bold">GİRİŞ YAP</a>
+                <button type="button" class="btn btn-light py-3 rounded-3 fw-bold" data-bs-dismiss="modal">VAZGEÇ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+// SEPETE EKLEME AJAX
+function addToCart(urunId, btn) {
+    const qtyInput = document.getElementById('qty_' + urunId);
+    const adet = qtyInput ? qtyInput.value : 1;
+    
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+
+    fetch('{{ route("sepet.ekle") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ id: urunId, adet: adet })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            if (typeof window.updateAllCartCounts === 'function') {
+                window.updateAllCartCounts(data.sepet_count || data.sepetCount);
+            }
+            
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.classList.add('btn-success');
+            if(window.showToast) window.showToast('Ürün sepete eklendi!', 'success');
+
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+                btn.classList.remove('btn-success');
+                btn.disabled = false;
+            }, 2000);
+        } else {
+            alert(data.message || 'Hata oluştu');
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+    });
+}
+
+// FAVORİ İŞLEMİ AJAX
+function toggleFavorite(id, btn) {
+    @guest
+        new bootstrap.Modal(document.getElementById('loginModal')).show();
+        return;
+    @endguest
+
+    fetch('{{ route("favori.toggle") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ urun_id: id })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const icon = btn.querySelector('i');
+        if(data.action === 'added') {
+            icon.classList.replace('far', 'fas');
+            btn.classList.add('active');
+            if(window.showToast) window.showToast('Favorilere eklendi!', 'success');
+        } else {
+            icon.classList.replace('fas', 'far');
+            btn.classList.remove('active');
+            if(window.showToast) window.showToast('Favorilerden kaldırıldı.', 'info');
+        }
+    });
+}
+
+// MİKTAR AYARLARI
+function increaseQty(id) {
+    const input = document.getElementById('qty_' + id);
+    let val = parseInt(input.value);
+    const max = parseInt(input.getAttribute('max'));
+    if(val < max) input.value = val + 1;
+}
+
+function decreaseQty(id) {
+    const input = document.getElementById('qty_' + id);
+    let val = parseInt(input.value);
+    if(val > 1) input.value = val - 1;
+}
+
+// FİLTRELEME
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("🚀 Filtre sistemi başlatıldı");
-
-    const kategoriSelect = document.getElementById("kategori_select");
-    const altKategoriSelect = document.getElementById("alt_kategori_select");
-    const markaList = document.getElementById("marka_list");
-    const modelList = document.getElementById("model_list");
-    const dynamicKriterFilters = document.getElementById("dynamic_kriter_filters");
     const filterForm = document.getElementById("filterForm");
-
-    const markaSection = document.getElementById("marka_section");
-    const modelSection = document.getElementById("model_section");
-    const altKategoriSection = document.getElementById("alt_kategori_section");
-
     const loadingOverlay = document.getElementById("loadingOverlay");
 
-    let isLoading = false;
-
-    /* ---------------------- LOADING ----------------------- */
-    function showLoading() {
-        if (isLoading) return; 
-        isLoading = true;
-        loadingOverlay.classList.add("show");
-    }
-
-    function hideLoading() {
-        isLoading = false;
-        loadingOverlay.classList.remove("show");
-    }
-
-
-    /* ---------------------- FORM SUBMIT ---------------------- */
     function submitForm() {
-        if (isLoading) return;
-        showLoading();
+        loadingOverlay.classList.add("show");
         filterForm.submit();
     }
 
-    /**
-     * Mevcut form filtrelerini alıp Query String olarak döndürür.
-     */
-    function getFormDataAsQueryString(excludeKeys = []) {
-        const formData = new FormData(filterForm);
-        const params = new URLSearchParams();
-        
-        const kategoriId = kategoriSelect.value;
-        const altKategoriId = altKategoriSelect.value;
-        
-        // Tüm form girdilerini işle
-        for (const [key, value] of formData.entries()) {
-            if (value === '' || value === 'hepsi' || key === 'sort' || key === 'page' || key === '_token') {
-                continue; 
-            }
-            
-            if (key !== 'kategori_id' && key !== 'alt_kategori_id') {
-                if (excludeKeys.includes(key.replace('[]', ''))) {
-                    continue;
-                }
-                
-                if (key.startsWith('kriterler[') && excludeKeys.includes('kriterler')) {
-                     continue;
-                }
-                
-                params.append(key, value);
-            }
-        }
-        
-        // Kategori ve Alt Kategori her zaman mevcut olmalı
-        if (kategoriId && !excludeKeys.includes('kategori_id')) {
-            params.append('kategori_id', kategoriId);
-        }
-        if (altKategoriId && !excludeKeys.includes('alt_kategori_id')) {
-             params.append('alt_kategori_id', altKategoriId);
-        }
-
-        return params.toString();
-    }
-
-
-    /* ---------------------- SEÇİLİ FİLTRELERİ AL (Aynı kaldı) ---------------------- */
-    function getCheckedValues() {
-        const checked = { markalar: [], modeller: [], kriterler: {} };
-
-        document.querySelectorAll('#marka_list input:checked').forEach(i => checked.markalar.push(i.value));
-        document.querySelectorAll('#model_list input:checked').forEach(i => checked.modeller.push(i.value));
-
-        document.querySelectorAll('#dynamic_kriter_filters input:checked').forEach(i => {
-            const match = i.name.match(/kriterler\[(\d+)\]/);
-            if (match) {
-                const id = match[1];
-                if (!checked.kriterler[id]) checked.kriterler[id] = [];
-                checked.kriterler[id].push(i.value);
-            }
-        });
-
-        return checked;
-    }
-
-
-    /* ---------------------- KRİTER HTML RENDER (Aynı kaldı) ---------------------- */
-    function renderKriterFilters(kriterler, checked) {
-        let html = "";
-
-        kriterler.forEach(k => {
-            const aktifDeger = k.degerler.filter(x => x.urun_count > 0);
-            if (aktifDeger.length === 0) return;
-
-            html += `
-                <div class="filter-section">
-                    <div class="filter-section-title">⚙️ ${k.kriter_ad}</div>
-                    <div class="checkbox-list">
-            `;
-
-            aktifDeger.forEach(d => {
-                const ch = checked.kriterler[k.id] && checked.kriterler[k.id].includes(String(d.id)) ? "checked" : "";
-
-                html += `
-                    <div class="checkbox-item">
-                        <label>
-                            <input type="checkbox" name="kriterler[${k.id}][]" value="${d.id}" ${ch} class="auto-submit-checkbox">
-                            ${d.deger}
-                        </label>
-                        <span class="checkbox-count">(${d.urun_count})</span>
-                    </div>
-                `;
-            });
-
-            html += `</div></div>`;
-        });
-
-        dynamicKriterFilters.innerHTML = html;
-        attachAutoSubmitListeners(); 
-    }
-
-
-    /* ---------------------- MARKA / MODEL RENDER (Aynı kaldı) ---------------------- */
-    function renderMarkaModel(data, checked) {
-        markaList.innerHTML = "";
-        modelList.innerHTML = "";
-
-        /* Marka */
-        if (data.markalar && data.markalar.length > 0) {
-            markaSection.style.display = "block";
-            data.markalar.forEach(m => {
-                const ch = checked.markalar.includes(m.marka) ? "checked" : "";
-                markaList.innerHTML += `
-                    <div class="checkbox-item">
-                        <label>
-                            <input type="checkbox" name="marka[]" value="${m.marka}" ${ch} class="auto-submit-checkbox">
-                            ${m.marka}
-                        </label>
-                        <span class="checkbox-count">(${m.count})</span>
-                    </div>
-                `;
-            });
-        } else {
-            markaSection.style.display = "none";
-        }
-
-        /* Model */
-        if (data.modeller && data.modeller.length > 0) {
-            modelSection.style.display = "block";
-            data.modeller.forEach(m => {
-                const ch = checked.modeller.includes(m.model) ? "checked" : "";
-                modelList.innerHTML += `
-                    <div class="checkbox-item">
-                        <label>
-                            <input type="checkbox" name="model[]" value="${m.model}" ${ch} class="auto-submit-checkbox">
-                            ${m.model}
-                        </label>
-                        <span class="checkbox-count">(${m.count})</span>
-                    </div>
-                `;
-            });
-        } else {
-            modelSection.style.display = "none";
-        }
-        
-        attachAutoSubmitListeners(); 
-    }
-
-
-    /* ---------------------- EVENT LISTENER YENİDEN EKLE (Aynı kaldı) ---------------------- */
-    function attachAutoSubmitListeners() {
-        // Checkbox, Radio, Price Inputs
-        document.querySelectorAll(".auto-submit-checkbox, .auto-submit-radio, .price-input").forEach(el => {
-            el.removeEventListener("change", submitForm);
-            el.addEventListener("change", submitForm);
-        });
-        
-        // Price Inputs (Enter tuşu)
-        filterForm.querySelectorAll('.price-input').forEach(input => {
-            input.removeEventListener('keydown', function(e) {
-                if (e.key === 'Enter') { e.preventDefault(); submitForm(); }
-            });
-            input.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') { e.preventDefault(); submitForm(); }
-            });
-        });
-    }
-
-
-    /* ---------------------- ALT KATEGORİ AJAX FİLTRE YÜKLEME ---------------------- */
-    function fetchKriterMarkaModel(altKategoriId) {
-        if (!altKategoriId) {
-            dynamicKriterFilters.innerHTML = "";
-            markaList.innerHTML = "";
-            modelList.innerHTML = "";
-            markaSection.style.display = "none";
-            modelSection.style.display = "none";
-            return;
-        }
-
-        const checked = getCheckedValues();
-        
-        // Tüm aktif filtreleri al (bu Alt Kategori ID'sini içerir)
-        const qs = getFormDataAsQueryString(); 
-
-        const kriterUrl = `{{ route('urun.getKriterler') }}?${qs}`;
-        const markaModelUrl = `{{ route('urun.getMarkaModel') }}?${qs}`;
-
-        isLoading = true;
-        showLoading();
-
-        Promise.all([
-            fetch(kriterUrl).then(r => r.json()),
-            fetch(markaModelUrl).then(r => r.json())
-        ]).then(([kriterler, markamodel]) => {
-            console.log("✅ Filtre verisi geldi.");
-
-            if(kriterler.error || markamodel.error) {
-                console.error("Sunucu hatası:", kriterler.error || markamodel.error);
-                renderKriterFilters([], checked);
-                renderMarkaModel({markalar: [], modeller: []}, checked);
-            } else {
-                 renderKriterFilters(kriterler, checked);
-                 renderMarkaModel(markamodel, checked);
-            }
-
-            hideLoading();
-        }).catch(error => {
-            console.error("❌ AJAX Hatası:", error);
-            hideLoading();
-        });
-    }
-
-
-    /* ---------------------- KATEGORİ SEÇİMİ ---------------------- */
-    kategoriSelect.addEventListener("change", function() {
-        const kategoriId = this.value;
-        
-        // Diğer filtreleri sıfırla
-        altKategoriSelect.value = "";
-        altKategoriSelect.innerHTML = '<option value="">Tümü</option>';
-        dynamicKriterFilters.innerHTML = "";
-        markaList.innerHTML = "";
-        modelList.innerHTML = "";
-        markaSection.style.display = "none";
-        modelSection.style.display = "none";
-
-        filterForm.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]').forEach(input => {
-            if (input.name !== 'stok_durumu') input.checked = false;
-        });
-        filterForm.querySelector('input[name="stok_durumu"][value="hepsi"]').checked = true;
-        filterForm.querySelector('input[name="min_fiyat"]').value = '';
-        filterForm.querySelector('input[name="max_fiyat"]').value = '';
-
-
-        // Eğer kategori seçiliyse (veya boşaltılıyorsa), formu gönder (bu Alt Kategoriyi yükler/temizler)
-        submitForm();
+    document.querySelectorAll(".auto-submit-select, .auto-submit-checkbox, .auto-submit-radio").forEach(el => {
+        el.addEventListener("change", submitForm);
     });
 
-
-    /* ---------------------- ALT KATEGORİ SEÇİMİ ---------------------- */
-    altKategoriSelect.addEventListener("change", function () {
-        const altKategoriId = this.value;
-        
-        // Filtreleri sıfırla
-        dynamicKriterFilters.innerHTML = "";
-        markaList.innerHTML = "";
-        modelList.innerHTML = "";
-        
-        // Alt kategori değiştiği anda yeni filtreleri yükle
-        if(altKategoriId) {
-             fetchKriterMarkaModel(altKategoriId);
-        } else {
-             // Alt kategori "Tümü" seçildiyse dinamik alanları temizle/gizle
-             markaSection.style.display = "none";
-             modelSection.style.display = "none";
-        }
-        
-        // Yeni ürün listesini çekmek için formu gönder
+    document.getElementById("kategori_select")?.addEventListener("change", function() {
+        const altSelect = document.getElementById("alt_kategori_select");
+        if(altSelect) altSelect.value = "";
         submitForm();
     });
-    
-    
-    // --- GEREKLİ ALT KATEGORİ ÇEKME FONKSİYONU (index sayfasındaki ilk yükleme için) ---
-    function fetchAltKategoriler(kategoriId) {
-        if (!kategoriId) return;
-        
-        fetch(`{{ route('urun.getAltKategoriler') }}?kategori_id=${kategoriId}`)
-            .then(response => response.json())
-            .then(data => {
-                altKategoriSelect.innerHTML = '<option value="">Tümü</option>';
-                data.forEach(altKat => {
-                    const option = document.createElement('option');
-                    option.value = altKat.id;
-                    option.textContent = altKat.alt_kategori_ad;
-                    altKategoriSelect.appendChild(option);
-                });
-                // URL'den seçili alt kategori varsa ayarla
-                const urlParams = new URLSearchParams(window.location.search);
-                const currentAltKategoriId = urlParams.get('alt_kategori_id');
-                if (currentAltKategoriId && altKategoriSelect.querySelector(`option[value="${currentAltKategoriId}"]`)) {
-                    altKategoriSelect.value = currentAltKategoriId;
-                }
-            })
-            .catch(error => console.error('Alt Kategori AJAX Hatası:', error));
-    }
-
-
-    /* ---------------------- SAYFA İLK YÜKLENME ---------------------- */
-    // Eğer Alt Kategori ilk yüklemede seçiliyse, dinamik filtreleri yükle
-    if (altKategoriSelect.value && altKategoriSelect.children.length > 1) {
-        console.log("⏳ İlk yükleme: Alt kategori seçili, dinamik filtreler yükleniyor...");
-        fetchKriterMarkaModel(altKategoriSelect.value);
-    } else if (kategoriSelect.value) {
-        // Eğer kategori seçili ama alt kategoriler henüz yüklenmemişse, yükle
-        fetchAltKategoriler(kategoriSelect.value);
-    }
-
-    // Genel auto-submit dinleyicilerini ilk başta ekle
-    attachAutoSubmitListeners();
-    console.log("✅ Filtre sistemi hazır.");
 });
-
-// Yardımcı fonksiyonlar (Mevcut haliyle bırakıldı)
-function increaseQty(id) { 
-    const input = document.getElementById('qty_' + id); 
-    let val = parseInt(input.value); 
-    if(val < 99) input.value = val + 1; 
-}
-
-function decreaseQty(id) { 
-    const input = document.getElementById('qty_' + id); 
-    let val = parseInt(input.value); 
-    if(val > 1) input.value = val - 1; 
-}
-
-function addToCart(urunId) { 
-    console.log('🛒 Sepete eklendi:', urunId); 
-}
-
-function toggleFavorite(id) { 
-    console.log('❤️ Favori toggle:', id); 
-}
 </script>
 @endsection

@@ -27,4 +27,11 @@ class KampanyaIndirim extends Model
     {
         return $this->belongsTo(Urun::class, 'urun_id');
     }
+
+    public function kategori()
+{
+    return $this->belongsTo(AltKategori::class, 'kategori_id'); // AltKategori'ye bağlanıyorsa
+    // VEYA
+    // return $this->belongsTo(Kategori::class, 'kategori_id'); // Ana Kategori'ye bağlanıyorsa
+}
 }

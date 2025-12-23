@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use App\Models\Urun;
 use App\Models\User;
+use Carbon\Carbon;
+use Auth;
+
 
 
 class SepetController extends Controller
@@ -46,13 +49,9 @@ class SepetController extends Controller
     public function ekle(Request $request)
     {
         $id = $request->input('id');
-        $urun_ad = $request->input('urun_ad');
         $adet = intval($request->input('adet', 1));
-        $resim_url = $request->input('resim_url', '');
-        $marka = $request->input('marka', '');
-        $model = $request->input('model', '');
 
-        if(!$id || !$urun_ad) {
+        if(!$id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Ürün bilgileri eksik!'
@@ -87,12 +86,12 @@ class SepetController extends Controller
         } else {
             $sepet[$id] = [
                 'id' => $id,
-                'urun_ad' => $urun_ad,
-                'fiyat' => $guncelFiyat, // Kullanıcıya özel fiyat
+                'urun_ad' => $urun->urun_ad,
+                'fiyat' => $guncelFiyat,
                 'adet' => $adet,
-                'resim_url' => $resim_url,
-                'marka' => $marka,
-                'model' => $model
+                'resim_url' => $urun->resim_url,
+                'marka' => $urun->marka,
+                'model' => $urun->model
             ];
         }
 
@@ -102,6 +101,7 @@ class SepetController extends Controller
         return response()->json([
             'success' => true,
             'sepetCount' => $sepetCount,
+            'sepet_count' => $sepetCount, // Her iki formatta da gönder
             'message' => 'Ürün sepete eklendi!'
         ]);
     }
