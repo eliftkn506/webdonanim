@@ -9,12 +9,14 @@ use Illuminate\Support\Facades\Storage;
 
 class SliderController extends Controller
 {
-    public function index()
-    {
-        $sliders = Slider::orderBy('order', 'asc')->get();
-        return view('admin.sliders.index', compact('sliders'));
-    }
-
+   public function index()
+{
+    // Veriyi çekiyoruz
+    $sliders = Slider::orderBy('order', 'asc')->get();
+    
+    // view'a 'sliders' adıyla gönderiyoruz
+    return view('admin.sliders.index', compact('sliders'));
+}
     public function create()
     {
         return view('admin.sliders.create');
