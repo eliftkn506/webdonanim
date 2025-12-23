@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Artisan; // Link oluşturmak için eklendi
+use Illuminate\Support\Facades\Artisan;
 
 // ===================== CONTROLLER IMPORTLARI =====================
 use App\Http\Controllers\HomeController;
@@ -36,15 +36,26 @@ use App\Http\Controllers\BayiBasvuruController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\PageController;
 
-// ===================== SUNUCU YARDIMCI ROTASI (ÖNEMLİ) =====================
-// Resimler açılmazsa tarayıcıdan sitenize.com/storage-link-yap adresine gidin
-Route::get('/storage-link-yap', function () {
-    try {
-        Artisan::call('storage:link');
-        return "Storage linki başarıyla oluşturuldu!";
-    } catch (\Exception $e) {
-        return "Hata: " . $e->getMessage();
-    }
+// ===================== SUNUCU BAKIM & YARDIMCI ROTLAR =====================
+Route::middleware(['auth'])->group(function () {
+    // Resimler görünmezse: siteniz.com/admin/storage-link-yap
+    Route::get('/admin/storage-link-yap', function () {
+        try {
+            Artisan::call('storage:link');
+            return "Storage linki başarıyla oluşturuldu!";
+        } catch (\Exception $e) {
+            return "Hata: " . $e->getMessage();
+        }
+    });
+
+    // Rota veya View hatası alırsanız: siteniz.com/admin/onbellek-temizle
+    Route::get('/admin/onbellek-temizle', function () {
+        Artisan::call('route:clear');
+        Artisan::call('view:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('config:clear');
+        return "Tüm önbellek başarıyla temizlendi!";
+    });
 });
 
 // ===================== ANASAYFA =====================
@@ -64,7 +75,7 @@ Route::get('/urunler/kategori/{id}', [KullaniciUrunController::class, 'kategori'
 Route::get('/urunler/altkategori/{id}', [KullaniciUrunController::class, 'altkategori'])->name('urun.altkategori');
 Route::get('/urunler/incele/{id}', [KullaniciUrunController::class, 'incele'])->name('urun.incele');
 
-// ===================== ÜRÜN FİLTRELEME - AJAX ENDPOINTS =====================
+// ===================== ÜRÜN FİLTRELEME - AJAX =====================
 Route::get('/urun/get-alt-kategoriler', [KullaniciUrunController::class, 'getAltKategoriler'])->name('urun.getAltKategoriler');
 Route::get('/urun/get-kriterler', [KullaniciUrunController::class, 'getKriterler'])->name('urun.getKriterler');
 Route::get('/urun/get-marka-model', [KullaniciUrunController::class, 'getMarkaModel'])->name('urun.getMarkaModel');
@@ -81,12 +92,10 @@ Route::prefix('sepet')->group(function () {
 
 Route::get('/sepet/sayisi', function() {
     $sepet = session('sepet', []);
-    return response()->json([
-        'count' => array_sum(array_column($sepet, 'adet'))
-    ]);
+    return response()->json(['count' => array_sum(array_column($sepet, 'adet'))]);
 })->name('sepet.sayisi');
 
-// ===================== KULLANICI İŞLEMLERİ (AUTH GEREKLİ) =====================
+// ===================== KULLANICI İŞLEMLERİ (AUTH) =====================
 Route::middleware(['auth'])->group(function () {
     Route::get('/profil', [KullaniciController::class, 'profil'])->name('profil');
     Route::get('/kuponlarim', [KullaniciController::class, 'kuponlarim'])->name('kuponlarim');
@@ -112,22 +121,12 @@ Route::middleware(['auth'])->group(function () {
         return response()->json(['count' => FavoriUrun::where('user_id', Auth::id())->count()]);
     })->name('favori.sayisi');
 
-    Route::post('/favori-kontrol', function(Request $request) {
-        $urunIds = $request->input('urun_ids', []);
-        $favoriler = FavoriUrun::where('user_id', Auth::id())
-                                ->whereIn('urun_id', $urunIds)
-                                ->pluck('urun_id')
-                                ->toArray();
-        return response()->json(['favorites' => $favoriler]);
-    })->name('favori.kontrol');
-
     // SİPARİŞLER
     Route::get('/siparislerim', [SiparisController::class, 'siparislerim'])->name('siparislerim');
     Route::get('/siparis/olustur', [SiparisController::class, 'olustur'])->name('siparis.olustur');
     Route::post('/siparis/tamamla', [SiparisController::class, 'tamamla'])->name('siparis.tamamla');
     Route::get('/siparis/basarili/{id}', [SiparisController::class, 'basarili'])->name('siparis.basarili');
     Route::get('/siparis/detay/{id}', [SiparisController::class, 'detay'])->name('siparis.detay');
-    Route::get('/siparis/{id}/detay', [SiparisController::class, 'detay'])->name('siparis.detay.alt');
     Route::get('/siparis/{id}/fatura', [SiparisController::class, 'fatura'])->name('fatura.goster');
     Route::post('siparis/kupon-kontrol', [SiparisController::class, 'kuponKontrol'])->name('siparis.kupon.kontrol');
 
@@ -138,12 +137,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/basarili/{siparis_id}', [OdemeController::class, 'basarili'])->name('basarili');
         Route::get('/basarisiz/{siparis_id}', [OdemeController::class, 'basarisiz'])->name('basarisiz');
         Route::post('/callback', [OdemeController::class, 'callback'])->name('callback');
-    });
-
-    // FATURA
-    Route::prefix('fatura')->name('fatura.')->group(function () {
-        Route::get('/{siparis_id}/pdf', [FaturaController::class, 'pdfIndir'])->name('pdf');
-        Route::get('/arsiv', [FaturaController::class, 'arsiv'])->name('arsiv');
     });
 
     // WIZARD
@@ -161,37 +154,64 @@ Route::post('/iletisim', [SayfaController::class, 'iletisimGonder'])->name('ilet
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
     Route::resource('sliders', SliderController::class);
+
+    // SAYFA YÖNETİMİ
     Route::get('pages', [PageController::class, 'index'])->name('pages.index');
+    Route::get('pages/create', [PageController::class, 'create'])->name('pages.create');
+    Route::post('pages/store', [PageController::class, 'store'])->name('pages.store');
+    Route::get('pages/{slug}/edit', [PageController::class, 'edit'])->name('pages.edit');
+    Route::put('pages/{slug}/update', [PageController::class, 'update'])->name('pages.update');
+
+    // DEĞERLENDİRME YÖNETİMİ
+    Route::get('/degerlendirmeler', [DegerlendirmeController::class, 'index'])->name('degerlendirmeler.index');
+    Route::post('/degerlendirmeler/{id}/onayla', [DegerlendirmeController::class, 'onayla'])->name('degerlendirmeler.onayla');
+    Route::delete('/degerlendirmeler/{id}/sil', [DegerlendirmeController::class, 'sil'])->name('degerlendirmeler.sil');
+    Route::post('/degerlendirmeler/{id}/cevapla', [DegerlendirmeController::class, 'cevapla'])->name('degerlendirmeler.cevapla');
+    Route::delete('/degerlendirmeler/{id}/cevap-sil', [DegerlendirmeController::class, 'cevapSil'])->name('degerlendirmeler.cevapSil');
+
+    // KATEGORİ & ÜRÜN YÖNETİMİ
     Route::resource('kategoriler', KategoriController::class)->parameters(['kategoriler' => 'kategori']);
+    Route::resource('altkategoriler', AltKategoriController::class)->except(['index', 'create']);
     Route::resource('urunler', UrunController::class);
+    Route::get('urunler/kriterler/{altKategoriId}', [UrunController::class, 'getKriterlerByAltKategori'])->name('urunler.getKriterlerByAltKategori');
+
+    // KRİTERLER
+    Route::resource('kriterler', KriterController::class)->except(['create'])->parameters(['kriterler' => 'kriter']);
+    Route::controller(KriterDegerController::class)->group(function () {
+        Route::get('/kriter-degerleri', 'index')->name('kriterdegerleri.index'); 
+        Route::post('/kriter-degerleri/store', 'store')->name('kriterdegerleri.store');
+        Route::delete('/kriter-degerleri/{kriterDeger}', 'destroy')->name('kriterdegerleri.destroy');
+    });
+
+    // SİPARİŞ & KUPON & FİYAT
     Route::resource('siparisler', AdminSiparisController::class);
-    
+    Route::resource('kuponlar', KuponController::class);
+    Route::resource('kampanyalar', KampanyaIndirimController::class);
+    Route::resource('fiyatlar', UrunFiyatController::class)->except(['show']);
+
+    // BAYİ YÖNETİMİ
     Route::prefix('bayiler')->name('bayiler.')->group(function () {
         Route::get('/basvurular', [BayiController::class, 'basvurular'])->name('basvurular'); 
         Route::get('/', [BayiController::class, 'index'])->name('index'); 
         Route::post('/{basvuru}/onayla', [BayiController::class, 'approve'])->name('approve');
+        Route::post('/{basvuru}/reddet', [BayiController::class, 'reject'])->name('reject');
     });
 });
 
-// ===================== ÖDEME WEBHOOK =====================
+// ===================== WEBHOOKS =====================
 Route::prefix('webhook')->name('webhook.')->withoutMiddleware(['web'])->group(function () {
     Route::post('/odeme-callback', [OdemeController::class, 'paymentCallback'])->name('odeme.callback');
 });
 
 // ===================== RESİM PROXY (SUNUCUDA GÖRÜNMEME ÇÖZÜMÜ) =====================
-// Sadece storage/public altındaki dosyalara erişim sağlar
+// asset('storage/...') ile çağrılan tüm resimleri PHP üzerinden okur.
 Route::get('storage/{path}', function ($path) {
     $fullPath = storage_path('app/public/' . $path);
-
-    if (!File::exists($fullPath)) {
-        abort(404);
-    }
+    if (!File::exists($fullPath)) abort(404);
 
     $file = File::get($fullPath);
     $type = File::mimeType($fullPath);
-
     $response = Response::make($file, 200);
     $response->header("Content-Type", $type);
-
     return $response;
 })->where('path', '.*')->name('storage.proxy');
