@@ -52,23 +52,41 @@ class Kupon extends Model
                     ->withTimestamps();
     }
 
+    /**
+     * Kullanıcıya kupon ata
+     */
     public function kullaniciyaAta($userId)
     {
-        // SQL Server için updateOrInsert kullanımı daha güvenlidir
-        return DB::table('kullanici_kuponlar')->updateOrInsert(
-            ['user_id' => $userId, 'kupon_id' => $this->id],
-            [
-                'kullanildi' => 0, 
-                'atanma_tarihi' => now(),
-                'created_at' => now(),
-                'updated_at' => now()
-            ]
-        );
+        // Zaten atanmışsa tekrar atama
+        $exists = DB::table('kullanici_kuponlar')
+            ->where('user_id', $userId)
+            ->where('kupon_id', $this->id)
+            ->exists();
+            
+        if ($exists) {
+            return false;
+        }
+
+        return DB::table('kullanici_kuponlar')->insert([
+            'user_id' => $userId,
+            'kupon_id' => $this->id,
+            'kullanildi' => 0,
+            'kullanilma_tarihi' => null,
+            'atanma_tarihi' => now(),
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
     }
 
+    /**
+     * Kuponu kullan - hem genel kuponlar hem de kullanıcıya özel kuponlar için
+     */
     public function kullan($userId)
     {
+        // Kullanım sayısını artır
         $this->increment('kullanilan_adet');
+        
+        // Eğer kupon genel değilse (kullanıcıya özel veya kural bazlı), kullanıcı-kupon ilişkisini güncelle
         if ($this->kupon_turu !== 'genel') {
             DB::table('kullanici_kuponlar')
                 ->where('user_id', $userId)
@@ -76,7 +94,90 @@ class Kupon extends Model
                 ->update([
                     'kullanildi' => 1,
                     'kullanilma_tarihi' => now(),
+                    'updated_at' => now()
                 ]);
         }
+    }
+
+    /**
+     * Kullanıcının bu kuponu kullanıp kullanmadığını kontrol et
+     */
+    public function kullaniciKullandiMi($userId)
+    {
+        if ($this->kupon_turu === 'genel') {
+            // Genel kuponlar için kullanım limiti kontrolü
+            if ($this->kullanim_limiti && $this->kullanilan_adet >= $this->kullanim_limiti) {
+                return true;
+            }
+            return false;
+        }
+
+        // Özel ve kural bazlı kuponlar için kullanıcı-kupon ilişkisini kontrol et
+        $kullanim = DB::table('kullanici_kuponlar')
+            ->where('user_id', $userId)
+            ->where('kupon_id', $this->id)
+            ->first();
+
+        if (!$kullanim) {
+            return true; // Kullanıcıya atanmamış
+        }
+
+        return $kullanim->kullanildi == 1;
+    }
+
+    /**
+     * Kuponun aktif olup olmadığını kontrol et
+     */
+    public function isActive()
+    {
+        if (!$this->aktif) {
+            return false;
+        }
+
+        $now = now();
+        if ($now->lt($this->baslangic_tarihi) || $now->gt($this->bitis_tarihi)) {
+            return false;
+        }
+
+        if ($this->kullanim_limiti && $this->kullanilan_adet >= $this->kullanim_limiti) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Kullanıcı için kupon kullanılabilir mi?
+     */
+    public function kullaniciIcinGecerliMi($userId, $sepetTutari = 0)
+    {
+        // Kupon aktif değilse
+        if (!$this->isActive()) {
+            return [
+                'gecerli' => false,
+                'mesaj' => 'Bu kupon geçerli değil veya süresi dolmuş.'
+            ];
+        }
+
+        // Minimum tutar kontrolü
+        if ($sepetTutari < $this->minimum_tutar) {
+            return [
+                'gecerli' => false,
+                'mesaj' => 'Minimum ' . number_format($this->minimum_tutar, 2) . ' ₺ alışveriş yapmalısınız.'
+            ];
+        }
+
+        // Kullanıcı daha önce kullanmış mı?
+        if ($this->kullaniciKullandiMi($userId)) {
+            return [
+                'gecerli' => false,
+                'mesaj' => 'Bu kuponu daha önce kullandınız veya size atanmamış.'
+            ];
+        }
+
+        return [
+            'gecerli' => true,
+            'mesaj' => 'Kupon geçerli!'
+        ];
     }
 }

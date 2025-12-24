@@ -1,830 +1,539 @@
 @extends('layouts.app')
-@section('title', 'Sipariş Oluştur ')
+
+@section('title', 'Sipariş Oluştur - Avantaj Bilişim')
+
 @section('content')
+
 <style>
-:root {
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --success-gradient: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
-    --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-    --warning-gradient: linear-gradient(135deg, #ffd93d 0%, #ff9500 100%);
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-    --text-primary: #2d3436;
-    --text-secondary: #636e72;
-}
-
-body {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    min-height: 100vh;
-}
-
-.page-header {
-    background: var(--primary-gradient);
-    padding: 4rem 0 2rem;
-    margin-bottom: 3rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.page-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="rgba(255,255,255,0.1)"><path d="M0,0v46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1047.97,8.57,1130.87,27.39,1200.94,44,1266.87,85.69,1341.17,91.49,1427.93,98.19,1513.25,63.17,1597.94,35.28c82.44-27.24,165.39-48.76,251.38-35.88C1912.08-4.87,1959.63,22.33,2004.54,57.9V0Z"/></svg>') repeat-x;
-    background-size: 2000px 100px;
-    animation: wave 10s ease-in-out infinite;
-}
-
-@keyframes wave {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(-50px); }
-}
-
-.page-title {
-    color: white;
-    font-size: 3rem;
-    font-weight: 800;
-    text-align: center;
-    margin: 0;
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    position: relative;
-    z-index: 2;
-}
-
-.checkout-steps {
-    display: flex;
-    justify-content: center;
-    margin: 2rem 0;
-    position: relative;
-    z-index: 2;
-}
-
-.step {
-    display: flex;
-    align-items: center;
-    color: rgba(255, 255, 255, 0.7);
-    margin: 0 1rem;
-}
-
-.step.active {
-    color: white;
-    font-weight: 700;
-}
-
-.step-number {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0.5rem;
-    font-weight: 700;
-}
-
-.step.active .step-number {
-    background: white;
-    color: #667eea;
-}
-
-.glass-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 35px rgba(31, 38, 135, 0.3);
-}
-
-.form-section {
-    margin-bottom: 2rem;
-}
-
-.section-title {
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-label {
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    display: block;
-}
-
-.form-control {
-    width: 100%;
-    padding: 1rem;
-    border: 2px solid #e9ecef;
-    border-radius: 15px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background: white;
-}
-
-.form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    outline: none;
-}
-
-.payment-methods {
-    display: grid;
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.payment-option {
-    border: 2px solid #e9ecef;
-    border-radius: 15px;
-    padding: 1.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: white;
-}
-
-.payment-option:hover {
-    border-color: #667eea;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
-}
-
-.payment-option.selected {
-    border-color: #667eea;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-}
-
-.payment-option input[type="radio"] {
-    display: none;
-}
-
-.payment-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-.payment-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: white;
-}
-
-.payment-icon.credit-card {
-    background: var(--primary-gradient);
-}
-
-.payment-icon.cash {
-    background: var(--warning-gradient);
-}
-
-.payment-icon.transfer {
-    background: var(--success-gradient);
-}
-
-.payment-title {
-    font-weight: 700;
-    color: var(--text-primary);
-    font-size: 1.1rem;
-}
-
-.payment-desc {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-
-.credit-card-fields {
-    display: none;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e9ecef;
-}
-
-.credit-card-fields.show {
-    display: block;
-}
-
-.card-row {
-    display: flex;
-    gap: 1rem;
-}
-
-.card-row .form-group {
-    flex: 1;
-}
-
-.order-summary {
-    background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 2rem;
-}
-
-.summary-title {
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.order-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.order-item:last-child {
-    border-bottom: none;
-}
-
-.item-image {
-    width: 60px;
-    height: 60px;
-    border-radius: 10px;
-    object-fit: contain;
-    background: #f8f9fa;
-    padding: 5px;
-}
-
-.item-info {
-    flex: 1;
-}
-
-.item-name {
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-}
-
-.item-quantity {
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-}
-
-.item-price {
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.summary-row:last-child {
-    border-bottom: none;
-    font-size: 1.2rem;
-    font-weight: 800;
-}
-
-.btn-modern {
-    padding: 1rem 2rem;
-    border: none;
-    border-radius: 25px;
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    text-decoration: none;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-}
-
-.btn-success {
-    background: var(--success-gradient);
-    color: white;
-    box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
-}
-
-.btn-success:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(78, 205, 196, 0.6);
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-    box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
-}
-
-.btn-secondary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(108, 117, 125, 0.6);
-}
-
-.coupon-section {
-    border: 2px dashed #e9ecef;
-    border-radius: 15px;
-    padding: 1rem;
-    margin: 1rem 0;
-    background: rgba(249, 250, 251, 0.5);
-}
-
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.loading-overlay.show {
-    opacity: 1;
-    visibility: visible;
-}
-
-.loading-spinner {
-    width: 60px;
-    height: 60px;
-    border: 4px solid rgba(255, 255, 255, 0.1);
-    border-top: 4px solid white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 1rem;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loading-text {
-    color: white;
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-
-.alert {
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 10px;
-    border: none;
-}
-
-.alert-success {
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
-    color: #059669;
-    border-left: 4px solid #10b981;
-}
-
-.alert-danger {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
-    color: #dc2626;
-    border-left: 4px solid #ef4444;
-}
-
-@media (max-width: 768px) {
-    .page-title {
-        font-size: 2rem;
-    }
+    /* --- SAYFAYA ÖZEL STİLLER --- */
     
-    .checkout-steps {
-        flex-direction: column;
+    /* 1. Hero & Stepper (Üst Kısım) */
+    .checkout-hero {
+        background: var(--secondary-color); /* Fallback */
+        background: linear-gradient(135deg, var(--secondary-color) 0%, #0f172a 100%);
+        padding: 40px 0 80px 0; /* Alttan boşluk grid'in üzerine binmesi için */
+        color: white;
+        position: relative;
+        margin-bottom: -50px; /* Kartları yukarı çekmek için negatif margin */
+    }
+
+    .stepper-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .step-badge {
+        display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 10px;
+        background: rgba(255,255,255,0.08);
+        padding: 8px 20px;
+        border-radius: 50px;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 0.9rem;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255,255,255,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .step-badge.active {
+        background: var(--primary-color);
+        color: var(--secondary-color);
+        box-shadow: 0 0 15px rgba(0, 212, 170, 0.4);
+        border-color: var(--primary-color);
     }
     
-    .card-row {
+    .step-badge.completed {
+        background: rgba(0, 212, 170, 0.2);
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .step-number {
+        width: 24px;
+        height: 24px;
+        background: white;
+        color: var(--secondary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.8rem;
+    }
+    
+    .step-badge.active .step-number {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    /* 2. Kart Tasarımı (Beyaz Kutular) */
+    .checkout-card {
+        background: white;
+        border-radius: 1.25rem; /* radius-xl */
+        border: 1px solid var(--border-color);
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        margin-bottom: 24px;
+    }
+
+    .card-header-custom {
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--secondary-color);
+    }
+    
+    .card-header-custom i { color: var(--primary-color); }
+
+    /* 3. Form Elemanları */
+    .form-control-custom {
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+    }
+    .form-control-custom:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+        outline: none;
+    }
+    .form-label { font-weight: 600; font-size: 0.9rem; color: var(--secondary-color); }
+
+    /* 4. Ödeme Sekmeleri */
+    .payment-tab-btn {
+        flex: 1;
+        padding: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        background: #f8fafc;
+        color: var(--text-muted);
+        font-weight: 600;
+        transition: all 0.3s;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+    }
+    
+    .payment-tab-btn.active {
+        border-color: var(--primary-color);
+        background: rgba(0, 212, 170, 0.05);
+        color: #0f766e; /* primary-dark */
+    }
+
+    /* 5. KUPON BİLET TASARIMI (Ticket Style) */
+    .coupon-ticket {
+        position: relative;
+        display: flex;
+        background: linear-gradient(to right, #ffffff, #f8fafc);
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .coupon-ticket:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        border-color: var(--primary-color);
+    }
+
+    .ticket-stub {
+        background: var(--secondary-color);
+        color: white;
+        width: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-right: 2px dashed rgba(255,255,255,0.4);
+        position: relative;
+        padding: 5px;
+    }
+    
+    /* Tırtıklı Kenar Efekti */
+    .ticket-stub::after {
+        content: '';
+        position: absolute;
+        right: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 12px;
+        height: 12px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: -2px 0 0 0 rgba(0,0,0,0.05); 
+    }
+
+    .stub-text {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        font-weight: 800;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .ticket-body {
+        padding: 12px 15px;
+        flex: 1;
+        display: flex;
         flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .coupon-code {
+        font-family: 'Monaco', 'Consolas', monospace;
+        font-weight: 800;
+        color: var(--secondary-color);
+        font-size: 0.95rem;
+        display: block;
+    }
+
+    .coupon-desc {
+        font-size: 0.75rem;
+        color: #64748b;
+        line-height: 1.3;
+        margin-top: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .apply-text {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        font-weight: 800;
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* 6. Özet Alanı */
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+        color: var(--text-muted);
     }
     
-    .order-summary {
-        position: static;
-        margin-top: 2rem;
+    .total-row {
+        border-top: 2px dashed var(--border-color);
+        padding-top: 15px;
+        margin-top: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
-}
+    
+    .total-amount {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--secondary-color);
+    }
+
+    .btn-checkout-primary {
+        background: var(--secondary-color);
+        color: white;
+        width: 100%;
+        padding: 16px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+        border: none;
+        transition: all 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .btn-checkout-primary:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+
 </style>
 
-<!-- Loading Overlay -->
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">Siparişiniz hazırlanıyor...</div>
-</div>
-
-<!-- Page Header -->
-<div class="page-header">
-    <div class="container">
-        <h1 class="page-title">Sipariş Oluştur</h1>
-        <div class="checkout-steps">
-            <div class="step">
-                <div class="step-number">1</div>
-                <span>Sepet</span>
+<div class="checkout-hero">
+    <div class="container text-center">
+        <h2 class="fw-800 m-0">Siparişini Tamamla</h2>
+        <div class="stepper-container">
+            <div class="step-badge completed">
+                <div class="step-number"><i class="fas fa-check"></i></div>
+                <span>Sepetim</span>
             </div>
-            <div class="step active">
+            <div class="step-badge active">
                 <div class="step-number">2</div>
-                <span>Sipariş</span>
+                <span>Teslimat & Ödeme</span>
             </div>
-            <div class="step">
+            <div class="step-badge">
                 <div class="step-number">3</div>
-                <span>Ödeme</span>
+                <span>Onay</span>
             </div>
         </div>
     </div>
 </div>
 
-<div class="container py-5">
-    <!-- Hata/Başarı Mesajları -->
-    @if(session('success'))
-        <div class="alert alert-success">
-            <i class="fas fa-check-circle me-2"></i>
-            {{ session('success') }}
-        </div>
-    @endif
-
+<div class="container pb-5" style="position: relative; z-index: 10;">
     @if(session('error'))
-        <div class="alert alert-danger">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            {{ session('error') }}
+        <div class="alert alert-danger shadow-sm rounded-3 border-0 mb-4">
+            <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
         </div>
     @endif
 
-    @if($errors->any())
-        <div class="alert alert-danger">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <ul class="mb-0">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <!-- Bayi Bilgilendirmesi -->
-@if(auth()->check() && auth()->user()->isBayi())
-    <div class="container mb-3">
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>
-            <strong>Bayi Hesabı:</strong> Sipariş özeti bayi fiyatlarını göstermektedir.
-        </div>
-    </div>
-@endif
-
-@if($kuponlar->count())
-<div class="mb-3">
-    <label for="kupon_kodu">Kupon Kodu Kullan:</label>
-    <select name="kupon_kodu" id="kupon_kodu" class="form-control">
-        <option value="">Seçiniz</option>
-        @foreach($kuponlar as $kupon)
-            <option value="{{ $kupon->kupon_kodu }}">
-                {{ $kupon->kupon_kodu }} - {{ $kupon->baslik }} 
-                @if($kupon->indirim_tipi=='yuzde')
-                    ({{ $kupon->indirim_miktari }}%)
-                @else
-                    (₺{{ $kupon->indirim_miktari }})
-                @endif
-            </option>
-        @endforeach
-    </select>
-</div>
-@endif
-
-
-    <form id="checkoutForm" action="{{ route('siparis.tamamla') }}" method="POST">
+    <form action="{{ route('siparis.tamamla') }}" method="POST" id="checkoutForm">
         @csrf
         <div class="row g-4">
-            <!-- Sipariş Formu -->
-            <div class="col-lg-7">
-                <div class="glass-card p-4">
-                    <!-- Kişisel Bilgiler -->
-                    <div class="form-section">
-                        <h4 class="section-title">
-                            <i class="fas fa-user"></i>
-                            Kişisel Bilgiler
-                        </h4>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label">Ad Soyad *</label>
-                                    <input type="text" name="ad_soyad" class="form-control" required 
-                                           value="{{ old('ad_soyad', Auth::check() ? Auth::user()->name : '') }}" 
-                                           placeholder="Adınızı ve soyadınızı girin">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label">Telefon *</label>
-                                    <input type="tel" name="telefon" class="form-control" required 
-                                           value="{{ old('telefon') }}"
-                                           placeholder="0555 123 4567">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">E-posta</label>
-                            <input type="email" name="email" class="form-control" 
-                                   value="{{ old('email', Auth::check() ? Auth::user()->email : '') }}" 
-                                   placeholder="ornek@email.com">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Teslimat Adresi *</label>
-                            <textarea name="kargo_adresi" class="form-control" rows="3" required 
-                                      placeholder="Tam adresinizi yazın">{{ old('kargo_adresi') }}</textarea>
-                        </div>
+            
+            <div class="col-lg-8">
+                
+                <div class="checkout-card">
+                    <div class="card-header-custom">
+                        <i class="fas fa-map-marker-alt"></i> Teslimat Adresi
                     </div>
-
-                    <!-- Fatura Bilgileri -->
-                    <div class="form-section">
-                        <h4 class="section-title">
-                            <i class="fas fa-file-invoice"></i>
-                            Fatura Bilgileri
-                        </h4>
-                        
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="sameAddress" 
-                                   {{ old('same_address', true) ? 'checked' : '' }}>
-                            <label class="form-check-label" for="sameAddress">
-                                Fatura adresi teslimat adresi ile aynı
-                            </label>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Adınız</label>
+                            <input type="text" name="ad_soyad" class="form-control form-control-custom" placeholder="Örn: Ahmet Yılmaz" value="{{ Auth::user()->name ?? old('ad_soyad') }}" required>
                         </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Fatura Türü</label>
-                                <select name="fatura_tipi" class="form-control" id="faturaTipi">
-                                    <option value="bireysel" {{ old('fatura_tipi', 'bireysel') == 'bireysel' ? 'selected' : '' }}>Bireysel</option>
-                                    <option value="kurumsal" {{ old('fatura_tipi') == 'kurumsal' ? 'selected' : '' }}>Kurumsal</option>
+                        <div class="col-md-6">
+                            <label class="form-label">Telefon</label>
+                            <input type="tel" name="telefon" class="form-control form-control-custom" placeholder="05XX XXX XX XX" value="{{ old('telefon') }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Şehir</label>
+                            <select name="sehir" class="form-select form-control-custom">
+                                <option selected disabled>Seçiniz</option>
+                                <option value="Istanbul">İstanbul</option>
+                                <option value="Ankara">Ankara</option>
+                                <option value="Izmir">İzmir</option>
                                 </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Teslimat Adresi</label>
+                            <textarea name="kargo_adresi" class="form-control form-control-custom" rows="3" placeholder="Mahalle, sokak, kapı no, daire no..." required>{{ old('kargo_adresi') }}</textarea>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="faturaAdresiAyni" checked onchange="toggleFaturaAdresi()">
+                                <label class="form-check-label small" for="faturaAdresiAyni">
+                                    Fatura adresim teslimat adresimle aynı
+                                </label>
                             </div>
                         </div>
-                        
-                        <div id="faturaFields" style="{{ old('same_address', true) ? 'display: none;' : '' }}">
-                            <div class="row">
-                                <div class="col-md-6" id="tckn_field" style="{{ old('fatura_tipi', 'bireysel') == 'kurumsal' ? 'display: none;' : '' }}">
-                                    <div class="form-group">
-                                        <label class="form-label">TC Kimlik No</label>
-                                        <input type="text" name="tc_kimlik_no" class="form-control" 
-                                               value="{{ old('tc_kimlik_no') }}"
-                                               maxlength="11" placeholder="12345678901">
-                                    </div>
-                                </div>
-                                <div class="col-md-6" id="vergi_dairesi_field" style="{{ old('fatura_tipi', 'bireysel') == 'bireysel' ? 'display: none;' : '' }}">
-                                    <div class="form-group">
-                                        <label class="form-label">Vergi Dairesi</label>
-                                        <input type="text" name="vergi_dairesi" class="form-control" 
-                                               value="{{ old('vergi_dairesi') }}"
-                                               placeholder="Vergi dairesi adı">
-                                    </div>
-                                </div>
-                                <div class="col-md-6" id="vergi_no_field" style="{{ old('fatura_tipi', 'bireysel') == 'bireysel' ? 'display: none;' : '' }}">
-                                    <div class="form-group">
-                                        <label class="form-label">Vergi No</label>
-                                        <input type="text" name="vergi_no" class="form-control" 
-                                               value="{{ old('vergi_no') }}"
-                                               maxlength="10" placeholder="1234567890">
-                                    </div>
-                                </div>
+                        <div class="col-12 d-none" id="faturaAdresiDiv">
+                            <label class="form-label">Fatura Adresi</label>
+                            <textarea name="fatura_adresi" class="form-control form-control-custom" rows="2" placeholder="Fatura adresinizi giriniz...">{{ old('fatura_adresi') }}</textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Sipariş Notu (İsteğe Bağlı)</label>
+                            <textarea name="siparis_notu" class="form-control form-control-custom" rows="2" placeholder="Kurye için notunuz...">{{ old('siparis_notu') }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checkout-card">
+                    <div class="card-header-custom">
+                        <i class="fas fa-wallet"></i> Ödeme Seçenekleri
+                    </div>
+
+                    <input type="hidden" name="odeme_yontemi" id="selectedPaymentMethod" value="kredi_karti">
+
+                    <div class="d-flex gap-3 mb-4 flex-wrap">
+                        <div class="payment-tab-btn active" id="btn-cc" onclick="switchPayment('kredi_karti')">
+                            <i class="fas fa-credit-card fs-5"></i>
+                            <div>
+                                <div>Kredi / Banka Kartı</div>
+                                <div style="font-size: 0.75rem; font-weight: 400;">Güvenli Ödeme</div>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">Fatura Adresi</label>
-                                <textarea name="fatura_adresi" class="form-control" rows="3" 
-                                          placeholder="Fatura adresinizi yazın">{{ old('fatura_adresi') }}</textarea>
+                        </div>
+                        <div class="payment-tab-btn" id="btn-havale" onclick="switchPayment('havale')">
+                            <i class="fas fa-university fs-5"></i>
+                            <div>
+                                <div>Havale / EFT</div>
+                                <div style="font-size: 0.75rem; font-weight: 400;">Banka Transferi</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Ödeme Yöntemi -->
-                    <div class="form-section">
-                        <h4 class="section-title">
-                            <i class="fas fa-credit-card"></i>
-                            Ödeme Yöntemi
-                        </h4>
-                        
-                        <div class="payment-methods">
-                            <!-- Kredi Kartı -->
-                            <div class="payment-option {{ old('odeme_yontemi', 'kredi_karti') == 'kredi_karti' ? 'selected' : '' }}" onclick="selectPayment('kredi_karti')">
-                                <input type="radio" name="odeme_yontemi" value="kredi_karti" id="kredi_karti" 
-                                       {{ old('odeme_yontemi', 'kredi_karti') == 'kredi_karti' ? 'checked' : '' }}>
-                                <div class="payment-header">
-                                    <div class="payment-icon credit-card">
-                                        <i class="fas fa-credit-card"></i>
-                                    </div>
-                                    <div>
-                                        <div class="payment-title">Kredi Kartı</div>
-                                        <div class="payment-desc">Güvenli ödeme, anında onay</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="credit-card-fields {{ old('odeme_yontemi', 'kredi_karti') == 'kredi_karti' ? 'show' : '' }}" id="creditCardFields">
-                                    <div class="form-group">
-                                        <label class="form-label">Kart Üzerindeki İsim *</label>
-                                        <input type="text" name="kart_isim" class="form-control" 
-                                               value="{{ old('kart_isim') }}"
-                                               placeholder="AHMET MEHMET">
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label">Kart Numarası *</label>
-                                        <input type="text" name="kart_no" class="form-control" 
-                                               value="{{ old('kart_no') }}"
-                                               placeholder="1234 5678 9012 3456" 
-                                               maxlength="19" 
-                                               oninput="formatCardNumber(this)">
-                                    </div>
-                                    
-                                    <div class="card-row">
-                                        <div class="form-group">
-                                            <label class="form-label">Son Kullanma Tarihi *</label>
-                                            <input type="text" name="kart_tarih" class="form-control" 
-                                                   value="{{ old('kart_tarih') }}"
-                                                   placeholder="MM/YY" 
-                                                   maxlength="5" 
-                                                   oninput="formatExpiryDate(this)">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">CVV *</label>
-                                            <input type="text" name="kart_cvv" class="form-control" 
-                                                   value="{{ old('kart_cvv') }}"
-                                                   placeholder="123" 
-                                                   maxlength="4">
-                                        </div>
-                                    </div>
+                    <div id="cc-form">
+                        <div class="p-4 rounded-3" style="background: #f8fafc; border: 1px solid var(--border-color);">
+                            <div class="mb-3">
+                                <label class="form-label">Kart Üzerindeki İsim</label>
+                                <input type="text" name="kart_isim" class="form-control form-control-custom">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Kart Numarası</label>
+                                <div class="position-relative">
+                                    <input type="text" name="kart_no" class="form-control form-control-custom" placeholder="0000 0000 0000 0000" maxlength="19">
+                                    <i class="fab fa-cc-mastercard position-absolute top-50 end-0 translate-middle-y me-3 fs-4 text-muted"></i>
                                 </div>
                             </div>
-
-                            <!-- Kapıda Ödeme -->
-                            <div class="payment-option {{ old('odeme_yontemi') == 'kapida_odeme' ? 'selected' : '' }}" onclick="selectPayment('kapida_odeme')">
-                                <input type="radio" name="odeme_yontemi" value="kapida_odeme" id="kapida_odeme" 
-                                       {{ old('odeme_yontemi') == 'kapida_odeme' ? 'checked' : '' }}>
-                                <div class="payment-header">
-                                    <div class="payment-icon cash">
-                                        <i class="fas fa-money-bill-wave"></i>
-                                    </div>
-                                    <div>
-                                        <div class="payment-title">Kapıda Ödeme</div>
-                                        <div class="payment-desc">Nakit veya kartla kapıda öde</div>
-                                    </div>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <label class="form-label">Son Kullanma (Ay/Yıl)</label>
+                                    <input type="text" name="kart_tarih" class="form-control form-control-custom" placeholder="MM/YY" maxlength="5">
                                 </div>
-                            </div>
-
-                            <!-- Havale/EFT -->
-                            <div class="payment-option {{ old('odeme_yontemi') == 'havale' ? 'selected' : '' }}" onclick="selectPayment('havale')">
-                                <input type="radio" name="odeme_yontemi" value="havale" id="havale" 
-                                       {{ old('odeme_yontemi') == 'havale' ? 'checked' : '' }}>
-                                <div class="payment-header">
-                                    <div class="payment-icon transfer">
-                                        <i class="fas fa-university"></i>
-                                    </div>
-                                    <div>
-                                        <div class="payment-title">Havale/EFT</div>
-                                        <div class="payment-desc">Banka hesabına havale yapın</div>
-                                    </div>
+                                <div class="col-6">
+                                    <label class="form-label">CVV</label>
+                                    <input type="text" name="kart_cvv" class="form-control form-control-custom" placeholder="***" maxlength="4">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Sipariş Notu -->
-                    <div class="form-section">
-                        <h4 class="section-title">
-                            <i class="fas fa-sticky-note"></i>
-                            Sipariş Notu (İsteğe Bağlı)
-                        </h4>
-                        <div class="form-group">
-                            <textarea name="siparis_notu" class="form-control" rows="3" 
-                                      placeholder="Siparişinizle ilgili özel bir notunuz varsa yazabilirsiniz">{{ old('siparis_notu') }}</textarea>
+                    <div id="havale-info" class="d-none">
+                        <div class="alert alert-info border-0 text-dark d-flex align-items-center" style="background-color: #e0f2f1;">
+                            <i class="fas fa-info-circle fa-2x me-3 text-info"></i>
+                            <div>
+                                <strong>Bilgilendirme:</strong> Siparişinizi onayladıktan sonra size verilecek sipariş numarası ile birlikte aşağıdaki hesaplarımıza ödeme yapabilirsiniz.
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Sipariş Özeti -->
-            <div class="col-lg-5">
-                <div class="order-summary">
-                    <h4 class="summary-title">
-                        <i class="fas fa-shopping-bag"></i>
-                        Sipariş Özeti
-                    </h4>
-                    
-                    <div class="order-items">
-                        @foreach($sepet as $item)
-                        <div class="order-item">
-                            <div class="item-image">
-                                @if(isset($item['resim']) && $item['resim'])
-                                    <img src="{{ asset($item['resim']) }}" alt="{{ $item['isim'] }}" 
-                                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
-                                @else
-                                    <i class="fas fa-box"></i>
-                                @endif
+            <div class="col-lg-4">
+                
+                <div class="checkout-card position-sticky" style="top: 100px;">
+                    <div class="card-header-custom justify-content-between">
+                        <span>Sipariş Özeti</span>
+                        <span class="badge bg-light text-dark border">{{ count($sepet) }} Ürün</span>
+                    </div>
+
+                    <div class="summary-content">
+                        <div class="summary-row">
+                            <span>Ara Toplam</span>
+                            <span class="fw-bold">{{ number_format($toplam, 2) }} ₺</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Kargo</span>
+                            <span class="text-success fw-bold">Ücretsiz</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>KDV Dahil</span>
+                            <span>Evet</span>
+                        </div>
+                        
+                        <div class="summary-row d-none" id="indirimSatiri">
+                            <span class="text-danger">Kupon İndirimi</span>
+                            <span class="text-danger fw-bold" id="indirimTutari">-0.00 ₺</span>
+                        </div>
+                        
+                        <div class="mt-4 mb-3">
+                            <label class="form-label small">İndirim Kuponu</label>
+                            <div class="input-group">
+                                <input type="text" name="kupon_kodu" id="couponInput" class="form-control form-control-custom" placeholder="Kupon kodunu giriniz" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                                <button class="btn btn-dark" type="button" onclick="checkCoupon()" style="border-top-right-radius: 10px; border-bottom-right-radius: 10px; background: var(--secondary-color);">Uygula</button>
                             </div>
-                            <div class="item-info">
-                                <div class="item-name">{{ $item['isim'] }}</div>
-                                <div class="item-quantity">{{ $item['adet'] }} adet x {{ number_format($item['fiyat'], 2) }} ₺</div>
-                            </div>
-                            <div class="item-price">₺{{ number_format($item['fiyat'] * $item['adet'], 2) }}</div>
+                            <div id="couponMessage" class="small mt-1"></div>
                         </div>
-                        @endforeach
-                    </div>
 
-                    <!-- Kupon Bölümü -->
-                    <div class="coupon-section">
-                        <div class="input-group">
-                            <input type="text" name="kupon_kodu" id="kuponKodu" class="form-control" 
-                                   value="{{ old('kupon_kodu') }}"
-                                   placeholder="Kupon kodunuz">
-                            <button class="btn btn-outline-primary" type="button" onclick="kuponKontrol()">
-                                <i class="fas fa-tags"></i> Uygula
-                            </button>
-                        </div>
-                        <div id="kuponSonuc" class="mt-2"></div>
-                    </div>
+                        <div class="mt-4">
+                            <h6 class="fw-800 small text-uppercase text-muted mb-3 ps-1">
+                                <i class="fas fa-tags text-warning me-1"></i> Senin İçin Fırsatlar
+                            </h6>
 
-                    <div class="summary-totals">
-                        <div class="summary-row">
-                            <span>Ara Toplam:</span>
-                            <span id="araToplam">₺{{ number_format($toplam, 2) }}</span>
-                        </div>
-                        <div class="summary-row">
-                            <span>Kargo:</span>
-                            <span class="text-success">Ücretsiz</span>
-                        </div>
-                        <div class="summary-row">
-                            <span>KDV (%18):</span>
-                            <span id="kdvTutari">₺{{ number_format($kdvToplam, 2) }}</span>
-                        </div>
-                        <div class="summary-row" id="kuponIndirimiRow" style="display: none;">
-                            <span>Kupon İndirimi:</span>
-                            <span id="kuponIndirimi" class="text-success">-₺0.00</span>
-                        </div>
-                        <div class="summary-row">
-                            <span>Toplam:</span>
-                            <span id="genelToplam">₺{{ number_format($toplam + $kdvToplam, 2) }}</span>
-                        </div>
-                    </div>
+                            @php
+                                // Tasarımdaki renk paleti (Sırayla dönecek)
+                                $colors = ['var(--primary-color)', '#1e293b', '#e11d48', '#f59e0b', '#7c3aed'];
+                            @endphp
 
-                    <div class="checkout-actions mt-4">
-                        <button type="submit" class="btn-modern btn-success mb-3">
-                            <i class="fas fa-shopping-cart me-2"></i>
-                            Siparişi Oluştur
+                            @forelse($kuponlar as $index => $kupon)
+                                @php
+                                    // 1. Renk Seçimi
+                                    $currentColor = $colors[$index % count($colors)];
+
+                                    // 2. İkon ve Metin Mantığı (Controller verisine göre)
+                                    $stubText = '';
+                                    $descText = '';
+
+                                    // İndirim Tipi Kontrolü
+                                    if ($kupon->indirim_tipi == 'yuzde') {
+                                        $stubText = '%' . intval($kupon->indirim_miktari);
+                                    } elseif ($kupon->indirim_tipi == 'tutar') {
+                                        $stubText = intval($kupon->indirim_miktari) . 'TL';
+                                    } else {
+                                        $stubText = 'FREE';
+                                    }
+
+                                    // Özel Durum: Kargo kuponu
+                                    if (str_contains(strtoupper($kupon->kupon_kodu), 'KARGO')) {
+                                        $stubText = 'KARGO';
+                                    }
+
+                                    // Açıklama Mantığı
+                                    if (!empty($kupon->aciklama)) {
+                                        $descText = $kupon->aciklama;
+                                    } else {
+                                        if ($kupon->minimum_tutar > 0) {
+                                            $descText = number_format($kupon->minimum_tutar, 0) . ' TL ve üzeri alışverişlerde geçerli.';
+                                        } else {
+                                            $descText = 'Tüm ürünlerde geçerli özel fırsat!';
+                                        }
+                                    }
+                                @endphp
+
+                                <div class="coupon-ticket" onclick="applyCoupon('{{ $kupon->kupon_kodu }}')" title="Kuponu Kullan">
+                                    <div class="ticket-stub" style="background: {{ $currentColor }};">
+                                        <span class="stub-text" style="font-size: {{ strlen($stubText) > 4 ? '0.65rem' : '0.75rem' }}">
+                                            {{ $stubText }}
+                                        </span>
+                                    </div>
+                                    <div class="ticket-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="coupon-code">{{ $kupon->kupon_kodu }}</span>
+                                            @if($kupon->bitis_tarihi)
+                                                <small class="text-muted" style="font-size:0.65rem;">
+                                                    <i class="far fa-clock"></i> {{ \Carbon\Carbon::parse($kupon->bitis_tarihi)->diffInDays() }} gün
+                                                </small>
+                                            @endif
+                                        </div>
+                                        <span class="coupon-desc">{{ $descText }}</span>
+                                        <span class="apply-text" style="color: {{ $currentColor }}">
+                                            <i class="fas fa-plus-circle"></i> KULLAN
+                                        </span>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="p-3 text-center border rounded-3 bg-light text-muted small">
+                                    <i class="fas fa-ticket-alt opacity-50 mb-1"></i><br>
+                                    Şu an kullanılabilir kupon yok.
+                                </div>
+                            @endforelse
+                        </div>
+                        <div class="total-row">
+                            <span>GENEL TOPLAM</span>
+                            <span class="total-amount text-primary" id="genelToplam">{{ number_format($toplam, 2) }} ₺</span>
+                        </div>
+
+                        <button type="submit" class="btn-checkout-primary mt-4">
+                            Siparişi Onayla <i class="fas fa-arrow-right"></i>
                         </button>
-                        <a href="{{ route('sepet.index') }}" class="btn-modern btn-secondary">
-                            <i class="fas fa-arrow-left me-2"></i>
-                            Sepete Geri Dön
-                        </a>
-                    </div>
 
-                    <!-- Güvenlik Bilgileri -->
-                    <div class="security-info mt-4 p-3 bg-light rounded">
-                        <h6 class="mb-2">
-                            <i class="fas fa-shield-alt text-success me-2"></i>
-                            Güvenli Alışveriş
-                        </h6>
-                        <small class="text-muted">
-                            Tüm bilgileriniz 256-bit SSL şifreleme ile korunmaktadır.
-                        </small>
+                        <div class="text-center mt-3 small text-muted">
+                            <i class="fas fa-lock"></i> 256-bit SSL ile güvenli ödeme
+                        </div>
                     </div>
                 </div>
             </div>
@@ -833,208 +542,101 @@ body {
 </div>
 
 <script>
-// Global değişkenler
-let araToplam = {{ $toplam }};
-let kdvToplam = {{ $kdvToplam }};
-let kuponIndirim = 0;
-
-// Payment method selection
-function selectPayment(method) {
-    // Remove all selected classes
-    document.querySelectorAll('.payment-option').forEach(option => {
-        option.classList.remove('selected');
-    });
-    
-    // Hide all credit card fields
-    document.querySelectorAll('.credit-card-fields').forEach(field => {
-        field.classList.remove('show');
-    });
-    
-    // Select current option
-    const selectedOption = document.querySelector(`input[value="${method}"]`).closest('.payment-option');
-    selectedOption.classList.add('selected');
-    
-    // Check radio button
-    document.querySelector(`input[value="${method}"]`).checked = true;
-    
-    // Show credit card fields if credit card is selected
-    if (method === 'kredi_karti') {
-        document.getElementById('creditCardFields').classList.add('show');
-    }
-}
-
-// Format card number
-function formatCardNumber(input) {
-    let value = input.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-    input.value = formattedValue;
-}
-
-// Format expiry date
-function formatExpiryDate(input) {
-    let value = input.value.replace(/\D/g, '');
-    if (value.length >= 2) {
-        value = value.substring(0, 2) + '/' + value.substring(2, 4);
-    }
-    input.value = value;
-}
-
-// Kupon kontrol
-function kuponKontrol() {
-    const kuponKodu = document.getElementById('kuponKodu').value;
-    const sonucDiv = document.getElementById('kuponSonuc');
-    
-    if (!kuponKodu) {
-        sonucDiv.innerHTML = '<small class="text-danger">Lütfen kupon kodunu girin.</small>';
-        return;
-    }
-    
-    // AJAX ile kupon kontrolü
-    fetch('{{ route("siparis.kupon.kontrol") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            kupon_kodu: kuponKodu,
-            sepet_toplami: araToplam
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            kuponIndirim = data.indirim;
-            sonucDiv.innerHTML = `<small class="text-success"><i class="fas fa-check"></i> ${data.message}</small>`;
-            
-            // Kupon indirimi satırını göster
-            document.getElementById('kuponIndirimiRow').style.display = 'flex';
-            document.getElementById('kuponIndirimi').textContent = '-₺' + kuponIndirim.toFixed(2);
-            
-            // Genel toplamı güncelle
-            const yeniToplam = araToplam + kdvToplam - kuponIndirim;
-            document.getElementById('genelToplam').textContent = '₺' + yeniToplam.toFixed(2);
-        } else {
-            sonucDiv.innerHTML = `<small class="text-danger"><i class="fas fa-times"></i> ${data.message}</small>`;
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        sonucDiv.innerHTML = '<small class="text-danger">Bir hata oluştu.</small>';
-    });
-}
-
-// Fatura adresi toggle
-document.getElementById('sameAddress').addEventListener('change', function() {
-    document.getElementById('faturaFields').style.display = this.checked ? 'none' : 'block';
-});
-
-// Fatura türü değişimi
-document.getElementById('faturaTipi').addEventListener('change', function() {
-    const tcknField = document.getElementById('tckn_field');
-    const vergiDairesiField = document.getElementById('vergi_dairesi_field');
-    const vergiNoField = document.getElementById('vergi_no_field');
-    
-    if (this.value === 'kurumsal') {
-        tcknField.style.display = 'none';
-        vergiDairesiField.style.display = 'block';
-        vergiNoField.style.display = 'block';
-    } else {
-        tcknField.style.display = 'block';
-        vergiDairesiField.style.display = 'none';
-        vergiNoField.style.display = 'none';
-    }
-});
-
-// Form submission
-document.getElementById('checkoutForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Validate form
-    if (!validateForm()) {
-        return;
-    }
-    
-    // Show loading
-    document.getElementById('loadingOverlay').classList.add('show');
-    
-    // Submit form after delay
-    setTimeout(() => {
-        this.submit();
-    }, 1000);
-});
-
-// Form validation
-function validateForm() {
-    const requiredFields = document.querySelectorAll('input[required], textarea[required]');
-    let isValid = true;
-    
-    requiredFields.forEach(field => {
-        if (!field.value.trim()) {
-            field.style.borderColor = '#ff6b6b';
-            isValid = false;
-        } else {
-            field.style.borderColor = '#e9ecef';
-        }
-    });
-    
-    // Check payment method
-    const paymentMethod = document.querySelector('input[name="odeme_yontemi"]:checked');
-    if (!paymentMethod) {
-        alert('Lütfen bir ödeme yöntemi seçin.');
-        isValid = false;
-    }
-    
-    // If credit card is selected, validate credit card fields
-    if (paymentMethod && paymentMethod.value === 'kredi_karti') {
-        const cardFields = document.querySelectorAll('#creditCardFields input');
-        cardFields.forEach(field => {
-            if (field.hasAttribute('required') || field.name === 'kart_isim' || field.name === 'kart_no' || field.name === 'kart_cvv' || field.name === 'kart_tarih') {
-                if (!field.value.trim()) {
-                    field.style.borderColor = '#ff6b6b';
-                    isValid = false;
-                } else {
-                    field.style.borderColor = '#e9ecef';
-                }
-            }
-        });
+    // 1. Ödeme Yöntemi Değiştirme
+    function switchPayment(type) {
+        // Buton stillerini sıfırla
+        document.getElementById('btn-cc').classList.remove('active');
+        document.getElementById('btn-cc').style.borderColor = 'var(--border-color)';
+        document.getElementById('btn-cc').style.background = '#f8fafc';
+        document.getElementById('btn-cc').style.color = 'var(--text-muted)';
         
-        // Kart numarası uzunluk kontrolü
-        const kartNo = document.querySelector('input[name="kart_no"]').value.replace(/\s/g, '');
-        if (kartNo.length !== 16) {
-            alert('Kart numarası 16 haneli olmalıdır.');
-            isValid = false;
+        document.getElementById('btn-havale').classList.remove('active');
+        document.getElementById('btn-havale').style.borderColor = 'var(--border-color)';
+        document.getElementById('btn-havale').style.background = '#f8fafc';
+        document.getElementById('btn-havale').style.color = 'var(--text-muted)';
+
+        // Seçilen butonu aktif yap
+        const activeBtn = type === 'kredi_karti' ? document.getElementById('btn-cc') : document.getElementById('btn-havale');
+        activeBtn.classList.add('active');
+        activeBtn.style.borderColor = 'var(--primary-color)';
+        activeBtn.style.background = 'rgba(0, 212, 170, 0.05)';
+        activeBtn.style.color = '#0f766e'; // Primary dark
+
+        // Form alanlarını göster/gizle
+        document.getElementById('selectedPaymentMethod').value = type;
+        if (type === 'kredi_karti') {
+            document.getElementById('cc-form').classList.remove('d-none');
+            document.getElementById('havale-info').classList.add('d-none');
+        } else {
+            document.getElementById('cc-form').classList.add('d-none');
+            document.getElementById('havale-info').classList.remove('d-none');
         }
     }
-    
-    if (!isValid) {
-        alert('Lütfen tüm gerekli alanları doldurun.');
-    }
-    
-    return isValid;
-}
 
-// Initialize page
-document.addEventListener('DOMContentLoaded', function() {
-    // Set default payment method if not set
-    const selectedPayment = document.querySelector('input[name="odeme_yontemi"]:checked');
-    if (selectedPayment) {
-        selectPayment(selectedPayment.value);
+    // 2. Fatura Adresi Toggle
+    function toggleFaturaAdresi() {
+        const checkbox = document.getElementById('faturaAdresiAyni');
+        const div = document.getElementById('faturaAdresiDiv');
+        if (checkbox.checked) {
+            div.classList.add('d-none');
+        } else {
+            div.classList.remove('d-none');
+        }
     }
-    
-    // Add animations to elements
-    const elements = document.querySelectorAll('.glass-card, .order-summary');
-    elements.forEach((element, index) => {
-        element.style.opacity = '0';
-        element.style.transform = 'translateY(30px)';
+
+    // 3. Kuponu Input'a Kopyalama
+    function applyCoupon(code) {
+        const input = document.getElementById('couponInput');
+        input.value = code;
+        
+        // Görsel efekt
+        input.style.transition = "all 0.3s";
+        input.style.backgroundColor = "#e0f2f1"; // Açık yeşil flash
+        input.style.borderColor = "var(--primary-color)";
         
         setTimeout(() => {
-            element.style.transition = 'all 0.5s ease';
-            element.style.opacity = '1';
-            element.style.transform = 'translateY(0)';
-        }, index * 200);
-    });
-});
+            input.style.backgroundColor = "white";
+        }, 500);
+    }
+
+    // 4. Kupon Kontrolü (AJAX) - Controller'daki 'kuponKontrol' metoduna istek atar
+    function checkCoupon() {
+        const code = document.getElementById('couponInput').value;
+        const total = {{ $toplam }}; // Blade değişkeni
+        const msgDiv = document.getElementById('couponMessage');
+        const indirimSatiri = document.getElementById('indirimSatiri');
+        const indirimTutari = document.getElementById('indirimTutari');
+        const genelToplam = document.getElementById('genelToplam');
+
+        if(!code) return;
+
+        fetch('{{ route("siparis.kupon.kontrol") }}', { // Rotayı web.php'de tanımladığından emin ol
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ kupon_kodu: code, sepet_toplami: total })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                msgDiv.innerHTML = `<span class="text-success"><i class="fas fa-check"></i> ${data.message}</span>`;
+                indirimSatiri.classList.remove('d-none');
+                indirimTutari.innerText = '-' + data.indirim + ' ₺';
+                genelToplam.innerText = data.yeni_toplam + ' ₺';
+            } else {
+                msgDiv.innerHTML = `<span class="text-danger"><i class="fas fa-times"></i> ${data.message}</span>`;
+                indirimSatiri.classList.add('d-none');
+                // Toplamı sıfırla gerekirse
+                genelToplam.innerText = '{{ number_format($toplam, 2) }} ₺';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            msgDiv.innerHTML = '<span class="text-danger">Bir hata oluştu.</span>';
+        });
+    }
 </script>
 
 @endsection

@@ -16,65 +16,111 @@ use Illuminate\Support\Facades\Log;
 
 class SiparisController extends Controller
 {
-    
+    public function olustur()
+    {
+        $sepet = session('sepet', []);
 
-public function olustur()
-{
-    $sepet = session('sepet', []);
+        if (empty($sepet)) {
+            return redirect()->route('sepet.index')->with('error', 'Sepetiniz boş.');
+        }
 
-    if (empty($sepet)) {
-        return redirect()->route('sepet.index')->with('error', 'Sepetiniz boş.');
+        $toplam = 0;
+        $kdvToplam = 0;
+        $normalizedSepet = [];
+
+        foreach ($sepet as $key => $item) {
+            $urun = Urun::find($item['id'] ?? $item['urun_id'] ?? $key);
+            if(!$urun) continue;
+
+            $guncelFiyat = $this->hesaplaGuncelFiyat($urun);
+            $adet = intval($item['adet'] ?? 1);
+            
+            $normalizedSepet[] = [
+                'id' => $urun->id,
+                'isim' => $urun->urun_ad,
+                'fiyat' => $guncelFiyat,
+                'adet' => $adet,
+                'resim' => $urun->resim_url,
+            ];
+
+            $toplam += $guncelFiyat * $adet;
+            $kdvToplam += 0;
+        }
+
+        $kullaniciId = Auth::id();
+        $now = now();
+        
+        // 1. Genel Kuponlar
+        $genelKuponlar = Kupon::where('aktif', true)
+            ->where('baslangic_tarihi', '<=', $now)
+            ->where('bitis_tarihi', '>=', $now)
+            ->where('kupon_turu', 'genel')
+            ->where(function($q) {
+                $q->whereNull('kullanim_limiti')
+                  ->orWhereRaw('kullanilan_adet < kullanim_limiti');
+            })
+            ->get();
+
+        // 2. Kullanıcıya Özel Atanmış Kuponlar (Pivot tablodan kontrol)
+        $ozelKuponlar = Kupon::where('aktif', true)
+            ->where('baslangic_tarihi', '<=', $now)
+            ->where('bitis_tarihi', '>=', $now)
+            ->where('kupon_turu', 'kullanici_ozel')
+            ->whereHas('kullanicilar', function($q) use ($kullaniciId) {
+                $q->where('user_id', $kullaniciId)->where('kullanildi', 0);
+            })
+            ->get();
+
+        // 3. Kural Bazlı Kuponlar (DİNAMİK KONTROL)
+        // Veritabanında atanmış olmasına bakmaksızın, şartları o an sağlayanları getiriyoruz.
+        $tumKuralBazli = Kupon::where('aktif', true)
+            ->where('baslangic_tarihi', '<=', $now)
+            ->where('bitis_tarihi', '>=', $now)
+            ->where('kupon_turu', 'kural_bazli')
+            ->get();
+
+        // PHP tarafında filtreleme yapıyoruz
+        $uygunKuralBazli = $tumKuralBazli->filter(function($kupon) use ($toplam, $kullaniciId) {
+            // A. Kullanıcı bu kuponu daha önce kullanmış mı?
+            $kullanilmis = DB::table('kullanici_kuponlar')
+                ->where('user_id', $kullaniciId)
+                ->where('kupon_id', $kupon->id)
+                ->where('kullanildi', 1)
+                ->exists();
+            
+            if ($kullanilmis) return false;
+
+            // B. Sepet tutarı, kuponun genel minimum tutarını karşılıyor mu?
+            if ($kupon->minimum_tutar > 0 && $toplam < $kupon->minimum_tutar) {
+                return false;
+            }
+
+            // C. Kural bazlı özel limit kontrolü (Örn: toplam_alisveris kuralı için limit)
+            $kuralTipi = strtolower($kupon->kural_tipi ?? '');
+            if (str_contains($kuralTipi, 'alisveris') || str_contains($kuralTipi, 'tutar')) {
+                 if ($toplam < ($kupon->kural_min_tutar ?? 0)) {
+                     return false;
+                 }
+            }
+
+            return true;
+        });
+
+        // Tüm kuponları birleştir
+        $kuponlar = collect()
+            ->merge($genelKuponlar)
+            ->merge($ozelKuponlar)
+            ->merge($uygunKuralBazli)
+            ->unique('id');
+
+        return view('kullanici.siparis_olustur', [
+            'sepet' => $normalizedSepet,
+            'toplam' => $toplam,
+            'kdvToplam' => $kdvToplam,
+            'kuponlar' => $kuponlar,
+        ]);
     }
 
-    $toplam = 0;
-    $kdvToplam = 0;
-    $normalizedSepet = [];
-
-    foreach ($sepet as $key => $item) {
-        $urun = Urun::find($item['id'] ?? $item['urun_id'] ?? $key);
-        if(!$urun) continue;
-
-        $guncelFiyat = $this->hesaplaGuncelFiyat($urun);
-
-        $adet = intval($item['adet'] ?? 1);
-        $normalizedSepet[] = [
-            'id' => $urun->id,
-            'isim' => $urun->urun_ad,
-            'fiyat' => $guncelFiyat,
-            'adet' => $adet,
-            'resim' => $urun->resim_url,
-        ];
-
-        $toplam += $guncelFiyat * $adet;
-        $kdvToplam += 0;
-    }
-
-    // Kullanıcının geçerli kuponlarını getir
-    $kullaniciId = Auth::id();
-    $kuponlar = Kupon::where('aktif', true)
-        ->where('baslangic_tarihi', '<=', now())
-        ->where('bitis_tarihi', '>=', now())
-        ->where(function($q) use ($kullaniciId) {
-            // Genel kuponlar veya kullanıcıya özel kuponlar
-            $q->where('kupon_turu', 'genel')
-              ->orWhereHas('kullanicilar', function($q2) use ($kullaniciId) {
-                  $q2->where('user_id', $kullaniciId);
-              });
-        })
-        ->get();
-
-    return view('kullanici.siparis_olustur', [
-        'sepet' => $normalizedSepet,
-        'toplam' => $toplam,
-        'kdvToplam' => $kdvToplam,
-        'kuponlar' => $kuponlar,
-    ]);
-}
-
-
-    /**
-     * Siparişi tamamla ve veritabanına kaydet
-     */
     public function tamamla(Request $request)
     {
         $rules = [
@@ -93,80 +139,110 @@ public function olustur()
                 'kart_tarih' => 'required|string|size:5',
             ]);
         }
-
-        $validated = $request->validate($rules);
+        $request->validate($rules);
 
         $sepet = session('sepet', []);
-        if (empty($sepet)) {
-            return redirect()->route('sepet.index')->with('error', 'Sepetiniz boş.');
-        }
+        if (empty($sepet)) return redirect()->route('sepet.index');
 
         DB::beginTransaction();
         try {
             $araToplam = 0;
             $kdvToplam = 0;
-
-            // Sepetteki ürünlerin kullanıcıya göre güncel fiyatlarını hesapla
             $guncelSepet = [];
+
+            // Sepet Hesaplama
             foreach ($sepet as $item) {
                 $urun = Urun::find($item['id']);
                 if(!$urun) continue;
-
-                // Kullanıcıya göre güncel fiyat
                 $guncelFiyat = $this->hesaplaGuncelFiyat($urun);
                 $adet = intval($item['adet'] ?? 1);
-                
                 $itemTotal = $guncelFiyat * $adet;
                 
-                // Fiyat zaten vergi dahil, ekstra KDV hesaplama
-                $kdv = 0;
-                
                 $araToplam += $itemTotal;
-                $kdvToplam += $kdv;
+                $kdvToplam += 0;
 
                 $guncelSepet[] = [
                     'id' => $item['id'],
                     'urun_ad' => $item['urun_ad'] ?? $urun->urun_ad,
                     'fiyat' => $guncelFiyat,
                     'adet' => $adet,
-                    'resim_url' => $item['resim_url'] ?? $urun->resim_url,
-                    'marka' => $item['marka'] ?? $urun->marka,
-                    'model' => $item['model'] ?? $urun->model
                 ];
             }
 
-            // Kupon kontrolü ve indirim hesaplama
+            // --- KUPON İŞLEMLERİ ---
             $kuponIndirim = 0;
             $kuponKodu = $request->kupon_kodu ?? null;
+            $kullaniciId = Auth::id();
+            $kuponNesnesi = null;
             
             if ($kuponKodu) {
                 $kupon = Kupon::where('kupon_kodu', $kuponKodu)
                     ->where('aktif', true)
                     ->where('baslangic_tarihi', '<=', now())
                     ->where('bitis_tarihi', '>=', now())
-                    ->where(function($q) {
-                        $q->whereNull('kullanim_limiti')
-                          ->orWhereRaw('kullanilan_adet < kullanim_limiti');
-                    })
                     ->first();
 
-                if ($kupon && $araToplam >= ($kupon->minimum_tutar ?? 0)) {
-                    if ($kupon->indirim_tipi === 'yuzde') {
-                        $kuponIndirim = ($araToplam * $kupon->indirim_miktari) / 100;
-                    } else {
-                        $kuponIndirim = floatval($kupon->indirim_miktari);
-                    }
+                if ($kupon) {
+                    $kuponKullanilabilir = false;
                     
-                    $kuponIndirim = min($kuponIndirim, $araToplam);
-                    $kupon->increment('kullanilan_adet');
+                    // 1. Genel Kupon
+                    if ($kupon->kupon_turu === 'genel') {
+                        $kuponKullanilabilir = true;
+                    } 
+                    // 2. Kural Bazlı veya Özel
+                    else {
+                        // Önce kullanılmış mı diye bak
+                        $kullanilmis = DB::table('kullanici_kuponlar')
+                            ->where('user_id', $kullaniciId)
+                            ->where('kupon_id', $kupon->id)
+                            ->where('kullanildi', 1)
+                            ->exists();
+
+                        if (!$kullanilmis) {
+                            // Kural Bazlı ise ve şartları sağlıyorsa izin ver
+                            if ($kupon->kupon_turu === 'kural_bazli') {
+                                if ($araToplam >= ($kupon->minimum_tutar ?? 0)) {
+                                    $kuponKullanilabilir = true;
+                                    
+                                    // Veritabanında atama kaydı yoksa oluştur (ki kullanıldı işaretleyebilelim)
+                                    $kayitVarMi = DB::table('kullanici_kuponlar')
+                                        ->where('user_id', $kullaniciId)
+                                        ->where('kupon_id', $kupon->id)
+                                        ->exists();
+                                    
+                                    if (!$kayitVarMi) {
+                                        $kupon->kullaniciyaAta($kullaniciId);
+                                    }
+                                }
+                            } 
+                            // Kullanıcıya özel atanmışsa
+                            else {
+                                $atanmis = DB::table('kullanici_kuponlar')
+                                    ->where('user_id', $kullaniciId)
+                                    ->where('kupon_id', $kupon->id)
+                                    ->exists();
+                                if ($atanmis) $kuponKullanilabilir = true;
+                            }
+                        }
+                    }
+
+                    if ($kuponKullanilabilir && $araToplam >= ($kupon->minimum_tutar ?? 0)) {
+                        if ($kupon->indirim_tipi === 'yuzde') {
+                            $kuponIndirim = ($araToplam * $kupon->indirim_miktari) / 100;
+                        } else {
+                            $kuponIndirim = floatval($kupon->indirim_miktari);
+                        }
+                        $kuponIndirim = min($kuponIndirim, $araToplam);
+                        $kuponNesnesi = $kupon;
+                    }
                 }
             }
 
             $genelToplam = $araToplam + $kdvToplam - $kuponIndirim;
 
-            // Sipariş kaydı oluştur
+            // Sipariş Oluşturma
             $siparis = Siparis::create([
-                'user_id' => Auth::id(),
+                'user_id' => $kullaniciId,
                 'siparis_no' => 'SIP-' . strtoupper(Str::random(8)),
                 'toplam_tutar' => round($araToplam, 2),
                 'kdv_tutari' => round($kdvToplam, 2),
@@ -181,34 +257,34 @@ public function olustur()
                 'notlar' => $request->siparis_notu,
             ]);
 
-            // Sipariş ürünlerini kaydet
+            // Sipariş Ürünleri
             foreach ($guncelSepet as $item) {
-                $birimFiyat = $item['fiyat'];
-                $adet = $item['adet'];
-                $toplamFiyat = $birimFiyat * $adet;
-                $kdvTutari = 0; // Fiyat zaten vergi dahil
-
                 SiparisUrunu::create([
                     'siparis_id' => $siparis->id,
                     'urun_id' => $item['id'],
-                    'adet' => $adet,
-                    'birim_fiyat' => round($birimFiyat, 2),
-                    'toplam_fiyat' => round($toplamFiyat, 2),
+                    'adet' => $item['adet'],
+                    'birim_fiyat' => round($item['fiyat'], 2),
+                    'toplam_fiyat' => round($item['fiyat'] * $item['adet'], 2),
                     'kdv_orani' => 0,
-                    'kdv_tutari' => round($kdvTutari, 2),
+                    'kdv_tutari' => 0,
                     'indirim_orani' => 0,
                     'indirim_tutari' => 0,
                 ]);
             }
 
-            // Fatura kaydı oluştur
-            $fatura = Fatura::create([
+            // Kuponu Kullanıldı İşaretle
+            if ($kuponNesnesi) {
+                $kuponNesnesi->kullan($kullaniciId);
+            }
+
+            // Fatura ve Ödeme
+            Fatura::create([
                 'siparis_id' => $siparis->id,
                 'fatura_no' => 'FTR-' . date('Y') . '-' . str_pad($siparis->id, 6, '0', STR_PAD_LEFT),
                 'unvan' => $request->ad_soyad,
-                'vergi_dairesi' => $request->vergi_dairesi ?? null,
-                'vergi_no' => $request->vergi_no ?? null,
-                'tc_kimlik_no' => $request->tc_kimlik_no ?? null,
+                'vergi_dairesi' => $request->vergi_dairesi,
+                'vergi_no' => $request->vergi_no,
+                'tc_kimlik_no' => $request->tc_kimlik_no,
                 'fatura_adresi' => $request->fatura_adresi ?? $request->kargo_adresi,
                 'ara_toplam' => round($araToplam, 2),
                 'kdv_tutari' => round($kdvToplam, 2),
@@ -218,162 +294,31 @@ public function olustur()
                 'e_fatura_tarih' => null,
             ]);
 
-            // Ödeme bilgisi kaydı
             $odemeBilgisi = OdemeBilgisi::create([
                 'siparis_id' => $siparis->id,
                 'odeme_tipi' => $request->odeme_yontemi,
-                'kart_son_dort_hanesi' => null,
-                'kart_tipi' => null,
-                'banka_adi' => null,
-                'transaction_id' => null,
                 'odenen_tutar' => round($genelToplam, 2),
                 'para_birimi' => 'TRY',
                 'durum' => 'beklemede',
-                'hata_mesaji' => null,
-                'gateway_response' => null,
             ]);
 
-            // Kredi kartı ödemesi
             if ($request->odeme_yontemi === 'kredi_karti') {
                 $this->processCardPayment($request, $siparis, $odemeBilgisi);
             }
 
             DB::commit();
-
-            // Sepeti temizle
             session()->forget('sepet');
 
-            return redirect()->route('siparis.basarili', $siparis->id)
-                ->with('success', 'Siparişiniz başarıyla oluşturuldu. Sipariş No: ' . $siparis->siparis_no);
+            return redirect()->route('siparis.basarili', $siparis->id)->with('success', 'Siparişiniz başarıyla oluşturuldu. Sipariş No: ' . $siparis->siparis_no);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Sipariş oluşturma hatası: ' . $e->getMessage());
-            return back()->withInput()->with('error', 'Sipariş oluşturulurken hata oluştu. Lütfen tekrar deneyin.');
+            Log::error('Sipariş hatası: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Hata: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Kredi kartı ödeme işlemi
-     */
-    private function processCardPayment($request, $siparis, $odemeBilgisi)
-    {
-        $kartNo = str_replace([' ', '-'], '', $request->kart_no);
-
-        if (strlen($kartNo) < 15 || strlen($kartNo) > 16) {
-            throw new \Exception('Geçersiz kart numarası');
-        }
-
-        $odemeBilgisi->update([
-            'kart_son_dort_hanesi' => substr($kartNo, -4),
-            'kart_tipi' => $this->kartTipiBelirle($kartNo),
-            'transaction_id' => 'TXN-' . strtoupper(Str::random(10)),
-        ]);
-
-        $testKartlari = ['4111111111111111', '5555555555554444'];
-
-        if (in_array($kartNo, $testKartlari)) {
-            $odemeBilgisi->update([
-                'durum' => 'basarili',
-                'gateway_response' => [
-                    'status' => 'success',
-                    'message' => 'Test kartı ile ödeme başarılı',
-                    'processed_at' => now()->toISOString()
-                ]
-            ]);
-
-            $siparis->update([
-                'odeme_durumu' => 'odendi',
-                'durum' => 'onaylandi'
-            ]);
-        } else {
-            $basarili = rand(1, 10) <= 9;
-
-            if ($basarili) {
-                $odemeBilgisi->update([
-                    'durum' => 'basarili',
-                    'gateway_response' => [
-                        'status' => 'success',
-                        'message' => 'Ödeme başarıyla işlendi',
-                        'processed_at' => now()->toISOString()
-                    ]
-                ]);
-
-                $siparis->update([
-                    'odeme_durumu' => 'odendi',
-                    'durum' => 'onaylandi'
-                ]);
-            } else {
-                $odemeBilgisi->update([
-                    'durum' => 'hata',
-                    'hata_mesaji' => 'Kart limiti yetersiz veya kart blokeli',
-                    'gateway_response' => [
-                        'status' => 'failed',
-                        'error_code' => 'INSUFFICIENT_FUNDS',
-                        'processed_at' => now()->toISOString()
-                    ]
-                ]);
-
-                throw new \Exception('Ödeme işlemi başarısız: Kart limiti yetersiz veya kart blokeli');
-            }
-        }
-    }
-
-    /**
-     * Kart tipi belirleme
-     */
-    private function kartTipiBelirle($kartNo)
-    {
-        $firstDigit = substr($kartNo, 0, 1);
-        switch ($firstDigit) {
-            case '4':
-                return 'Visa';
-            case '5':
-                return 'MasterCard';
-            case '3':
-                return 'American Express';
-            default:
-                return 'Diğer';
-        }
-    }
-
-    /**
-     * Sipariş başarılı sayfası
-     */
-    public function basarili($id)
-    {
-        $siparis = Siparis::with(['urunler.urun', 'user'])->findOrFail($id);
-        return view('kullanici.siparis_basarili', compact('siparis'));
-    }
-
-    /**
-     * Sipariş detayı
-     */
-    public function detay($id)
-    {
-        $siparis = Siparis::with(['urunler.urun', 'user'])->findOrFail($id);
-        $odemeBilgisi = OdemeBilgisi::where('siparis_id', $siparis->id)->first();
-        $fatura = Fatura::where('siparis_id', $siparis->id)->first();
-
-        return view('kullanici.siparis_detay', compact('siparis', 'odemeBilgisi', 'fatura'));
-    }
-
-    /**
-     * Kullanıcının tüm siparişleri
-     */
-    public function siparislerim()
-    {
-        $siparisler = Siparis::with(['urunler.urun'])
-            ->where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
-        return view('kullanici.siparislerim', compact('siparisler'));
-    }
-
-    /**
-     * Kupon kontrol - AJAX endpoint
-     */
+    // AJAX İÇİN KUPON KONTROL
     public function kuponKontrol(Request $request)
     {
         try {
@@ -382,73 +327,112 @@ public function olustur()
                 'sepet_toplami' => 'required|numeric|min:0'
             ]);
 
-            $kuponKodu = $request->kupon_kodu;
-            $sepetToplami = floatval($request->sepet_toplami);
-
-            $kupon = Kupon::where('kupon_kodu', $kuponKodu)
+            $kupon = Kupon::where('kupon_kodu', $request->kupon_kodu)
                 ->where('aktif', true)
                 ->where('baslangic_tarihi', '<=', now())
                 ->where('bitis_tarihi', '>=', now())
-                ->where(function($q) {
-                    $q->whereNull('kullanim_limiti')
-                      ->orWhereRaw('kullanilan_adet < kullanim_limiti');
-                })
                 ->first();
 
             if (!$kupon) {
+                return response()->json(['success' => false, 'message' => 'Geçersiz kupon kodu.']);
+            }
+
+            $kullaniciId = Auth::id();
+
+            // Kural Bazlı veya Özel Kupon Kontrolü
+            if ($kupon->kupon_turu !== 'genel') {
+                // 1. Daha önce kullanılmış mı?
+                $kullanilmis = DB::table('kullanici_kuponlar')
+                    ->where('user_id', $kullaniciId)
+                    ->where('kupon_id', $kupon->id)
+                    ->where('kullanildi', 1)
+                    ->exists();
+
+                if ($kullanilmis) {
+                    return response()->json(['success' => false, 'message' => 'Bu kuponu daha önce kullandınız.']);
+                }
+
+                // 2. Kural Bazlı İse ve Şartlar Sağlanıyorsa İZİN VER
+                if ($kupon->kupon_turu === 'kural_bazli') {
+                    // Atanmış olması gerekmez, limit kontrolü yeterli
+                } 
+                // 3. Kullanıcı Özel ise, kesinlikle atanmış olmalı
+                else if ($kupon->kupon_turu === 'kullanici_ozel') {
+                    $atanmis = DB::table('kullanici_kuponlar')
+                        ->where('user_id', $kullaniciId)
+                        ->where('kupon_id', $kupon->id)
+                        ->exists();
+                    if (!$atanmis) {
+                        return response()->json(['success' => false, 'message' => 'Bu kupon size özel tanımlanmamış.']);
+                    }
+                }
+            }
+
+            // Minimum Tutar Kontrolü
+            if ($request->sepet_toplami < ($kupon->minimum_tutar ?? 0)) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Geçersiz veya süresi dolmuş kupon kodu'
+                    'success' => false, 
+                    'message' => 'Sepet tutarı en az ' . number_format($kupon->minimum_tutar, 2) . ' ₺ olmalıdır.'
                 ]);
             }
 
-            if ($sepetToplami < ($kupon->minimum_tutar ?? 0)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Minimum ' . number_format($kupon->minimum_tutar, 2) . ' ₺ alışveriş yapmalısınız'
-                ]);
-            }
+            // İndirim Hesapla
+            $indirim = ($kupon->indirim_tipi === 'yuzde') 
+                ? ($request->sepet_toplami * $kupon->indirim_miktari / 100) 
+                : $kupon->indirim_miktari;
 
-            $indirim = 0;
-            if ($kupon->indirim_tipi === 'yuzde') {
-                $indirim = ($sepetToplami * floatval($kupon->indirim_miktari)) / 100;
-            } else {
-                $indirim = floatval($kupon->indirim_miktari);
-            }
-
-            $indirim = min($indirim, $sepetToplami);
+            $indirim = min($indirim, $request->sepet_toplami);
 
             return response()->json([
                 'success' => true,
                 'indirim' => round($indirim, 2),
-                'yeni_toplam' => round($sepetToplami - $indirim, 2),
-                'message' => $kupon->baslik . ' kuponu uygulandı!'
+                'yeni_toplam' => round($request->sepet_toplami - $indirim, 2),
+                'message' => $kupon->baslik . ' uygulandı!'
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Kupon kontrolü hatası: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Kupon kontrolünde hata oluştu'
-            ], 500);
+            return response()->json(['success' => false, 'message' => 'Sistem hatası: ' . $e->getMessage()]);
         }
     }
 
-    /**
-     * Helper: Ürünün güncel satış fiyatını kullanıcıya göre hesapla
-     */
-    private function hesaplaGuncelFiyat($urun)
+    private function processCardPayment($request, $siparis, $odemeBilgisi)
     {
-        $user = auth()->user();
+        $kartNo = str_replace([' ', '-'], '', $request->kart_no);
         
-        // Kullanıcıya göre fiyat al (bayi veya standart)
-        $satisFiyati = $urun->getFiyatForUser($user);
-        
-        if($satisFiyati <= 0) {
-            return 0;
+        // Basit validasyon
+        if (strlen($kartNo) < 15 || strlen($kartNo) > 16) {
+            throw new \Exception('Geçersiz kart numarası');
         }
 
-        // Kampanya kontrolü
+        $odemeBilgisi->update([
+            'kart_son_dort_hanesi' => substr($kartNo, -4),
+            'kart_tipi' => $this->kartTipiBelirle($kartNo),
+            'transaction_id' => 'TXN-' . strtoupper(Str::random(10)),
+            'durum' => 'basarili',
+            'gateway_response' => ['status' => 'success', 'message' => 'Ödeme başarılı']
+        ]);
+
+        $siparis->update([
+            'odeme_durumu' => 'odendi',
+            'durum' => 'onaylandi'
+        ]);
+    }
+
+    private function kartTipiBelirle($kartNo)
+    {
+        $firstDigit = substr($kartNo, 0, 1);
+        switch ($firstDigit) {
+            case '4': return 'Visa';
+            case '5': return 'MasterCard';
+            case '3': return 'American Express';
+            default: return 'Diğer';
+        }
+    }
+
+    private function hesaplaGuncelFiyat($urun)
+    {
+        $fiyat = $urun->getFiyatForUser(auth()->user());
+        
         $kampanya = DB::table('kampanya_indirim')
             ->where('urun_id', $urun->id)
             ->where('aktif', 1)
@@ -456,11 +440,33 @@ public function olustur()
             ->where('bitis_tarihi', '>=', now())
             ->first();
         
-        $indirimliFiyat = $satisFiyati;
-        if($kampanya && $satisFiyati > 0) {
-            $indirimliFiyat = $satisFiyati * (1 - $kampanya->indirim_orani / 100);
+        if($kampanya && $fiyat > 0) {
+            $fiyat = $fiyat * (1 - $kampanya->indirim_orani / 100);
         }
+        
+        return round($fiyat, 2);
+    }
 
-        return round($indirimliFiyat, 2);
+    public function basarili($id)
+    {
+        $siparis = Siparis::with(['urunler.urun', 'user'])->findOrFail($id);
+        return view('kullanici.siparis_basarili', compact('siparis'));
+    }
+
+    public function detay($id)
+    {
+        $siparis = Siparis::with(['urunler.urun', 'user'])->findOrFail($id);
+        $odemeBilgisi = OdemeBilgisi::where('siparis_id', $siparis->id)->first();
+        $fatura = Fatura::where('siparis_id', $siparis->id)->first();
+        return view('kullanici.siparis_detay', compact('siparis', 'odemeBilgisi', 'fatura'));
+    }
+
+    public function siparislerim()
+    {
+        $siparisler = Siparis::with(['urunler.urun'])
+            ->where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        return view('kullanici.siparislerim', compact('siparisler'));
     }
 }

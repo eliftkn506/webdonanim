@@ -32,6 +32,16 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bx bx-error me-2 fs-4"></i>
+                {{ session('error') }}
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div class="card">
         <div class="card-header border-bottom">
             <h5 class="card-title mb-0">Kupon Listesi</h5>
@@ -45,6 +55,7 @@
                         <th>Tür</th>
                         <th>İndirim</th>
                         <th>Kullanım</th>
+                        <th>Atanan Kişi</th>
                         <th>Geçerlilik</th>
                         <th>Durum</th>
                         <th class="text-center">İşlemler</th>
@@ -72,11 +83,10 @@
                             </td>
                             <td>
                                 @php
-                                    // Renkleri Sneat'in bg-label-* sınıflarıyla güncelledik (yumuşak renkler)
                                     $badgeClass = match($kupon->kupon_turu) {
                                         'genel' => 'bg-label-info',
                                         'kullanici_ozel' => 'bg-label-warning',
-                                        'kural_bazli' => 'bg-label-primary', // Mavi tonlarında, okunabilir
+                                        'kural_bazli' => 'bg-label-primary',
                                         default => 'bg-label-secondary'
                                     };
                                     $turText = match($kupon->kupon_turu) {
@@ -118,6 +128,20 @@
                                 </div>
                             </td>
                             <td>
+                                @if($kupon->kupon_turu === 'genel')
+                                    <span class="badge bg-label-success">
+                                        <i class="bx bx-world"></i> Herkese Açık
+                                    </span>
+                                @else
+                                    @php
+                                        $atananSayi = $kupon->kullanicilar->count();
+                                    @endphp
+                                    <span class="badge bg-label-{{ $atananSayi > 0 ? 'primary' : 'secondary' }}">
+                                        <i class="bx bx-user"></i> {{ $atananSayi }} Kişi
+                                    </span>
+                                @endif
+                            </td>
+                            <td>
                                 <small class="d-block">{{ \Carbon\Carbon::parse($kupon->baslangic_tarihi)->format('d.m.y') }}</small>
                                 <small class="d-block text-muted">{{ \Carbon\Carbon::parse($kupon->bitis_tarihi)->format('d.m.y') }}</small>
                             </td>
@@ -146,6 +170,12 @@
                                             </button>
                                         @endif
 
+                                        @if($kupon->kupon_turu !== 'genel')
+                                            <a class="dropdown-item" href="{{ route('admin.kuponlar.edit', $kupon->id) }}">
+                                                <i class="bx bx-user-check me-1"></i> Atanan Kullanıcılar
+                                            </a>
+                                        @endif
+
                                         <div class="dropdown-divider"></div>
                                         <form action="{{ route('admin.kuponlar.destroy', $kupon->id) }}" method="POST" onsubmit="return confirm('Bu kuponu silmek istediğinize emin misiniz?');">
                                             @csrf
@@ -160,7 +190,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-5">
+                            <td colspan="9" class="text-center py-5">
                                 <div class="d-flex flex-column align-items-center justify-content-center">
                                     <div class="mb-3">
                                         <span class="badge bg-label-secondary p-4 rounded-circle">
@@ -189,19 +219,16 @@
 </div>
 
 <script>
-    // Tüm kuralları çalıştır
     function otomatikAta() {
         if (!confirm('Sistemdeki tüm "Kural Bazlı" ve "Otomatik Atama" özellikli kuponlar taranacak ve şartları sağlayan kullanıcılara tanımlanacaktır. Bu işlem kullanıcı sayısına göre zaman alabilir. Onaylıyor musunuz?')) {
             return;
         }
         
-        // Loading state
         const btn = document.querySelector('button[onclick="otomatikAta()"]');
         const originalContent = btn.innerHTML;
         btn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i> İşleniyor...';
         btn.disabled = true;
 
-        // CSRF Token
         const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
         fetch('{{ route("admin.kuponlar.otomatik-ata") }}', {
@@ -211,23 +238,34 @@
                 'X-CSRF-TOKEN': token || '{{ csrf_token() }}'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.message || 'Sunucu hatası');
+                });
+            }
+            return response.json();
+        })
         .then(data => {
-            alert('İşlem Başarılı!\nToplu tarama sonucu ' + (data.atanan_sayisi || 0) + ' adet yeni kupon tanımlandı.');
-            location.reload();
+            if (data.success) {
+                alert('✅ İşlem Başarılı!\n\nToplu tarama sonucu ' + (data.atanan_sayisi || 0) + ' adet yeni kupon tanımlandı.');
+                location.reload();
+            } else {
+                throw new Error(data.message || 'Bilinmeyen hata');
+            }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Bir hata oluştu. Lütfen konsolu kontrol edin.');
+            console.error('Hata detayı:', error);
+            alert('❌ Hata Oluştu!\n\n' + error.message + '\n\nDetaylar için konsolu kontrol edin (F12).');
             
-            // Reset button
             btn.innerHTML = originalContent;
             btn.disabled = false;
         });
     }
 
-    // Tekil kural çalıştırma (Opsiyonel)
     function tekilOtomatikAta(kuponId) {
+        // Şimdilik genel otomatik atamayı çağırıyoruz
+        // İstersen tek kupon için ayrı endpoint ekleyebiliriz
         otomatikAta(); 
     }
 </script>

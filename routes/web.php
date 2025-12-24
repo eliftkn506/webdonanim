@@ -38,7 +38,6 @@ use App\Http\Controllers\Admin\PageController;
 
 // ===================== SUNUCU BAKIM & YARDIMCI ROTLAR =====================
 Route::middleware(['auth'])->group(function () {
-    // Resimler görünmezse: siteniz.com/admin/storage-link-yap
     Route::get('/admin/storage-link-yap', function () {
         try {
             Artisan::call('storage:link');
@@ -48,7 +47,6 @@ Route::middleware(['auth'])->group(function () {
         }
     });
 
-    // Rota veya View hatası alırsanız: siteniz.com/admin/onbellek-temizle
     Route::get('/admin/onbellek-temizle', function () {
         Artisan::call('route:clear');
         Artisan::call('view:clear');
@@ -121,14 +119,14 @@ Route::middleware(['auth'])->group(function () {
         return response()->json(['count' => FavoriUrun::where('user_id', Auth::id())->count()]);
     })->name('favori.sayisi');
 
-    // SİPARİŞLER
+    // SİPARİŞLER (Kullanıcı Tarafı)
     Route::get('/siparislerim', [SiparisController::class, 'siparislerim'])->name('siparislerim');
     Route::get('/siparis/olustur', [SiparisController::class, 'olustur'])->name('siparis.olustur');
     Route::post('/siparis/tamamla', [SiparisController::class, 'tamamla'])->name('siparis.tamamla');
     Route::get('/siparis/basarili/{id}', [SiparisController::class, 'basarili'])->name('siparis.basarili');
     Route::get('/siparis/detay/{id}', [SiparisController::class, 'detay'])->name('siparis.detay');
     Route::get('/siparis/{id}/fatura', [SiparisController::class, 'fatura'])->name('fatura.goster');
-    Route::post('siparis/kupon-kontrol', [SiparisController::class, 'kuponKontrol'])->name('siparis.kupon.kontrol');
+    Route::post('/siparis/kupon-kontrol', [SiparisController::class, 'kuponKontrol'])->name('siparis.kupon.kontrol');
 
     // ÖDEME
     Route::prefix('odeme')->name('odeme.')->group(function () {
@@ -183,9 +181,29 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::delete('/kriter-degerleri/{kriterDeger}', 'destroy')->name('kriterdegerleri.destroy');
     });
 
-    // SİPARİŞ & KUPON & FİYAT
+    // SİPARİŞ YÖNETİMİ (EKSİK ROTA BURAYA EKLENDİ)
+    Route::post('siparisler/{id}/durum-guncelle', [AdminSiparisController::class, 'durumGuncelle'])->name('siparisler.durumGuncelle');
     Route::resource('siparisler', AdminSiparisController::class);
-    Route::resource('kuponlar', KuponController::class);
+    
+   // Admin grubu içinde:
+
+// 1. Önce UPDATE rotasını manuel ve açıkça tanımlıyoruz
+Route::put('kuponlar/{kupon}', [KuponController::class, 'update'])->name('kuponlar.update');
+
+// 2. Diğer özel metotlar
+Route::post('kuponlar/otomatik-ata', [KuponController::class, 'kuralBazliKuponlariAta'])->name('kuponlar.otomatik-ata');
+Route::get('kuponlar/kullanici-ara', [KuponController::class, 'kullaniciAra'])->name('kuponlar.kullanici-ara');
+
+// 3. Geri kalan standart rotalar (update hariç tutuldu)
+Route::resource('kuponlar', KuponController::class)->except(['update'])->parameters([
+    'kuponlar' => 'kupon'
+]);
+  
+    Route::resource('kuponlar', KuponController::class)->parameters([
+        'kuponlar' => 'kupon'
+    ]);
+        
+    
     Route::resource('kampanyalar', KampanyaIndirimController::class);
     Route::resource('fiyatlar', UrunFiyatController::class)->except(['show']);
 
@@ -198,17 +216,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     });
 });
 
-// ===================== WEBHOOKS =====================
+// ===================== WEBHOOKS & PROXY =====================
 Route::prefix('webhook')->name('webhook.')->withoutMiddleware(['web'])->group(function () {
     Route::post('/odeme-callback', [OdemeController::class, 'paymentCallback'])->name('odeme.callback');
 });
 
-// ===================== RESİM PROXY (SUNUCUDA GÖRÜNMEME ÇÖZÜMÜ) =====================
-// asset('storage/...') ile çağrılan tüm resimleri PHP üzerinden okur.
 Route::get('storage/{path}', function ($path) {
     $fullPath = storage_path('app/public/' . $path);
     if (!File::exists($fullPath)) abort(404);
-
     $file = File::get($fullPath);
     $type = File::mimeType($fullPath);
     $response = Response::make($file, 200);
