@@ -12,14 +12,15 @@ use App\Models\UrunVaryasyon;
 use App\Models\UrunVaryasyonKriterDegeri;
 use App\Models\UrunKriterDegeri;
 use Illuminate\Support\Facades\DB;
-use App\Models\UrunFiyat;
+use App\Models\UrunFiyat; // Fiyat modeli eklendi
 use Illuminate\Support\Str;
 
 class UrunController extends Controller
 {
     public function index()
     {
-        $urunler = Urun::with(['altKategori', 'fiyatlar'])->paginate(15);
+        // Fiyatlar ilişkisiyle beraber ürünleri getir
+        $urunler = Urun::with(['altKategori', 'fiyatlar'])->orderByDesc('created_at')->paginate(15);
         $fiyatlar = UrunFiyat::all();
         return view('admin.urunler.index', compact('urunler', 'fiyatlar'));
     }
@@ -68,11 +69,10 @@ class UrunController extends Controller
                 'stok'            => $request->stok,
             ]);
 
-            // --- ANA ÜRÜN KRİTERLERİNİ KAYDET (Pivot Tablo: urun_kriter_degerleri) ---
+            // --- ANA ÜRÜN KRİTERLERİNİ KAYDET ---
             if ($request->has('kriter_degerleri') && is_array($request->kriter_degerleri)) {
                 foreach ($request->kriter_degerleri as $kriterId => $degerId) {
                     if ($degerId) {
-                        // Manuel insert yerine model kullanımı (Daha güvenli)
                         UrunKriterDegeri::create([
                             'urun_id' => $urun->id,
                             'kriter_id' => $kriterId,
@@ -102,7 +102,7 @@ class UrunController extends Controller
                     
                     $varyasyonIndex++;
 
-                    // Varyasyon Kriterleri (Pivot Tablo: urun_varyasyon_kriter_degerleri)
+                    // Varyasyon Kriterleri
                     if (isset($varyasyonData['kriter_degerleri']) && is_array($varyasyonData['kriter_degerleri'])) {
                         foreach ($varyasyonData['kriter_degerleri'] as $kriterId => $degerId) {
                             if ($degerId) {
@@ -118,7 +118,6 @@ class UrunController extends Controller
             }
 
             // --- OTOMATİK UYUMLULUK TARAMASI ---
-            // Veritabanına kayıt işlemi bittiği an bunu çalıştırıyoruz.
             $this->syncUyumluluk($urun);
 
             DB::commit();
@@ -291,6 +290,110 @@ class UrunController extends Controller
         }
     }
 
+    // =====================================================================
+    // === EKLENEN YENİ METODLAR (FİYAT YÖNETİMİ İÇİN) ===
+    // =====================================================================
+
+    /**
+     * Ürün Detay Sayfası (Fiyat Yönetimi ile Birlikte)
+     */
+    public function show($id)
+    {
+        // Ürün ve tüm ilişkilerini (fiyatlar dahil) çekiyoruz
+        $urun = Urun::with([
+            'altKategori.kategori', 
+            // Fiyatları en yeni tarihe göre sırala
+            'fiyatlar' => function($q) {
+                $q->orderByDesc('created_at');
+            },
+            'varyasyonlar',
+            'kriterDegerleri',
+            'uyumluUrunler.uyumluUrun'
+        ])->findOrFail($id);
+
+        return view('admin.urunler.show', compact('urun'));
+    }
+
+    /**
+     * Ürün Detay Sayfasından Fiyat Ekleme Metodu
+     * Bu metod, yeni bir UrunFiyat kaydı oluşturur ve eski aynı türdeki fiyatı arşivler.
+     */
+    public function storeFiyat(Request $request, $id)
+    {
+        // 1. Validasyon
+        $request->validate([
+            'fiyat_turu'       => 'required|in:standart,bayi,kampanya',
+            'maliyet'          => 'required|numeric|min:0',
+            'kar_orani'        => 'required|numeric|min:0',
+            'vergi_orani'      => 'required|numeric|min:0',
+            'baslangic_tarihi' => 'required|date',
+            'bayi_indirimi'    => 'nullable|numeric|min:0',
+            'bitis_tarihi'     => 'nullable|date|after_or_equal:baslangic_tarihi',
+        ]);
+
+        $urun = Urun::findOrFail($id);
+
+        DB::beginTransaction();
+        try {
+            // 2. Aynı türdeki eski aktif fiyatın bitiş tarihini güncelle (Arşivleme Mantığı)
+            // Eğer yeni bir 'standart' fiyat ekleniyorsa, önceki 'standart' fiyatın bitiş tarihi 
+            // yeni fiyatın başlangıç tarihi olarak ayarlanır.
+            UrunFiyat::where('urun_id', $urun->id)
+                ->where('fiyat_turu', $request->fiyat_turu)
+                ->whereNull('bitis_tarihi')
+                ->update(['bitis_tarihi' => $request->baslangic_tarihi]);
+
+            // 3. Yeni Fiyatı Oluştur (UrunFiyat tablosuna ekle)
+            $fiyat = UrunFiyat::create([
+                'urun_id'       => $urun->id,
+                'fiyat_turu'    => $request->fiyat_turu,
+                'maliyet'       => $request->maliyet,
+                'kar_orani'     => $request->kar_orani,
+                'bayi_indirimi' => $request->bayi_indirimi ?? 0,
+                'vergi_orani'   => $request->vergi_orani,
+                'baslangic_tarihi' => $request->baslangic_tarihi,
+                'bitis_tarihi'  => $request->bitis_tarihi ?? null,
+            ]);
+
+            // 4. İlişki tablosunu güncelle (Pivot: urun_fiyat_urun)
+            // Eğer pivot tablonuzda 'fiyat_id' ve 'urun_id' varsa:
+            if(!$urun->fiyatlar->contains($fiyat->fiyat_id)) {
+                $urun->fiyatlar()->attach($fiyat->fiyat_id, [
+                    'baslangic_tarihi' => $request->baslangic_tarihi,
+                    'bitis_tarihi' => $request->bitis_tarihi
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Yeni fiyat tanımlandı ve aktif edildi.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Hata: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Fiyat Silme Metodu
+     */
+    public function deleteFiyat($id)
+    {
+        try {
+            $fiyat = UrunFiyat::findOrFail($id);
+            // Önce ilişkiden çıkar (pivot), sonra asıl kaydı sil
+            $fiyat->urunler()->detach(); 
+            $fiyat->delete();
+            
+            return redirect()->back()->with('success', 'Fiyat kaydı silindi.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Silme işleminde hata: ' . $e->getMessage());
+        }
+    }
+
+    // =====================================================================
+    // === YARDIMCI METODLAR (Aynen korundu) ===
+    // =====================================================================
+
     public function getKriterlerByAltKategori($altKategoriId)
     {
         $kriterler = Kriter::where('alt_kategori_id', $altKategoriId)
@@ -298,67 +401,44 @@ class UrunController extends Controller
         return response()->json($kriterler);
     }
 
-    // =====================================================================
-    // === GELİŞMİŞ OTOMATİK UYUMLULUK MOTORU (Düzeltildi) ===
-    // =====================================================================
-
     private function syncUyumluluk(Urun $urun)
     {
-        // 1. Ürünün en güncel halini ve ilişkilerini yükle
         $urun->refresh();
-        // belongsToMany kullandığın için pivot verisiyle beraber yükler
         $urun->load(['kriterDegerleri', 'varyasyonlar.kriterDegerleri']);
         
-        // 2. Bu ürüne ait eski uyumluluk kayıtlarını temizle
         UyumluUrun::where('urun_id', $urun->id)
             ->orWhere('uyumlu_urun_id', $urun->id)
             ->delete();
         
-        // 3. Tüm kuralları getir
         $kurallar = DB::table('uyumluluk_kurallari')->get();
 
         foreach ($kurallar as $kural) {
-            // A. Eğer eklenen ürün "Ana Kategori"deyse, "Hedef Kategori"deki ürünleri ara
             $this->findAndLinkMatches(
                 $urun,
-                $kural->ana_kategori_id, // Kaynak (Bizim ürün)
-                $kural->ana_kriter_id,   // Kaynak Kriter ID
-                $kural->hedef_kategori_id, // Hedef Kategori
-                $kural->hedef_kriter_id    // Hedef Kriter ID
+                $kural->ana_kategori_id, $kural->ana_kriter_id, 
+                $kural->hedef_kategori_id, $kural->hedef_kriter_id
             );
 
-            // B. Eğer eklenen ürün "Hedef Kategori"deyse, "Ana Kategori"deki ürünleri ara (Ters Eşleşme)
             $this->findAndLinkMatches(
                 $urun,
-                $kural->hedef_kategori_id,
-                $kural->hedef_kriter_id,
-                $kural->ana_kategori_id,
-                $kural->ana_kriter_id
+                $kural->hedef_kategori_id, $kural->hedef_kriter_id,
+                $kural->ana_kategori_id, $kural->ana_kriter_id
             );
         }
     }
 
-    /**
-     * Veritabanı sorgusu ile eşleşen ürünleri bulup bağlar.
-     */
     private function findAndLinkMatches(Urun $urun, $sourceCatId, $sourceCritId, $targetCatId, $targetCritId)
     {
-        // Kuralın kaynak kategorisinde değilsek çık
         if ($urun->alt_kategori_id != $sourceCatId) return;
 
-        // --- 1. ADIM: Bizim ürünün kriter değerlerini topla (Değer isimleri, örn: "AM4", "DDR4") ---
         $degerler = collect();
 
-        // A. Ana ürünün kriter değerlerine bak
-        // belongsToMany olduğu için ->kriterDegerleri direkt Collection döner.
-        // Pivot verisine (kriter_id) göre filtreliyoruz.
         foreach ($urun->kriterDegerleri as $kriterDeger) {
             if ($kriterDeger->pivot->kriter_id == $sourceCritId) {
                 $degerler->push($kriterDeger->deger);
             }
         }
 
-        // B. Varyasyonların kriter değerlerine bak
         foreach ($urun->varyasyonlar as $varyasyon) {
             foreach ($varyasyon->kriterDegerleri as $kriterDeger) {
                 if ($kriterDeger->pivot->kriter_id == $sourceCritId) {
@@ -367,24 +447,18 @@ class UrunController extends Controller
             }
         }
 
-        $degerler = $degerler->unique()->filter(); // Boşları temizle, tekrar edenleri sil
+        $degerler = $degerler->unique()->filter();
         
-        // Eğer bu ürünün kurala uygun bir değeri yoksa eşleşme arama
         if ($degerler->isEmpty()) return;
 
-        // --- 2. ADIM: Hedef kategoride, bu değerlere sahip ürünleri bul ---
-        // Bu sorgu, veritabanında "değeri X olan" ürünleri getirir.
         $eslesecekUrunler = Urun::where('alt_kategori_id', $targetCatId)
-            ->where('id', '!=', $urun->id) // Kendisi hariç
+            ->where('id', '!=', $urun->id) 
             ->where(function($query) use ($targetCritId, $degerler) {
                 
-                // A. Hedef ürünün ANA kriterlerinde ara
                 $query->whereHas('kriterDegerleri', function($q) use ($targetCritId, $degerler) {
-                    // urun_kriter_degerleri pivot tablosundaki kriter_id ve asıl tablodaki değer
                     $q->where('urun_kriter_degerleri.kriter_id', $targetCritId)
                       ->whereIn('deger', $degerler);
                 })
-                // B. VEYA Hedef ürünün VARYASYONLARINDA ara
                 ->orWhereHas('varyasyonlar', function($qVar) use ($targetCritId, $degerler) {
                     $qVar->whereHas('kriterDegerleri', function($qKd) use ($targetCritId, $degerler) {
                         $qKd->where('urun_varyasyon_kriter_degerleri.kriter_id', $targetCritId)
@@ -394,7 +468,6 @@ class UrunController extends Controller
             })
             ->get();
 
-        // --- 3. ADIM: Bulunan ürünlerle eşleşme kaydı oluştur ---
         foreach ($eslesecekUrunler as $hedef) {
             $this->createUyumluluk($urun->id, $hedef->id);
         }
@@ -402,7 +475,6 @@ class UrunController extends Controller
 
     private function createUyumluluk($urunId, $uyumluUrunId)
     {
-        // Çift yönlü kayıt (Tekrarları önler)
         UyumluUrun::firstOrCreate([
             'urun_id' => $urunId,
             'uyumlu_urun_id' => $uyumluUrunId,
@@ -412,39 +484,5 @@ class UrunController extends Controller
             'urun_id' => $uyumluUrunId,
             'uyumlu_urun_id' => $urunId,
         ]);
-    }
-
-    public function uyumluUrunler()
-    {
-        $uyumluUrunler = UyumluUrun::with([
-            'urun' => function($query) {
-                $query->with(['altKategori', 'urunKriterDegerleri.kriter', 'urunKriterDegerleri.kriterDeger', 'varyasyonlar']);
-            },
-            'uyumluUrun' => function($query) {
-                $query->with(['altKategori', 'urunKriterDegerleri.kriter', 'urunKriterDegerleri.kriterDeger', 'varyasyonlar']);
-            }
-        ])
-        ->orderBy('urun_id')
-        ->orderBy('uyumlu_urun_id')
-        ->paginate(20);
-
-        return view('admin.urunler.uyumlu', compact('uyumluUrunler'));
-    }
-
-    public function uruneFiyatEkle(Request $request, $urunId)
-    {
-        $urun = Urun::findOrFail($urunId);
-        $fiyat = UrunFiyat::create($request->all());
-        $urun->fiyatlar()->attach($fiyat->fiyat_id, [
-            'baslangic_tarihi' => $request->baslangic_tarihi,
-            'bitis_tarihi' => $request->bitis_tarihi
-        ]);
-        return response()->json(['message' => 'Fiyat eklendi', 'satis_fiyati' => $urun->satis_fiyati]);
-    }
-
-    public function show($id)
-    {
-        $urun = Urun::with(['altKategori.kategori', 'fiyatlar', 'varyasyonlar'])->findOrFail($id);
-        return view('admin.urunler.show', compact('urun'));
     }
 }

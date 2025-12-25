@@ -2,39 +2,38 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Artisan;
 
 // ===================== CONTROLLER IMPORTLARI =====================
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\KategoriController;
-use App\Http\Controllers\Admin\AltKategoriController;
-use App\Http\Controllers\Admin\KriterController;
-use App\Http\Controllers\Admin\KriterDegerController;
-use App\Http\Controllers\Admin\UyumlulukKuraliController;
-use App\Http\Controllers\Admin\UrunController;
-use App\Http\Controllers\Admin\KampanyaIndirimController;
-use App\Http\Controllers\Admin\AdminSiparisController;
-use App\Http\Controllers\Admin\DegerlendirmeController;
-use App\Http\Controllers\WizardController;
-use App\Http\Controllers\KullaniciUrunController;
-use App\Http\Controllers\KullaniciController;
-use App\Http\Controllers\SepetController;
 use App\Http\Controllers\SayfaController;
+use App\Http\Controllers\KullaniciUrunController;
+use App\Http\Controllers\SepetController;
+use App\Http\Controllers\KullaniciController;
 use App\Http\Controllers\FavoriController;
 use App\Http\Controllers\SiparisController;
-use App\Http\Controllers\FaturaController;
 use App\Http\Controllers\OdemeController;
-use App\Models\FavoriUrun;
-use App\Http\Controllers\Admin\KuponController;
-use App\Http\Controllers\Admin\UrunFiyatController;
-use App\Http\Controllers\Admin\BayiController;
+use App\Http\Controllers\WizardController;
 use App\Http\Controllers\BayiBasvuruController;
+
+// Admin Controllerları
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\DegerlendirmeController;
+use App\Http\Controllers\Admin\KategoriController;
+use App\Http\Controllers\Admin\AltKategoriController;
+use App\Http\Controllers\Admin\UrunController;
+use App\Http\Controllers\Admin\UrunFiyatController;
+use App\Http\Controllers\Admin\KriterController;
+use App\Http\Controllers\Admin\KriterDegerController;
+use App\Http\Controllers\Admin\AdminSiparisController;
+use App\Http\Controllers\Admin\KuponController;
+use App\Http\Controllers\Admin\KampanyaIndirimController;
+use App\Http\Controllers\Admin\BayiController;
+use App\Models\FavoriUrun;
 
 // ===================== SUNUCU BAKIM & YARDIMCI ROTLAR =====================
 Route::middleware(['auth'])->group(function () {
@@ -167,13 +166,18 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('/degerlendirmeler/{id}/cevapla', [DegerlendirmeController::class, 'cevapla'])->name('degerlendirmeler.cevapla');
     Route::delete('/degerlendirmeler/{id}/cevap-sil', [DegerlendirmeController::class, 'cevapSil'])->name('degerlendirmeler.cevapSil');
 
-    // KATEGORİ & ÜRÜN YÖNETİMİ
+    // KATEGORİ & ALT KATEGORİ
     Route::resource('kategoriler', KategoriController::class)->parameters(['kategoriler' => 'kategori']);
     Route::resource('altkategoriler', AltKategoriController::class)->except(['index', 'create']);
+
+    // ÜRÜN & FİYAT YÖNETİMİ
     Route::resource('urunler', UrunController::class);
     Route::get('urunler/kriterler/{altKategoriId}', [UrunController::class, 'getKriterlerByAltKategori'])->name('urunler.getKriterlerByAltKategori');
-    Route::post('urunler/{id}/fiyat-ekle', [UrunFiyatController::class, 'store'])->name('urunler.fiyat.store');
-    // -------------------------
+    
+    // --> DÜZELTİLEN KISIM: Fiyat ekleme ve silme rotaları UrunController'a bağlandı
+    Route::post('urunler/{id}/fiyat-ekle', [UrunController::class, 'storeFiyat'])->name('urunler.fiyat.store');
+    Route::delete('urunler/fiyat-sil/{id}', [UrunController::class, 'deleteFiyat'])->name('urunler.fiyat.delete');
+
     // KRİTERLER
     Route::resource('kriterler', KriterController::class)->except(['create'])->parameters(['kriterler' => 'kriter']);
     Route::controller(KriterDegerController::class)->group(function () {
@@ -182,29 +186,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::delete('/kriter-degerleri/{kriterDeger}', 'destroy')->name('kriterdegerleri.destroy');
     });
 
-    // SİPARİŞ YÖNETİMİ (EKSİK ROTA BURAYA EKLENDİ)
+    // SİPARİŞ YÖNETİMİ
     Route::post('siparisler/{id}/durum-guncelle', [AdminSiparisController::class, 'durumGuncelle'])->name('siparisler.durumGuncelle');
     Route::resource('siparisler', AdminSiparisController::class);
     
-   // Admin grubu içinde:
-
-// 1. Önce UPDATE rotasını manuel ve açıkça tanımlıyoruz
-Route::put('kuponlar/{kupon}', [KuponController::class, 'update'])->name('kuponlar.update');
-
-// 2. Diğer özel metotlar
-Route::post('kuponlar/otomatik-ata', [KuponController::class, 'kuralBazliKuponlariAta'])->name('kuponlar.otomatik-ata');
-Route::get('kuponlar/kullanici-ara', [KuponController::class, 'kullaniciAra'])->name('kuponlar.kullanici-ara');
-
-// 3. Geri kalan standart rotalar (update hariç tutuldu)
-Route::resource('kuponlar', KuponController::class)->except(['update'])->parameters([
-    'kuponlar' => 'kupon'
-]);
-  
-    Route::resource('kuponlar', KuponController::class)->parameters([
-        'kuponlar' => 'kupon'
-    ]);
+    // KUPON YÖNETİMİ
+    Route::put('kuponlar/{kupon}', [KuponController::class, 'update'])->name('kuponlar.update');
+    Route::post('kuponlar/otomatik-ata', [KuponController::class, 'kuralBazliKuponlariAta'])->name('kuponlar.otomatik-ata');
+    Route::get('kuponlar/kullanici-ara', [KuponController::class, 'kullaniciAra'])->name('kuponlar.kullanici-ara');
+    Route::resource('kuponlar', KuponController::class)->except(['update'])->parameters(['kuponlar' => 'kupon']);
         
-    
+    // KAMPANYA & GENEL FİYATLAR
     Route::resource('kampanyalar', KampanyaIndirimController::class);
     Route::resource('fiyatlar', UrunFiyatController::class)->except(['show']);
 

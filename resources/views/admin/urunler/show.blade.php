@@ -13,11 +13,25 @@
             <a href="{{ route('admin.urunler.index') }}" class="btn btn-label-secondary">
                 <i class="bx bx-arrow-back me-1"></i> Geri Dön
             </a>
-            <a href="{{ route('admin.urunler.edit', $urun->id) }}" class="btn btn-primary">
+            <a href="{{ route('admin.urunler.edit', $urun->id) }}" class="btn btn-warning">
                 <i class="bx bx-edit me-1"></i> Düzenle
             </a>
         </div>
     </div>
+
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
 
     <div class="row">
         <div class="col-xl-4 col-lg-5 col-md-5">
@@ -116,11 +130,14 @@
                     </li>
                 </ul>
                 
-                <div class="tab-content">
+                <div class="tab-content shadow-sm">
                     
                     <div class="tab-pane fade show active" id="navs-fiyatlar" role="tabpanel">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="card-header p-0">Fiyat Listesi</h5>
+                            <h5 class="card-header p-0">Fiyat Listesi & Geçmişi</h5>
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalFiyatEkle">
+                                <i class="bx bx-plus me-1"></i> Yeni Fiyat Tanımla
+                            </button>
                         </div>
                         <div class="table-responsive text-nowrap border rounded">
                             <table class="table table-hover">
@@ -131,6 +148,7 @@
                                         <th>Kar %</th>
                                         <th>Satış Fiyatı (KDV Dahil)</th>
                                         <th>Tarih Aralığı</th>
+                                        <th width="50">İşlem</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -139,8 +157,11 @@
                                             $temel = $fiyat->maliyet + ($fiyat->maliyet * $fiyat->kar_orani / 100);
                                             if ($fiyat->bayi_indirimi > 0) $temel -= ($temel * $fiyat->bayi_indirimi / 100);
                                             $satis = $temel + ($temel * $fiyat->vergi_orani / 100);
+                                            
+                                            // Aktiflik kontrolü
+                                            $isActive = (is_null($fiyat->bitis_tarihi) || $fiyat->bitis_tarihi >= now()) && $fiyat->baslangic_tarihi <= now();
                                         @endphp
-                                        <tr>
+                                        <tr class="{{ $isActive ? 'table-success' : '' }}">
                                             <td>
                                                 @if($fiyat->fiyat_turu === 'standart')
                                                     <span class="badge bg-label-info">Standart</span>
@@ -158,12 +179,21 @@
                                                 @if($fiyat->bitis_tarihi)
                                                     <small class="d-block text-danger">Bit: {{ \Carbon\Carbon::parse($fiyat->bitis_tarihi)->format('d.m.Y') }}</small>
                                                 @else
-                                                    <small class="text-success">Süresiz</small>
+                                                    <small class="text-success">Süresiz (Aktif)</small>
                                                 @endif
+                                            </td>
+                                            <td>
+                                                <form action="{{ route('admin.urunler.fiyat.delete', $fiyat->fiyat_id) }}" method="POST" onsubmit="return confirm('Bu fiyatı silmek istediğinize emin misiniz?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-icon btn-sm btn-label-danger">
+                                                        <i class="bx bx-trash"></i>
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="5" class="text-center">Fiyat bulunamadı.</td></tr>
+                                        <tr><td colspan="6" class="text-center">Fiyat bulunamadı.</td></tr>
                                     @endforelse
                                 </tbody>
                             </table>
@@ -188,7 +218,7 @@
                                             <td>
                                                 @php
                                                     $vKriterler = \App\Models\UrunVaryasyonKriterDegeri::where('urun_varyasyon_id', $varyasyon->id)
-                                                                    ->with(['kriter', 'kriterDeger'])->get();
+                                                                        ->with(['kriter', 'kriterDeger'])->get();
                                                 @endphp
                                                 @foreach($vKriterler as $vk)
                                                     <span class="badge bg-label-secondary me-1">
@@ -232,7 +262,7 @@
                                  <div class="col-md-6">
                                      <div class="border rounded p-3 h-100">
                                          <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size: 0.75rem;">
-                                            {{ $kriterDeger->pivot->kriter_id ? \App\Models\Kriter::find($kriterDeger->pivot->kriter_id)->kriter_ad : 'Kriter' }}
+                                             {{ $kriterDeger->pivot->kriter_id ? \App\Models\Kriter::find($kriterDeger->pivot->kriter_id)->kriter_ad : 'Kriter' }}
                                          </small>
                                          <span class="fw-bold fs-5 text-dark">{{ $kriterDeger->deger }}</span>
                                      </div>
@@ -249,7 +279,6 @@
 
                     <div class="tab-pane fade" id="navs-uyumlu" role="tabpanel">
                         <h5 class="card-header p-0 mb-3">Uyumlu Ürünler</h5>
-                        
                         <div class="table-responsive text-nowrap border rounded">
                             <table class="table table-hover">
                                 <thead class="table-light">
@@ -264,7 +293,6 @@
                                 </thead>
                                 <tbody>
                                     @php
-                                        // Fetch compatible products using the relationship defined in Urun model
                                         $uyumluUrunler = $urun->uyumluUrunler()->with('uyumluUrun.altKategori.kategori')->get();
                                     @endphp
                                     
@@ -308,7 +336,6 @@
                                                 <div class="d-flex flex-column align-items-center">
                                                     <i class="bx bx-link-alt fs-1 text-muted mb-2"></i>
                                                     <p class="text-muted mb-0">Bu ürünle eşleşen uyumlu ürün bulunamadı.</p>
-                                                    <small class="text-muted">Uyumluluk kurallarını kontrol ediniz.</small>
                                                 </div>
                                             </td>
                                         </tr>
@@ -323,4 +350,166 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalFiyatEkle" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title text-white">Yeni Fiyat Tanımla</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.urunler.fiyat.store', $urun->id) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="row g-3">
+                        
+                        <div class="col-md-4">
+                            <label class="form-label">Fiyat Türü</label>
+                            <select name="fiyat_turu" class="form-select" id="inp_fiyat_turu">
+                                <option value="standart" selected>Standart Satış</option>
+                                <option value="bayi">Bayi Fiyatı</option>
+                                <option value="kampanya">Kampanya/İndirim</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Başlangıç Tarihi</label>
+                            <input type="date" name="baslangic_tarihi" class="form-control" value="{{ date('Y-m-d') }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Bitiş Tarihi (Opsiyonel)</label>
+                            <input type="date" name="bitis_tarihi" class="form-control">
+                            <small class="text-muted">Boş bırakılırsa süresiz olur.</small>
+                        </div>
+
+                        <hr class="my-2">
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold text-dark">Maliyet (₺)</label>
+                            <input type="number" step="0.01" name="maliyet" id="inp_maliyet" class="form-control" placeholder="0.00" required>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold text-dark">Kar Oranı (%)</label>
+                            <input type="number" step="0.01" name="kar_orani" id="inp_kar" class="form-control" value="30" required>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Vergi (KDV %)</label>
+                            <select name="vergi_orani" id="inp_vergi" class="form-select">
+                                <option value="0">0%</option>
+                                <option value="1">1%</option>
+                                <option value="10">10%</option>
+                                <option value="20" selected>20%</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3" id="div_bayi_indirim" style="display:none;">
+                            <label class="form-label text-warning">Bayi İndirimi (%)</label>
+                            <input type="number" step="0.01" name="bayi_indirimi" id="inp_bayi_indirim" class="form-control" value="0">
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <div class="card bg-label-secondary border border-secondary">
+                                <div class="card-body p-3">
+                                    <h6 class="card-title mb-3 border-bottom pb-2">Hesaplama Özeti</h6>
+                                    <div class="row text-center">
+                                        <div class="col">
+                                            <small class="d-block text-muted">Maliyet</small>
+                                            <strong class="fs-5" id="out_maliyet">0.00 ₺</strong>
+                                        </div>
+                                        <div class="col">
+                                            <i class="bx bx-plus text-muted"></i>
+                                        </div>
+                                        <div class="col">
+                                            <small class="d-block text-muted">Kar Tutarı</small>
+                                            <strong class="fs-5 text-success" id="out_kar">0.00 ₺</strong>
+                                        </div>
+                                        <div class="col">
+                                            <i class="bx bx-plus text-muted"></i>
+                                        </div>
+                                        <div class="col">
+                                            <small class="d-block text-muted">KDV Tutarı</small>
+                                            <strong class="fs-5" id="out_kdv">0.00 ₺</strong>
+                                        </div>
+                                        <div class="col border-start">
+                                            <small class="d-block text-primary fw-bold">SATIŞ FİYATI</small>
+                                            <strong class="fs-4 text-primary" id="out_satis">0.00 ₺</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Fiyatı Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const inpMaliyet = document.getElementById('inp_maliyet');
+        const inpKar = document.getElementById('inp_kar');
+        const inpVergi = document.getElementById('inp_vergi');
+        const inpBayiIndirim = document.getElementById('inp_bayi_indirim');
+        const inpTur = document.getElementById('inp_fiyat_turu');
+        const divBayi = document.getElementById('div_bayi_indirim');
+
+        // Çıktı Alanları
+        const outMaliyet = document.getElementById('out_maliyet');
+        const outKar = document.getElementById('out_kar');
+        const outKdv = document.getElementById('out_kdv');
+        const outSatis = document.getElementById('out_satis');
+
+        function hesapla() {
+            let maliyet = parseFloat(inpMaliyet.value) || 0;
+            let karOrani = parseFloat(inpKar.value) || 0;
+            let vergiOrani = parseFloat(inpVergi.value) || 0;
+            let bayiIndirimi = parseFloat(inpBayiIndirim.value) || 0;
+            let tur = inpTur.value;
+
+            // Kar Hesabı
+            let karTutari = maliyet * (karOrani / 100);
+            let karsizFiyat = maliyet + karTutari;
+
+            // Bayi İndirimi Varsa (Net fiyattan düşüyoruz)
+            if(tur === 'bayi' && bayiIndirimi > 0) {
+                karsizFiyat = karsizFiyat - (karsizFiyat * (bayiIndirimi / 100));
+            }
+
+            // Vergi Hesabı
+            let kdvTutari = karsizFiyat * (vergiOrani / 100);
+            let satisFiyati = karsizFiyat + kdvTutari;
+
+            // Ekrana Yazma
+            outMaliyet.innerText = maliyet.toFixed(2) + ' ₺';
+            outKar.innerText = karTutari.toFixed(2) + ' ₺';
+            outKdv.innerText = kdvTutari.toFixed(2) + ' ₺';
+            outSatis.innerText = satisFiyati.toFixed(2) + ' ₺';
+        }
+
+        // Event Listeners
+        [inpMaliyet, inpKar, inpVergi, inpBayiIndirim].forEach(el => {
+            el.addEventListener('input', hesapla);
+        });
+
+        // Fiyat türü değişince bayi indirimi alanını göster/gizle
+        inpTur.addEventListener('change', function() {
+            if(this.value === 'bayi') {
+                divBayi.style.display = 'block';
+            } else {
+                divBayi.style.display = 'none';
+                inpBayiIndirim.value = 0;
+            }
+            hesapla();
+        });
+    });
+</script>
+
 @endsection
