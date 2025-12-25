@@ -172,7 +172,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::resource('altkategoriler', AltKategoriController::class)->except(['index', 'create']);
     Route::resource('urunler', UrunController::class);
     Route::get('urunler/kriterler/{altKategoriId}', [UrunController::class, 'getKriterlerByAltKategori'])->name('urunler.getKriterlerByAltKategori');
-
+    Route::post('urunler/{id}/fiyat-ekle', [UrunFiyatController::class, 'store'])->name('urunler.fiyat.store');
+    // -------------------------
     // KRİTERLER
     Route::resource('kriterler', KriterController::class)->except(['create'])->parameters(['kriterler' => 'kriter']);
     Route::controller(KriterDegerController::class)->group(function () {
