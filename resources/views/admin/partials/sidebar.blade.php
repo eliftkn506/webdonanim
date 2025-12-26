@@ -142,6 +142,11 @@
                         <div>Sayfa Yönetimi</div>
                     </a>
                 </li>
+                <li class="menu-item {{ request()->routeIs('admin.blog.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.blog.index') }}" class="menu-link">
+                        <div>Blog Yönetimi</div>
+                    </a>
+                </li>
             </ul>
         </li>
 

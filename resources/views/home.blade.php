@@ -54,7 +54,6 @@
     .delay-2 { transition-delay: 0.4s; }
     .delay-3 { transition-delay: 0.6s; }
 
-    /* Butonlar */
     .btn-hero-primary {
         background: linear-gradient(135deg, #f59e0b, #d97706); 
         color: white; border: none; padding: 14px 40px; font-weight: 700; border-radius: 50px;
@@ -130,6 +129,7 @@
     }
     .badge-hot { background: linear-gradient(45deg, #ff416c, #ff4b2b); }
     .badge-new { background: linear-gradient(45deg, #4facfe, #00f2fe); }
+    .badge-discount { background: linear-gradient(45deg, #11998e, #38ef7d); }
 
     .pcm-image-wrapper {
         position: relative; height: 260px; padding: 30px; background: radial-gradient(circle, #f8fafc 0%, #f1f5f9 100%);
@@ -159,6 +159,40 @@
     .pcm-title a { color: var(--text-primary); text-decoration: none; transition: 0.2s; }
     .pcm-title a:hover { color: var(--accent-color); }
     
+    /* Kriter Değerleri Stili */
+    .pcm-specs {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 10px;
+        margin: 12px 0;
+        font-size: 0.8rem;
+    }
+    .spec-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .spec-item:last-child {
+        border-bottom: none;
+    }
+    .spec-label {
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.75rem;
+    }
+    .spec-value {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 0.8rem;
+        max-width: 60%;
+        text-align: right;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
     .pcm-price { font-size: 1.4rem; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; }
     .pcm-old-price { font-size: 0.95rem; text-decoration: line-through; color: #94a3b8; margin-right: 8px; font-weight: 600; }
     
@@ -168,6 +202,240 @@
         transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; cursor: pointer;
     }
     .pcm-add-btn:hover { background: var(--primary-color); border-color: var(--primary-color); color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+    /* --- YENİ BÖLÜMLER --- */
+    
+    /* Deals Timer Section */
+    .deals-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 80px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    .deals-section::before {
+        content: '';
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        top: -250px;
+        right: -100px;
+    }
+    .timer-box {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    .timer-digit {
+        font-size: 3rem;
+        font-weight: 800;
+        color: white;
+        line-height: 1;
+    }
+    .timer-label {
+        color: rgba(255,255,255,0.8);
+        font-size: 0.9rem;
+        margin-top: 8px;
+        font-weight: 600;
+    }
+
+    /* Blog Section */
+    .blog-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s;
+        border: 1px solid #f1f5f9;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .blog-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    .blog-image {
+        height: 220px;
+        overflow: hidden;
+        position: relative;
+    }
+    .blog-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s;
+    }
+    .blog-card:hover .blog-image img {
+        transform: scale(1.1);
+    }
+    .blog-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .blog-meta {
+        display: flex;
+        gap: 15px;
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-bottom: 12px;
+    }
+    .blog-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .blog-title a {
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: 0.2s;
+    }
+    .blog-title a:hover {
+        color: var(--primary-color);
+    }
+    .blog-excerpt {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        flex-grow: 1;
+    }
+    .blog-read-more {
+        color: var(--primary-color);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.9rem;
+    }
+    .blog-read-more:hover {
+        gap: 10px;
+    }
+
+    /* Newsletter Section */
+    .newsletter-section {
+        background: linear-gradient(135deg, #3b82f6 0%, #1e293b 100%);
+        padding: 80px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    .newsletter-form {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .newsletter-input {
+        padding: 18px 25px;
+        border-radius: 50px;
+        border: 2px solid rgba(255,255,255,0.3);
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        color: white;
+        width: 100%;
+    }
+    .newsletter-input::placeholder {
+        color: rgba(255,255,255,0.6);
+    }
+    .newsletter-input:focus {
+        outline: none;
+        border-color: white;
+        background: rgba(255,255,255,0.15);
+    }
+    .newsletter-btn {
+        padding: 18px 40px;
+        background: #f59e0b;
+        border: none;
+        border-radius: 50px;
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .newsletter-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    }
+
+    /* Testimonial Section */
+    .testimonial-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid #f1f5f9;
+        height: 100%;
+    }
+    .testimonial-quote {
+        font-size: 3rem;
+        color: var(--primary-color);
+        opacity: 0.2;
+        line-height: 1;
+        margin-bottom: 15px;
+    }
+    .testimonial-text {
+        color: #64748b;
+        font-size: 1rem;
+        line-height: 1.8;
+        margin-bottom: 20px;
+    }
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .testimonial-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.5rem;
+    }
+    .testimonial-info h6 {
+        font-weight: 700;
+        margin: 0;
+        color: var(--text-primary);
+    }
+    .testimonial-info p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    /* Stats Section */
+    .stats-section {
+        background: #f8fafc;
+        padding: 60px 0;
+    }
+    .stat-box {
+        text-align: center;
+    }
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--primary-color);
+        line-height: 1;
+        margin-bottom: 10px;
+    }
+    .stat-label {
+        color: #64748b;
+        font-weight: 600;
+        font-size: 1rem;
+    }
 
     /* --- MARKA BANDI --- */
     .brands-slider-area {
@@ -197,6 +465,8 @@
         .col-lg-7 { padding: 0 !important; }
         .d-flex.gap-3 { justify-content: center; }
         .hero-title { font-size: 2.5rem !important; }
+        .timer-digit { font-size: 2rem; }
+        .stat-number { font-size: 2rem; }
     }
 </style>
 
@@ -337,8 +607,51 @@
     </div>
 </section>
 
+<section class="deals-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 text-white mb-4 mb-lg-0">
+                <span class="badge bg-warning text-dark px-3 py-2 mb-3 d-inline-block">⚡ FLASH KAMPANYA</span>
+                <h2 class="display-4 fw-bold mb-3">Günün Fırsatları</h2>
+                <p class="lead mb-4 opacity-90">Sınırlı sayıda ürünlerde %50'ye varan indirimler. Acele edin, stoklar tükeniyor!</p>
+                <a href="{{ route('urun.index') }}" class="btn btn-light btn-lg rounded-pill px-4">
+                    <i class="fas fa-tags me-2"></i>Fırsatları Gör
+                </a>
+            </div>
+            <div class="col-lg-6">
+                <div class="row g-3">
+                    <div class="col-3">
+                        <div class="timer-box">
+                            <div class="timer-digit" id="hours">12</div>
+                            <div class="timer-label">Saat</div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="timer-box">
+                            <div class="timer-digit" id="minutes">34</div>
+                            <div class="timer-label">Dakika</div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="timer-box">
+                            <div class="timer-digit" id="seconds">56</div>
+                            <div class="timer-label">Saniye</div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="timer-box">
+                            <div class="timer-digit" id="milliseconds">78</div>
+                            <div class="timer-label">ms</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <div class="container">
-    <section class="mb-5" id="urunler">
+    <section class="my-5" id="urunler">
         <div class="section-header-modern">
             <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary px-3 py-2 mb-3">FIRSATLAR</span>
             <h2>Haftanın Yıldız Ürünleri</h2>
@@ -348,12 +661,10 @@
         <div class="row g-4">
             @forelse($urunler ?? [] as $index => $urun)
             @php
-                // --- FİYAT VE DEĞERLENDİRME MANTIĞI ENTEGRASYONU ---
                 $user = auth()->user();
                 $satisFiyati = $urun->getFiyatForUser($user) ?? 0;
                 $standartFiyat = $urun->getStandartFiyat() ?? 0;
                 
-                // Kampanya Kontrolü
                 $kampanya = DB::table('kampanya_indirim')
                     ->where('urun_id', $urun->id)
                     ->where('aktif', 1)
@@ -366,14 +677,20 @@
                     $finalFiyat = $satisFiyati * (1 - $kampanya->indirim_orani / 100);
                 }
 
-                // Gerçek Değerlendirme Verileri
                 $avgRating = $urun->degerlendirmeler()->where('onay', 1)->avg('puan') ?? 0;
                 $reviewCount = $urun->degerlendirmeler()->where('onay', 1)->count();
+                
+                // Kriter değerlerini al (maksimum 3 adet göster)
+                $kriterler = $urun->urunKriterDegerleri()->take(3)->get();
             @endphp
 
             <div class="col-lg-3 col-md-6 col-sm-6">
                 <div class="product-card-modern">
-                    @if($loop->index < 2)
+                    @if($kampanya)
+                        <div class="pcm-badge badge-discount">
+                            <i class="fas fa-percent me-1"></i>{{ round($kampanya->indirim_orani) }}% İNDİRİM
+                        </div>
+                    @elseif($loop->index < 2)
                         <div class="pcm-badge badge-hot"><i class="fas fa-fire me-1"></i>ÇOK SATAN</div>
                     @elseif($loop->index == 2)
                         <div class="pcm-badge badge-new"><i class="fas fa-star me-1"></i>YENİ</div>
@@ -399,7 +716,7 @@
                             <a href="{{ route('urun.incele', $urun->id) }}">{{ $urun->urun_ad }}</a>
                         </h3>
                         
-                        <div class="d-flex align-items-center mb-3">
+                        <div class="d-flex align-items-center mb-2">
                             <div class="text-warning small me-2">
                                 @for($i = 1; $i <= 5; $i++)
                                     @if($i <= round($avgRating))
@@ -411,6 +728,20 @@
                             </div>
                             <span class="text-muted small" style="font-size: 0.8rem;">({{ $reviewCount }})</span>
                         </div>
+
+                        @if($kriterler->count() > 0)
+                        <div class="pcm-specs">
+                            @foreach($kriterler as $kriter)
+                                <div class="spec-item">
+                                    <span class="spec-label">
+                                        <i class="fas fa-check-circle me-1" style="font-size: 0.7rem; color: var(--primary-color);"></i>
+                                        {{ $kriter->kriter->kriter_ad ?? 'Özellik' }}
+                                    </span>
+                                    <span class="spec-value">{{ $kriter->kriterDeger->deger ?? '-' }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        @endif
 
                         <div class="d-flex justify-content-between align-items-end mt-auto">
                             <div class="pcm-price-wrapper">
@@ -459,6 +790,141 @@
     </section>
 </div>
 
+<section class="stats-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-box">
+                    <div class="stat-number"><span class="counter" data-target="15000">0</span>+</div>
+                    <div class="stat-label">Mutlu Müşteri</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-box">
+                    <div class="stat-number"><span class="counter" data-target="8500">0</span>+</div>
+                    <div class="stat-label">Ürün Çeşidi</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-box">
+                    <div class="stat-number"><span class="counter" data-target="99">0</span>%</div>
+                    <div class="stat-label">Müşteri Memnuniyeti</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-box">
+                    <div class="stat-number"><span class="counter" data-target="24">0</span>/7</div>
+                    <div class="stat-label">Teknik Destek</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <section class="my-5">
+        <div class="section-header-modern">
+            <h2>Müşterilerimiz Ne Diyor?</h2>
+            <p>Binlerce mutlu müşterimizin deneyimlerini okuyun.</p>
+        </div>
+
+        <div class="row g-4">
+            @forelse($degerlendirmeler ?? [] as $yorum)
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-card">
+                    <div class="testimonial-quote">"</div>
+                    <p class="testimonial-text">
+                        {{ \Illuminate\Support\Str::limit($yorum->yorum, 150) }}
+                    </p>
+                    <div class="testimonial-author">
+                        @php
+                            $userName = $yorum->user->name ?? 'Müşteri';
+                            $initials = collect(explode(' ', $userName))
+                                ->map(function($segment) { return strtoupper(substr($segment, 0, 1)); })
+                                ->take(2)
+                                ->join('');
+                        @endphp
+                        <div class="testimonial-avatar">{{ $initials }}</div>
+                        <div class="testimonial-info">
+                            <h6>{{ $userName }}</h6>
+                            <p>Müşteri</p>
+                            <small class="text-warning">
+                                @for($i = 1; $i <= $yorum->puan; $i++) <i class="fas fa-star"></i> @endfor
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="col-12 text-center">
+                <p class="text-muted">Henüz onaylanmış müşteri yorumu bulunmamaktadır.</p>
+            </div>
+            @endforelse
+        </div>
+    </section>
+
+    <section class="my-5">
+        <div class="section-header-modern">
+            <h2>Teknoloji Dünyasından</h2>
+            <p>En son haberler, incelemeler ve rehberler.</p>
+        </div>
+
+        <div class="row g-4">
+            @forelse($bloglar ?? [] as $blog)
+            <div class="col-lg-4 col-md-6">
+                <div class="blog-card">
+                    <div class="blog-image">
+                        <img src="{{ asset('storage/' . $blog->resim) }}" alt="{{ $blog->baslik }}" onerror="this.src='https://via.placeholder.com/400x250/3b82f6/ffffff?text=Haber'">
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-meta">
+                            <span><i class="far fa-calendar me-1"></i>{{ \Carbon\Carbon::parse($blog->created_at)->translatedFormat('d F Y') }}</span>
+                            <span><i class="far fa-user me-1"></i>{{ $blog->yazar }}</span>
+                        </div>
+                        <h4 class="blog-title">
+    <a href="{{ route('blog.detay', $blog->slug) }}">{{ $blog->baslik }}</a>
+</h4>
+                        <p class="blog-excerpt">
+                            {{ \Illuminate\Support\Str::limit($blog->ozet ?? strip_tags($blog->icerik), 100) }}
+                        </p>
+                       <a href="{{ route('blog.detay', $blog->slug) }}" class="blog-read-more">
+    Devamını Oku <i class="fas fa-arrow-right"></i>
+</a>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="col-12 text-center">
+                <p class="text-muted">Henüz eklenmiş blog yazısı bulunmamaktadır.</p>
+            </div>
+            @endforelse
+        </div>
+    </section>
+</div>
+
+<section class="newsletter-section">
+    <div class="container">
+        <div class="text-center text-white mb-5">
+            <h2 class="display-5 fw-bold mb-3">Fırsatları Kaçırma!</h2>
+            <p class="lead mb-0" style="opacity: 0.9;">
+                Özel kampanyalar, yeni ürünler ve teknoloji haberleri için bültenimize abone ol.
+            </p>
+        </div>
+        <form class="newsletter-form">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <input type="email" class="newsletter-input" placeholder="E-posta adresinizi girin" required>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="newsletter-btn w-100">
+                        <i class="fas fa-paper-plane me-2"></i>Abone Ol
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
 <section class="brands-slider-area">
     <div class="container text-center mb-4">
         <h5 class="text-muted fw-bold text-uppercase" style="letter-spacing: 2px;">Resmi İş Ortaklarımız</h5>
@@ -477,7 +943,7 @@
         <div class="brand-slide"><i class="fab fa-windows"></i></div>
         <div class="brand-slide"><i class="fab fa-android"></i></div>
         <div class="brand-slide"><i class="fab fa-google"></i></div>
-        <div class="brand-slide"><i class="fab fa-amazon"></i></div>
+        <div class="brand-slide"><i class="fas fa-amazon"></i></div>
         <div class="brand-slide"><i class="fas fa-microchip"></i></div>
         <div class="brand-slide"><i class="fas fa-server"></i></div>
     </div>
@@ -487,7 +953,65 @@
 
 @push('scripts')
 <script>
-// ========== SEPETE EKLEME FONKSİYONU ==========
+// ========== COUNTDOWN TIMER ==========
+function updateTimer() {
+    const now = new Date();
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    const diff = endOfDay - now;
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    const milliseconds = Math.floor((diff % 1000) / 10);
+    
+    document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+    document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+    document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+    document.getElementById('milliseconds').textContent = String(milliseconds).padStart(2, '0');
+}
+
+setInterval(updateTimer, 50);
+updateTimer();
+
+// ========== COUNTER ANIMATION ==========
+const counters = document.querySelectorAll('.counter');
+const animateCounter = (counter) => {
+    const target = parseInt(counter.getAttribute('data-target'));
+    const duration = 2000;
+    const increment = target / (duration / 16);
+    let current = 0;
+    
+    const updateCounter = () => {
+        current += increment;
+        if (current < target) {
+            counter.textContent = Math.floor(current);
+            requestAnimationFrame(updateCounter);
+        } else {
+            counter.textContent = target;
+        }
+    };
+    updateCounter();
+};
+
+const observerOptions = {
+    threshold: 0.5
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const counter = entry.target;
+            animateCounter(counter);
+            observer.unobserve(counter);
+        }
+    });
+}, observerOptions);
+
+counters.forEach(counter => observer.observe(counter));
+
+// ========== SEPETE EKLEME ==========
 function sepeteEkle(urunId) {
     const btn = event.currentTarget;
     const originalContent = btn.innerHTML;
@@ -540,5 +1064,13 @@ function sepeteEkle(urunId) {
         }, 2000);
     });
 }
+
+// ========== NEWSLETTER FORM ==========
+document.querySelector('.newsletter-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = this.querySelector('input[type="email"]').value;
+    alert('Teşekkürler! ' + email + ' adresine onay e-postası gönderdik.');
+    this.reset();
+});
 </script>
 @endpush

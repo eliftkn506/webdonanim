@@ -34,6 +34,7 @@ use App\Http\Controllers\Admin\KuponController;
 use App\Http\Controllers\Admin\KampanyaIndirimController;
 use App\Http\Controllers\Admin\BayiController;
 use App\Models\FavoriUrun;
+use App\Http\Controllers\Admin\BlogController;
 
 // ===================== SUNUCU BAKIM & YARDIMCI ROTLAR =====================
 Route::middleware(['auth'])->group(function () {
@@ -60,6 +61,9 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // ===================== AUTH ROUTES =====================
 Auth::routes();
+
+// Blog Detay Rotası
+Route::get('/blog/{slug}', [App\Http\Controllers\HomeController::class, 'blogDetay'])->name('blog.detay');
 
 // ===================== BAYİ BAŞVURU =====================
 Route::get('/bayi-basvuru', [BayiBasvuruController::class, 'showForm'])->name('bayi.basvuru.form');
@@ -151,7 +155,7 @@ Route::post('/iletisim', [SayfaController::class, 'iletisimGonder'])->name('ilet
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
     Route::resource('sliders', SliderController::class);
-
+    Route::resource('blog', BlogController::class);
     // SAYFA YÖNETİMİ
     Route::get('pages', [PageController::class, 'index'])->name('pages.index');
     Route::get('pages/create', [PageController::class, 'create'])->name('pages.create');
