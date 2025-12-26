@@ -102,24 +102,5 @@ class BlogController extends Controller
         return redirect()->route('admin.blog.index')->with('success', 'Blog yazısı silindi.');
     }
 
-    public function blogDetay($slug)
-{
-    // 1. İstenen blog yazısını getir (yoksa 404 ver)
-    $blog = Blog::where('slug', $slug)->where('aktif', 1)->firstOrFail();
 
-    // 2. Yan menü için son eklenen diğer 5 yazıyı getir (şu an okunan hariç)
-    $sonYazilar = Blog::where('aktif', 1)
-        ->where('id', '!=', $blog->id)
-        ->latest()
-        ->take(5)
-        ->get();
-
-    // 3. Yan menüde rastgele 3 ürün önerelim (E-ticaret olduğu için)
-    // Eğer Urun modelin varsa:
-    $onerilenUrunler = Urun::where('aktif', 1)->inRandomOrder()->take(3)->get();
-    
-    // Eğer Urun modelin yoksa bu satırı silip view'dan da kaldırabilirsin.
-    
-    return view('blog.detay', compact('blog', 'sonYazilar', 'onerilenUrunler'));
-}
 }
