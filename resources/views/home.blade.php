@@ -159,7 +159,6 @@
     .pcm-title a { color: var(--text-primary); text-decoration: none; transition: 0.2s; }
     .pcm-title a:hover { color: var(--accent-color); }
     
-    /* Kriter Değerleri Stili */
     .pcm-specs {
         background: #f8fafc;
         border-radius: 10px;
@@ -168,30 +167,12 @@
         font-size: 0.8rem;
     }
     .spec-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 5px 0;
-        border-bottom: 1px solid #e2e8f0;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 5px 0; border-bottom: 1px solid #e2e8f0;
     }
-    .spec-item:last-child {
-        border-bottom: none;
-    }
-    .spec-label {
-        color: #64748b;
-        font-weight: 600;
-        font-size: 0.75rem;
-    }
-    .spec-value {
-        color: var(--text-primary);
-        font-weight: 700;
-        font-size: 0.8rem;
-        max-width: 60%;
-        text-align: right;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
+    .spec-item:last-child { border-bottom: none; }
+    .spec-label { color: #64748b; font-weight: 600; font-size: 0.75rem; }
+    .spec-value { color: var(--text-primary); font-weight: 700; font-size: 0.8rem; max-width: 60%; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     
     .pcm-price { font-size: 1.4rem; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; }
     .pcm-old-price { font-size: 0.95rem; text-decoration: line-through; color: #94a3b8; margin-right: 8px; font-weight: 600; }
@@ -203,9 +184,7 @@
     }
     .pcm-add-btn:hover { background: var(--primary-color); border-color: var(--primary-color); color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
 
-    /* --- YENİ BÖLÜMLER --- */
-    
-    /* Deals Timer Section */
+    /* --- DEALS TIMER --- */
     .deals-section {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 80px 0;
@@ -213,245 +192,194 @@
         overflow: hidden;
     }
     .deals-section::before {
-        content: '';
-        position: absolute;
-        width: 500px;
-        height: 500px;
-        background: rgba(255,255,255,0.1);
-        border-radius: 50%;
-        top: -250px;
-        right: -100px;
+        content: ''; position: absolute; width: 500px; height: 500px;
+        background: rgba(255,255,255,0.1); border-radius: 50%; top: -250px; right: -100px;
     }
     .timer-box {
-        background: rgba(255,255,255,0.15);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 30px;
-        text-align: center;
-        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 20px;
+        padding: 30px; text-align: center; border: 1px solid rgba(255,255,255,0.2);
     }
-    .timer-digit {
-        font-size: 3rem;
-        font-weight: 800;
-        color: white;
-        line-height: 1;
-    }
-    .timer-label {
-        color: rgba(255,255,255,0.8);
-        font-size: 0.9rem;
-        margin-top: 8px;
-        font-weight: 600;
-    }
+    .timer-digit { font-size: 3rem; font-weight: 800; color: white; line-height: 1; }
+    .timer-label { color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-top: 8px; font-weight: 600; }
 
-    /* Blog Section */
+    /* --- BLOG --- */
     .blog-card {
-        background: white;
+        background: white; border-radius: 20px; overflow: hidden; transition: all 0.3s;
+        border: 1px solid #f1f5f9; height: 100%; display: flex; flex-direction: column;
+    }
+    .blog-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+    .blog-image { height: 220px; overflow: hidden; position: relative; }
+    .blog-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .blog-card:hover .blog-image img { transform: scale(1.1); }
+    .blog-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
+    .blog-meta { display: flex; gap: 15px; font-size: 0.8rem; color: #64748b; margin-bottom: 12px; }
+    .blog-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .blog-title a { color: var(--text-primary); text-decoration: none; transition: 0.2s; }
+    .blog-title a:hover { color: var(--primary-color); }
+    .blog-excerpt { color: #64748b; font-size: 0.9rem; margin-bottom: 15px; flex-grow: 1; }
+    .blog-read-more { color: var(--primary-color); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-size: 0.9rem; }
+    .blog-read-more:hover { gap: 10px; }
+
+    /* --- GAMING READY SYSTEMS SECTION (YENİ EKLENEN) --- */
+    .gaming-ready-section {
+        background: #0f172a;
+        padding: 80px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    .gaming-ready-section::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231e293b' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    
+    .ready-system-card {
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 20px;
         overflow: hidden;
-        transition: all 0.3s;
-        border: 1px solid #f1f5f9;
+        transition: all 0.3s ease;
+        position: relative;
         height: 100%;
         display: flex;
         flex-direction: column;
+        z-index: 1;
     }
-    .blog-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    .ready-system-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        border-color: var(--primary-color);
     }
-    .blog-image {
+    
+    .system-img-wrap {
         height: 220px;
-        overflow: hidden;
         position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at center, #334155 0%, #1e293b 100%);
     }
-    .blog-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s;
+    .system-img-wrap img {
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        transition: transform 0.5s ease;
+        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
     }
-    .blog-card:hover .blog-image img {
-        transform: scale(1.1);
+    .ready-system-card:hover .system-img-wrap img {
+        transform: scale(1.1) rotate(2deg);
     }
-    .blog-content {
+    
+    .system-info {
         padding: 1.5rem;
         flex-grow: 1;
         display: flex;
         flex-direction: column;
     }
-    .blog-meta {
-        display: flex;
-        gap: 15px;
-        font-size: 0.8rem;
-        color: #64748b;
-        margin-bottom: 12px;
-    }
-    .blog-title {
-        font-size: 1.1rem;
-        font-weight: 700;
+    .system-badge {
+        display: inline-block;
+        background: var(--accent-color);
+        color: #000;
+        font-weight: 800;
+        font-size: 0.7rem;
+        padding: 4px 10px;
+        border-radius: 4px;
         margin-bottom: 10px;
-        line-height: 1.4;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        width: fit-content;
+        text-transform: uppercase;
     }
-    .blog-title a {
-        color: var(--text-primary);
-        text-decoration: none;
-        transition: 0.2s;
-    }
-    .blog-title a:hover {
-        color: var(--primary-color);
-    }
-    .blog-excerpt {
-        color: #64748b;
-        font-size: 0.9rem;
-        margin-bottom: 15px;
-        flex-grow: 1;
-    }
-    .blog-read-more {
-        color: var(--primary-color);
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 0.9rem;
-    }
-    .blog-read-more:hover {
-        gap: 10px;
-    }
-
-    /* Newsletter Section */
-    .newsletter-section {
-        background: linear-gradient(135deg, #3b82f6 0%, #1e293b 100%);
-        padding: 80px 0;
-        position: relative;
-        overflow: hidden;
-    }
-    .newsletter-form {
-        max-width: 600px;
-        margin: 0 auto;
-    }
-    .newsletter-input {
-        padding: 18px 25px;
-        border-radius: 50px;
-        border: 2px solid rgba(255,255,255,0.3);
-        background: rgba(255,255,255,0.1);
-        backdrop-filter: blur(10px);
+    .system-title {
         color: white;
-        width: 100%;
-    }
-    .newsletter-input::placeholder {
-        color: rgba(255,255,255,0.6);
-    }
-    .newsletter-input:focus {
-        outline: none;
-        border-color: white;
-        background: rgba(255,255,255,0.15);
-    }
-    .newsletter-btn {
-        padding: 18px 40px;
-        background: #f59e0b;
-        border: none;
-        border-radius: 50px;
-        color: white;
+        font-size: 1.25rem;
         font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        margin-bottom: 15px;
+        line-height: 1.3;
     }
-    .newsletter-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    .system-specs-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .sys-spec {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 8px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        color: #cbd5e1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .sys-spec i { color: var(--primary-color); }
+    
+    .system-price-area {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 15px;
+    }
+    .sys-price {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--accent-color);
+    }
+    .sys-btn {
+        background: white;
+        color: #0f172a;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s;
+        text-decoration: none;
+    }
+    .sys-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: rotate(45deg);
     }
 
     /* Testimonial Section */
     .testimonial-card {
-        background: white;
-        border-radius: 20px;
-        padding: 30px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        border: 1px solid #f1f5f9;
-        height: 100%;
+        background: white; border-radius: 20px; padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; height: 100%;
     }
-    .testimonial-quote {
-        font-size: 3rem;
-        color: var(--primary-color);
-        opacity: 0.2;
-        line-height: 1;
-        margin-bottom: 15px;
-    }
-    .testimonial-text {
-        color: #64748b;
-        font-size: 1rem;
-        line-height: 1.8;
-        margin-bottom: 20px;
-    }
-    .testimonial-author {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
+    .testimonial-quote { font-size: 3rem; color: var(--primary-color); opacity: 0.2; line-height: 1; margin-bottom: 15px; }
+    .testimonial-text { color: #64748b; font-size: 1rem; line-height: 1.8; margin-bottom: 20px; }
+    .testimonial-author { display: flex; align-items: center; gap: 15px; }
     .testimonial-avatar {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
+        width: 60px; height: 60px; border-radius: 50%;
         background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 700;
-        font-size: 1.5rem;
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-weight: 700; font-size: 1.5rem;
     }
-    .testimonial-info h6 {
-        font-weight: 700;
-        margin: 0;
-        color: var(--text-primary);
-    }
-    .testimonial-info p {
-        margin: 0;
-        color: #64748b;
-        font-size: 0.85rem;
-    }
+    .testimonial-info h6 { font-weight: 700; margin: 0; color: var(--text-primary); }
+    .testimonial-info p { margin: 0; color: #64748b; font-size: 0.85rem; }
 
     /* Stats Section */
-    .stats-section {
-        background: #f8fafc;
-        padding: 60px 0;
-    }
-    .stat-box {
-        text-align: center;
-    }
-    .stat-number {
-        font-size: 3rem;
-        font-weight: 800;
-        color: var(--primary-color);
-        line-height: 1;
-        margin-bottom: 10px;
-    }
-    .stat-label {
-        color: #64748b;
-        font-weight: 600;
-        font-size: 1rem;
-    }
+    .stats-section { background: #f8fafc; padding: 60px 0; }
+    .stat-box { text-align: center; }
+    .stat-number { font-size: 3rem; font-weight: 800; color: var(--primary-color); line-height: 1; margin-bottom: 10px; }
+    .stat-label { color: #64748b; font-weight: 600; font-size: 1rem; }
 
     /* --- MARKA BANDI --- */
     .brands-slider-area {
         background: white; padding: 50px 0; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9;
         overflow: hidden; position: relative; margin-bottom: 0;
     }
-    .brands-slider-track {
-        display: flex; width: calc(200px * 14); animation: scrollBrands 40s linear infinite;
-    }
-    .brand-slide {
-        width: 200px; display: flex; align-items: center; justify-content: center; opacity: 0.6; transition: 0.3s;
-    }
+    .brands-slider-track { display: flex; width: calc(200px * 14); animation: scrollBrands 40s linear infinite; }
+    .brand-slide { width: 200px; display: flex; align-items: center; justify-content: center; opacity: 0.6; transition: 0.3s; }
     .brand-slide:hover { opacity: 1; }
-    .brand-slide i {
-        font-size: 4rem; color: #cbd5e1; transition: all 0.3s ease;
-    }
+    .brand-slide i { font-size: 4rem; color: #cbd5e1; transition: all 0.3s ease; }
     .brand-slide:hover i { color: var(--primary-color); transform: scale(1.1); }
     @keyframes scrollBrands { 0% { transform: translateX(0); } 100% { transform: translateX(calc(-200px * 7)); } }
 
@@ -493,7 +421,6 @@
                 </div>
                 <div class="hero-content-inner">
                     <div class="col-lg-7 text-white">
-                        
                         @if($slider->badge_text)
                         <div class="hero-content-animate delay-1">
                             <span class="badge bg-{{ $slider->badge_color ?? 'danger' }} px-3 py-2 mb-4" style="letter-spacing: 2px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
@@ -519,7 +446,6 @@
                             <a href="{{ $slider->button_link }}" class="btn-hero-primary">{{ $slider->button_text }}</a>
                         </div>
                         @endif
-
                     </div>
                 </div>
             </div>
@@ -680,7 +606,6 @@
                 $avgRating = $urun->degerlendirmeler()->where('onay', 1)->avg('puan') ?? 0;
                 $reviewCount = $urun->degerlendirmeler()->where('onay', 1)->count();
                 
-                // Kriter değerlerini al (maksimum 3 adet göster)
                 $kriterler = $urun->urunKriterDegerleri()->take(3)->get();
             @endphp
 
@@ -790,6 +715,83 @@
     </section>
 </div>
 
+<section class="gaming-ready-section">
+    <div class="container">
+        <div class="section-header-modern text-white">
+            <h2 class="text-white">Oyuna Hazır Sistemler</h2>
+            <p style="color: #cbd5e1;">Test edilmiş, optimize edilmiş ve hemen kargoya hazır profesyonel sistemler.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="ready-system-card">
+                    <div class="system-img-wrap">
+                        <img src="https://via.placeholder.com/400x400/1e293b/ffffff?text=RTX+4060+Sistem" alt="Gaming PC">
+                    </div>
+                    <div class="system-info">
+                        <span class="system-badge">BAŞLANGIÇ SEVİYESİ</span>
+                        <h4 class="system-title">Phoenix 5T-12</h4>
+                        <div class="system-specs-grid">
+                            <div class="sys-spec"><i class="fas fa-microchip"></i> i5 12400F</div>
+                            <div class="sys-spec"><i class="fas fa-memory"></i> 16GB DDR4</div>
+                            <div class="sys-spec"><i class="fas fa-hdd"></i> 500GB NVMe</div>
+                            <div class="sys-spec"><i class="fas fa-tv"></i> RTX 4060</div>
+                        </div>
+                        <div class="system-price-area">
+                            <div class="sys-price">24.999 ₺</div>
+                            <a href="{{ route('urun.index') }}" class="sys-btn"><i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="ready-system-card">
+                    <div class="system-img-wrap">
+                        <img src="https://via.placeholder.com/400x400/1e293b/ffffff?text=RTX+4070+Sistem" alt="Gaming PC">
+                    </div>
+                    <div class="system-info">
+                        <span class="system-badge" style="background: #22c55e; color: white;">ÇOK SATAN</span>
+                        <h4 class="system-title">Dragon 7X-Elite</h4>
+                        <div class="system-specs-grid">
+                            <div class="sys-spec"><i class="fas fa-microchip"></i> Ryzen 7 7800X3D</div>
+                            <div class="sys-spec"><i class="fas fa-memory"></i> 32GB DDR5</div>
+                            <div class="sys-spec"><i class="fas fa-hdd"></i> 1TB NVMe Gen4</div>
+                            <div class="sys-spec"><i class="fas fa-tv"></i> RTX 4070 Super</div>
+                        </div>
+                        <div class="system-price-area">
+                            <div class="sys-price">54.999 ₺</div>
+                            <a href="{{ route('urun.index') }}" class="sys-btn"><i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="ready-system-card">
+                    <div class="system-img-wrap">
+                        <img src="https://via.placeholder.com/400x400/1e293b/ffffff?text=RTX+4090+Sistem" alt="Gaming PC">
+                    </div>
+                    <div class="system-info">
+                        <span class="system-badge" style="background: #a855f7; color: white;">ULTRA PERFORMANS</span>
+                        <h4 class="system-title">Titan 9-Pro Max</h4>
+                        <div class="system-specs-grid">
+                            <div class="sys-spec"><i class="fas fa-microchip"></i> i9 14900K</div>
+                            <div class="sys-spec"><i class="fas fa-memory"></i> 64GB DDR5</div>
+                            <div class="sys-spec"><i class="fas fa-hdd"></i> 2TB NVMe Gen5</div>
+                            <div class="sys-spec"><i class="fas fa-tv"></i> RTX 4090</div>
+                        </div>
+                        <div class="system-price-area">
+                            <div class="sys-price">129.999 ₺</div>
+                            <a href="{{ route('urun.index') }}" class="sys-btn"><i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <section class="stats-section">
     <div class="container">
         <div class="row g-4">
@@ -882,14 +884,14 @@
                             <span><i class="far fa-user me-1"></i>{{ $blog->yazar }}</span>
                         </div>
                         <h4 class="blog-title">
-    <a href="{{ route('blog.detay', $blog->slug) }}">{{ $blog->baslik }}</a>
-</h4>
+                            <a href="{{ route('blog.detay', $blog->slug) }}">{{ $blog->baslik }}</a>
+                        </h4>
                         <p class="blog-excerpt">
                             {{ \Illuminate\Support\Str::limit($blog->ozet ?? strip_tags($blog->icerik), 100) }}
                         </p>
-                       <a href="{{ route('blog.detay', $blog->slug) }}" class="blog-read-more">
-    Devamını Oku <i class="fas fa-arrow-right"></i>
-</a>
+                        <a href="{{ route('blog.detay', $blog->slug) }}" class="blog-read-more">
+                            Devamını Oku <i class="fas fa-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -901,29 +903,6 @@
         </div>
     </section>
 </div>
-
-<section class="newsletter-section">
-    <div class="container">
-        <div class="text-center text-white mb-5">
-            <h2 class="display-5 fw-bold mb-3">Fırsatları Kaçırma!</h2>
-            <p class="lead mb-0" style="opacity: 0.9;">
-                Özel kampanyalar, yeni ürünler ve teknoloji haberleri için bültenimize abone ol.
-            </p>
-        </div>
-        <form class="newsletter-form">
-            <div class="row g-3">
-                <div class="col-md-8">
-                    <input type="email" class="newsletter-input" placeholder="E-posta adresinizi girin" required>
-                </div>
-                <div class="col-md-4">
-                    <button type="submit" class="newsletter-btn w-100">
-                        <i class="fas fa-paper-plane me-2"></i>Abone Ol
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</section>
 
 <section class="brands-slider-area">
     <div class="container text-center mb-4">
@@ -1064,13 +1043,5 @@ function sepeteEkle(urunId) {
         }, 2000);
     });
 }
-
-// ========== NEWSLETTER FORM ==========
-document.querySelector('.newsletter-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const email = this.querySelector('input[type="email"]').value;
-    alert('Teşekkürler! ' + email + ' adresine onay e-postası gönderdik.');
-    this.reset();
-});
 </script>
 @endpush

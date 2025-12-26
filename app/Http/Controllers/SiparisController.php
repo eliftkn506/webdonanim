@@ -469,4 +469,18 @@ class SiparisController extends Controller
             ->paginate(10);
         return view('kullanici.siparislerim', compact('siparisler'));
     }
+    public function fatura($id)
+    {
+        // Siparişi ve Fatura detaylarını çek
+        $siparis = Siparis::with(['urunler.urun', 'user'])->findOrFail($id);
+        
+        // Güvenlik: Başkası başkasının faturasını görmesin
+        if (Auth::id() !== $siparis->user_id && !Auth::user()->isAdmin()) { // isAdmin() yoksa bu kısmı kaldırabilirsin
+             abort(403, 'Bu faturayı görüntüleme yetkiniz yok.');
+        }
+
+        $fatura = Fatura::where('siparis_id', $siparis->id)->firstOrFail();
+
+        return view('kullanici.fatura', compact('siparis', 'fatura'));
+    }
 }

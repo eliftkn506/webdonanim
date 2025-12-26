@@ -3,19 +3,22 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>@yield('title', config('app.name', 'Avantaj Bilişim'))</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         /* --- GLOBAL RENK PALETİ --- */
         :root {
             --primary-gradient: linear-gradient(135deg, #00d4aa 0%, #00a896 100%);
             --secondary-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            --accent-gradient: linear-gradient(135deg, #f59e0b 0%, #ff8c00 100%);
             
             --primary-color: #00d4aa;
             --primary-dark: #00a896;
@@ -54,6 +57,7 @@
 
         .top-bar-content { display: flex; justify-content: space-between; align-items: center; }
         .top-bar-left { display: flex; gap: 20px; align-items: center; }
+        
         .top-bar-item { 
             color: rgba(255, 255, 255, 0.85); 
             text-decoration: none; 
@@ -175,30 +179,56 @@
             font-weight: 800;
         }
 
+        /* Ana İçerik */
         .main-content { flex: 1; padding: 0 !important; }
 
-        /* ========== FOOTER ========== */
+        /* ========== FOOTER (DÜZENLENDİ) ========== */
         .footer-modern { 
             background: var(--secondary-color); 
             color: #94a3b8; 
-            padding: 80px 0 40px; 
+            padding: 80px 0 30px; 
             margin-top: auto; 
             position: relative;
         }
+        
+        /* Footer Üst Çizgisi (Gradient) */
         .footer-modern::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--primary-gradient);
         }
-        .footer-brand-title { font-size: 1.8rem; font-weight: 800; color: white; margin-bottom: 20px; display: block; }
-        .footer-link-item { color: #94a3b8; text-decoration: none; display: block; margin-bottom: 12px; font-weight: 600; transition: var(--transition); }
+        
+        .footer-brand-title { font-size: 1.8rem; font-weight: 800; color: white; margin-bottom: 20px; display: block; letter-spacing: -0.5px; }
+        
+        .footer-desc {
+            font-size: 0.95rem; line-height: 1.7; opacity: 0.8; margin-bottom: 2rem; max-width: 300px;
+        }
+
+        .footer-heading {
+            color: white; font-weight: 800; font-size: 1rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .footer-link-item { 
+            color: #94a3b8; text-decoration: none; display: block; margin-bottom: 12px; font-weight: 500; transition: var(--transition); 
+        }
         .footer-link-item:hover { color: var(--primary-color); padding-left: 8px; }
 
         .social-box-item {
-            width: 42px; height: 42px; border-radius: 12px;
+            width: 40px; height: 40px; border-radius: 10px;
             background: rgba(255,255,255,0.05); color: white;
             display: inline-flex; align-items: center; justify-content: center;
-            margin-right: 12px; transition: var(--transition);
+            margin-right: 10px; transition: var(--transition); border: 1px solid rgba(255,255,255,0.1);
         }
-        .social-box-item:hover { background: var(--primary-color); color: white; transform: translateY(-5px); }
+        .social-box-item:hover { background: var(--primary-color); color: white; transform: translateY(-3px); border-color: var(--primary-color); }
+
+        .contact-item {
+            display: flex; align-items: flex-start; gap: 12px; margin-bottom: 1rem; font-size: 0.9rem;
+        }
+        .contact-item i { color: var(--primary-color); margin-top: 4px; }
+
+        .copyright-area {
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 30px; margin-top: 50px;
+            text-align: center; font-size: 0.85rem; opacity: 0.6;
+        }
 
         @media (max-width: 1150px) {
             .nav-menu-list, .search-wrapper-modern { display: none !important; }
@@ -316,45 +346,59 @@
     @yield('content')
 </main>
 
-<footer class="footer-modern text-white">
+<footer class="footer-modern">
     <div class="container">
         <div class="row g-5">
-            <div class="col-lg-4">
+            <div class="col-lg-4 col-md-6">
                 <span class="footer-brand-title">Avantaj Bilişim</span>
-                <p class="small opacity-75">
-                    Türkiye'nin en yeni teknoloji platformu. Aradığınız tüm donanım parçaları, profesyonel sistemler ve kurumsal çözümlerle 7/24 hizmetinizdeyiz.
+                <p class="footer-desc">
+                    Teknolojinin en yeni adresi. Bilgisayar bileşenleri, hazır sistemler ve kurumsal çözümlerle, uygun fiyat ve güvenilir hizmet anlayışıyla yanınızdayız.
                 </p>
-                <div class="mt-4">
+                <div class="d-flex gap-2">
                     <a href="#" class="social-box-item"><i class="fab fa-facebook-f"></i></a>
                     <a href="#" class="social-box-item"><i class="fab fa-instagram"></i></a>
                     <a href="#" class="social-box-item"><i class="fab fa-twitter"></i></a>
                     <a href="#" class="social-box-item"><i class="fab fa-youtube"></i></a>
                 </div>
             </div>
-            <div class="col-6 col-lg-2">
-                <h6 class="text-white fw-800 mb-4 uppercase small">Kurumsal</h6>
+
+            <div class="col-lg-2 col-md-6 col-6">
+                <h6 class="footer-heading">Kurumsal</h6>
                 <a href="/hakkimizda" class="footer-link-item">Hakkımızda</a>
-                <a href="/iletisim" class="footer-link-item">Bize Ulaşın</a>
+                <a href="/iletisim" class="footer-link-item">İletişim</a>
                 <a href="#" class="footer-link-item">Banka Hesapları</a>
+                <a href="#" class="footer-link-item">Kargo Takibi</a>
             </div>
-            <div class="col-6 col-lg-2">
-                <h6 class="text-white fw-800 mb-4 uppercase small">Alışveriş</h6>
+
+            <div class="col-lg-2 col-md-6 col-6">
+                <h6 class="footer-heading">Alışveriş</h6>
                 <a href="/urunler" class="footer-link-item">Tüm Ürünler</a>
-                <a href="/wizard" class="footer-link-item text-primary fw-bold">PC Toplama</a>
-                <a href="#" class="footer-link-item">Sipariş Takibi</a>
+                <a href="/wizard" class="footer-link-item text-white fw-bold">PC Toplama</a>
+                <a href="#" class="footer-link-item">İade Koşulları</a>
+                <a href="#" class="footer-link-item">Gizlilik Politikası</a>
             </div>
-            <div class="col-lg-4">
-                <h6 class="text-white fw-800 mb-4 uppercase small">İletişim Bilgileri</h6>
-                <p class="small mb-3"><i class="fas fa-map-marker-alt me-2 text-primary"></i> Teknoloji Mah. Bilişim Cad. No:1, İstanbul</p>
-                <p class="small mb-3"><i class="fas fa-phone-alt me-2 text-primary"></i> 0850 533 3444</p>
-                <p class="small"><i class="fas fa-envelope me-2 text-primary"></i> bilgi@avantajbilisim.com</p>
-                <div class="mt-4 p-3 bg-white bg-opacity-5 rounded-4 border border-secondary text-center">
-                   <img src="https://vatanbilgisayar.com/assets/dist/images/footer/visa-mastercard.png" height="25" style="filter: brightness(0) invert(1);">
+
+            <div class="col-lg-4 col-md-6">
+                <h6 class="footer-heading">İletişim Bilgileri</h6>
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Teknoloji Mah. Bilişim Cad. No:1, Kat:3<br>Selçuklu / KONYA</span>
                 </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <span>0850 533 3444 (Müşteri Hizmetleri)</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>bilgi@avantajbilisim.com</span>
+                </div>
+                
+              
             </div>
         </div>
-        <div class="text-center mt-5 pt-4 border-top border-secondary small opacity-50">
-            &copy; {{ date('Y') }} Avantaj Bilişim. Tüm Hakları Saklıdır.
+
+        <div class="copyright-area">
+            &copy; {{ date('Y') }} Avantaj Bilişim Teknoloji A.Ş. Tüm Hakları Saklıdır.
         </div>
     </div>
 </footer>
@@ -389,7 +433,8 @@ window.updateAllCartCounts = function(count) {
 
 // ========== SEPETE EKLEME FONKSİYONU (Global) ==========
 window.sepeteEkle = function(urunId) {
-    const btn = event.currentTarget;
+    // Tıklanan butonu bul (Event Delegation gerekebilir, o yüzden parametre ile değil event ile alıyoruz)
+    const btn = event.currentTarget; 
     const originalContent = btn.innerHTML;
     
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -422,37 +467,44 @@ window.sepeteEkle = function(urunId) {
             }
 
             // Buton geri bildirimi
-            btn.classList.add('btn-success', 'text-white');
-            btn.innerHTML = '<i class="fas fa-check"></i> Eklendi';
+            btn.classList.add('bg-success', 'text-white', 'border-0'); // Bootstrap classları
+            btn.innerHTML = '<i class="fas fa-check"></i>';
             
             // Toast bildirimi (eğer varsa)
             if (typeof showToast === 'function') {
                 showToast('Ürün sepete eklendi!', 'success');
             } else {
-                // Basit alert
                 console.log('✅ Ürün sepete eklendi!');
             }
+            
+            // 2 saniye sonra butonu eski haline getir
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+                btn.classList.remove('bg-success', 'text-white', 'border-0');
+                btn.disabled = false;
+            }, 2000);
+
         } else {
             alert(data.message || 'Bir hata oluştu');
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
         }
     })
     .catch(error => {
         console.error('❌ Hata:', error);
         alert('İşlem sırasında bir hata oluştu.');
-    })
-    .finally(() => {
-        setTimeout(() => {
-            btn.innerHTML = originalContent;
-            btn.classList.remove('btn-success', 'text-white');
-            btn.disabled = false;
-        }, 2000);
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
     });
 }
 
-// Eski fonksiyonlar için alias
+// Eski fonksiyonlar için alias (Geriye uyumluluk)
 window.updateNavbarCart = window.updateAllCartCounts;
 
+// Sepetten Silme (Opsiyonel - Sepet sayfasında kullanılabilir)
 window.removeFromCart = function(id) {
+    if(!confirm('Ürünü sepetten silmek istiyor musunuz?')) return;
+
     fetch(`/sepet/sil/${id}`, {
         method: 'DELETE',
         headers: { 
