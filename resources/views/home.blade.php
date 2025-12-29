@@ -1045,3 +1045,5 @@ function sepeteEkle(urunId) {
 }
 </script>
 @endpush
+
+

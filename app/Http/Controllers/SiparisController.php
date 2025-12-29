@@ -61,7 +61,7 @@ class SiparisController extends Controller
             })
             ->get();
 
-        // 2. Kullanıcıya Özel Atanmış Kuponlar (Pivot tablodan kontrol)
+        // 2. Kullanıcıya Özel Atanmış Kuponlar
         $ozelKuponlar = Kupon::where('aktif', true)
             ->where('baslangic_tarihi', '<=', $now)
             ->where('bitis_tarihi', '>=', $now)
@@ -71,15 +71,14 @@ class SiparisController extends Controller
             })
             ->get();
 
-        // 3. Kural Bazlı Kuponlar (DİNAMİK KONTROL)
-        // Veritabanında atanmış olmasına bakmaksızın, şartları o an sağlayanları getiriyoruz.
+        // 3. Kural Bazlı Kuponlar
         $tumKuralBazli = Kupon::where('aktif', true)
             ->where('baslangic_tarihi', '<=', $now)
             ->where('bitis_tarihi', '>=', $now)
             ->where('kupon_turu', 'kural_bazli')
             ->get();
 
-        // PHP tarafında filtreleme yapıyoruz
+        // PHP tarafında filtreleme
         $uygunKuralBazli = $tumKuralBazli->filter(function($kupon) use ($toplam, $kullaniciId) {
             // A. Kullanıcı bu kuponu daha önce kullanmış mı?
             $kullanilmis = DB::table('kullanici_kuponlar')
@@ -95,11 +94,11 @@ class SiparisController extends Controller
                 return false;
             }
 
-            // C. Kural bazlı özel limit kontrolü (Örn: toplam_alisveris kuralı için limit)
+            // C. Kural bazlı özel limit kontrolü
             $kuralTipi = strtolower($kupon->kural_tipi ?? '');
             if (str_contains($kuralTipi, 'alisveris') || str_contains($kuralTipi, 'tutar')) {
                  if ($toplam < ($kupon->kural_min_tutar ?? 0)) {
-                     return false;
+                      return false;
                  }
             }
 
@@ -159,7 +158,7 @@ class SiparisController extends Controller
                 $itemTotal = $guncelFiyat * $adet;
                 
                 $araToplam += $itemTotal;
-                $kdvToplam += 0;
+                $kdvToplam += 0; // KDV mantığı eklenirse burası değişir
 
                 $guncelSepet[] = [
                     'id' => $item['id'],
@@ -272,12 +271,19 @@ class SiparisController extends Controller
                 ]);
             }
 
-            // Kuponu Kullanıldı İşaretle
+            // --- DÜZELTİLEN KISIM BAŞLANGICI ---
+            // Kuponu Kullanıldı İşaretle (Tüm argümanlar eksiksiz gönderiliyor)
             if ($kuponNesnesi) {
-                $kuponNesnesi->kullan($kullaniciId);
+                $kuponNesnesi->kullan(
+                    $kullaniciId,       // 1. Argüman: Kullanıcı ID
+                    $siparis->id,       // 2. Argüman: Sipariş ID
+                    $araToplam,         // 3. Argüman: Sipariş Tutarı
+                    $kuponIndirim       // 4. Argüman: İndirim Tutarı
+                );
             }
+            // --- DÜZELTİLEN KISIM BİTİŞİ ---
 
-            // Fatura ve Ödeme
+            // Fatura Oluşturma
             Fatura::create([
                 'siparis_id' => $siparis->id,
                 'fatura_no' => 'FTR-' . date('Y') . '-' . str_pad($siparis->id, 6, '0', STR_PAD_LEFT),
@@ -294,6 +300,7 @@ class SiparisController extends Controller
                 'e_fatura_tarih' => null,
             ]);
 
+            // Ödeme Bilgisi Oluşturma
             $odemeBilgisi = OdemeBilgisi::create([
                 'siparis_id' => $siparis->id,
                 'odeme_tipi' => $request->odeme_yontemi,
@@ -302,6 +309,7 @@ class SiparisController extends Controller
                 'durum' => 'beklemede',
             ]);
 
+            // Kredi Kartı İşlemi
             if ($request->odeme_yontemi === 'kredi_karti') {
                 $this->processCardPayment($request, $siparis, $odemeBilgisi);
             }
@@ -469,13 +477,15 @@ class SiparisController extends Controller
             ->paginate(10);
         return view('kullanici.siparislerim', compact('siparisler'));
     }
+    
     public function fatura($id)
     {
         // Siparişi ve Fatura detaylarını çek
         $siparis = Siparis::with(['urunler.urun', 'user'])->findOrFail($id);
         
         // Güvenlik: Başkası başkasının faturasını görmesin
-        if (Auth::id() !== $siparis->user_id && !Auth::user()->isAdmin()) { // isAdmin() yoksa bu kısmı kaldırabilirsin
+        // isAdmin fonksiyonunuz User modelinde tanımlı değilse bu kontrolü if(Auth::id() !== $siparis->user_id) şeklinde sadeleştirebilirsiniz.
+        if (Auth::id() !== $siparis->user_id && (!method_exists(Auth::user(), 'isAdmin') || !Auth::user()->isAdmin())) {
              abort(403, 'Bu faturayı görüntüleme yetkiniz yok.');
         }
 

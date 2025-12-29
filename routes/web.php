@@ -7,18 +7,20 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 
 // ===================== CONTROLLER IMPORTLARI =====================
+// Site Ön Yüzü
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SayfaController;
 use App\Http\Controllers\KullaniciUrunController;
 use App\Http\Controllers\SepetController;
 use App\Http\Controllers\KullaniciController;
+use App\Http\Controllers\HesapController;
 use App\Http\Controllers\FavoriController;
 use App\Http\Controllers\SiparisController;
 use App\Http\Controllers\OdemeController;
 use App\Http\Controllers\WizardController;
 use App\Http\Controllers\BayiBasvuruController;
 
-// Admin Controllerları
+// Admin Paneli
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\PageController;
@@ -33,10 +35,18 @@ use App\Http\Controllers\Admin\AdminSiparisController;
 use App\Http\Controllers\Admin\KuponController;
 use App\Http\Controllers\Admin\KampanyaIndirimController;
 use App\Http\Controllers\Admin\BayiController;
-use App\Models\FavoriUrun;
 use App\Http\Controllers\Admin\BlogController;
 
-// ===================== SUNUCU BAKIM & YARDIMCI ROTLAR =====================
+// Modeller
+use App\Models\FavoriUrun;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// ===================== BAKIM & YARDIMCI ROTALAR (Sadece Auth) =====================
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/storage-link-yap', function () {
         try {
@@ -48,40 +58,36 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/admin/onbellek-temizle', function () {
-        Artisan::call('route:clear');
-        Artisan::call('view:clear');
-        Artisan::call('cache:clear');
-        Artisan::call('config:clear');
+        Artisan::call('optimize:clear');
         return "Tüm önbellek başarıyla temizlendi!";
     });
 });
 
-// ===================== ANASAYFA =====================
+// ===================== GENEL SAYFALAR (Herkese Açık) =====================
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/hakkimizda', [SayfaController::class, 'hakkimizda'])->name('hakkimizda');
+Route::get('/iletisim', [SayfaController::class, 'iletisim'])->name('iletisim');
+Route::post('/iletisim', [SayfaController::class, 'iletisimGonder'])->name('iletisim.gonder');
+Route::get('/blog/{slug}', [HomeController::class, 'blogDetay'])->name('blog.detay');
 
-// ===================== AUTH ROUTES =====================
+// ===================== AUTH & BAYİ BAŞVURU =====================
 Auth::routes();
-
-// Blog Detay Rotası
-Route::get('/blog/{slug}', [App\Http\Controllers\HomeController::class, 'blogDetay'])->name('blog.detay');
-
-// ===================== BAYİ BAŞVURU =====================
 Route::get('/bayi-basvuru', [BayiBasvuruController::class, 'showForm'])->name('bayi.basvuru.form');
 Route::post('/bayi-basvuru', [BayiBasvuruController::class, 'submit'])->name('bayi.basvuru.submit');
 
-// ===================== ÜRÜNLER (Kullanıcı Arayüzü) =====================
+// ===================== ÜRÜNLER & KATALOG =====================
 Route::get('/urunler', [KullaniciUrunController::class, 'index'])->name('urun.index');
 Route::get('/urunler/ara', [KullaniciUrunController::class, 'ara'])->name('urun.ara');
 Route::get('/urunler/kategori/{id}', [KullaniciUrunController::class, 'kategori'])->name('urun.kategori');
 Route::get('/urunler/altkategori/{id}', [KullaniciUrunController::class, 'altkategori'])->name('urun.altkategori');
 Route::get('/urunler/incele/{id}', [KullaniciUrunController::class, 'incele'])->name('urun.incele');
 
-// ===================== ÜRÜN FİLTRELEME - AJAX =====================
+// AJAX Filtreleme
 Route::get('/urun/get-alt-kategoriler', [KullaniciUrunController::class, 'getAltKategoriler'])->name('urun.getAltKategoriler');
 Route::get('/urun/get-kriterler', [KullaniciUrunController::class, 'getKriterler'])->name('urun.getKriterler');
 Route::get('/urun/get-marka-model', [KullaniciUrunController::class, 'getMarkaModel'])->name('urun.getMarkaModel');
 
-// ===================== SEPET =====================
+// ===================== SEPET İŞLEMLERİ =====================
 Route::prefix('sepet')->group(function () {
     Route::get('/', [SepetController::class, 'index'])->name('sepet.index');
     Route::post('/ekle', [SepetController::class, 'ekle'])->name('sepet.ekle');
@@ -91,23 +97,32 @@ Route::prefix('sepet')->group(function () {
     Route::post('/guncelle/{id}', [SepetController::class, 'guncelle'])->name('sepet.guncelle');
 });
 
+// Sepet sayısı (AJAX)
 Route::get('/sepet/sayisi', function() {
     $sepet = session('sepet', []);
     return response()->json(['count' => array_sum(array_column($sepet, 'adet'))]);
 })->name('sepet.sayisi');
 
-// ===================== KULLANICI İŞLEMLERİ (AUTH) =====================
+// ===================== KULLANICI ÖZEL SAYFALARI (Auth) =====================
 Route::middleware(['auth'])->group(function () {
+    
+    // --- Profil & Genel ---
     Route::get('/profil', [KullaniciController::class, 'profil'])->name('profil');
-    Route::get('/kuponlarim', [KullaniciController::class, 'kuponlarim'])->name('kuponlarim');
     Route::post('/urun/{id}/degerlendirme', [KullaniciUrunController::class, 'degerlendirmeYap'])->name('urun.degerlendirme');
 
+    // --- Kupon İşlemleri (Müşteri Tarafı) ---
+    Route::get('/kuponlarim', [KullaniciController::class, 'kuponlarim'])->name('kuponlarim');
+    Route::get('hesabim/kuponlarim', [HesapController::class, 'kuponlarim'])->name('hesap.kuponlarim');
+    Route::post('sepet/kupon-uygula', [SepetController::class, 'kuponUygula'])->name('sepet.kupon-uygula');
+    Route::post('sepet/kupon-kaldir', [SepetController::class, 'kuponKaldir'])->name('sepet.kupon-kaldir');
+
+    // --- Konfigürasyon ---
     Route::delete('/kullanici/konfig/{id}', [KullaniciController::class, 'sil'])->name('konfig.sil');
     Route::post('/kullanici/konfig/{id}/sepete-ekle', [KullaniciController::class, 'konfigSepeteEkle'])->name('konfig.sepeteEkle');
     Route::get('/konfigurasyon/{id}/sepete-ekle', [KullaniciController::class, 'konfigSepeteEkle'])->name('konfigurasyon.sepet');
     Route::delete('/konfigurasyon/{id}/sil', [KullaniciController::class, 'sil'])->name('konfigurasyon.sil');
 
-    // FAVORİLER
+    // --- Favoriler ---
     Route::prefix('kullanici/favori')->name('favori.')->group(function () {
         Route::post('/toggle', [FavoriController::class, 'toggle'])->name('toggle');
         Route::get('/', [FavoriController::class, 'listele'])->name('listele');
@@ -117,12 +132,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/durum/{urunId}', [FavoriController::class, 'durumKontrol'])->name('durum');
         Route::get('/api', [FavoriController::class, 'apiFavoriler'])->name('api');
     });
-
+    
+    // Favori Sayısı
     Route::get('/favori-sayisi', function() {
         return response()->json(['count' => FavoriUrun::where('user_id', Auth::id())->count()]);
     })->name('favori.sayisi');
 
-    // SİPARİŞLER (Kullanıcı Tarafı)
+    // --- Siparişler ---
     Route::get('/siparislerim', [SiparisController::class, 'siparislerim'])->name('siparislerim');
     Route::get('/siparis/olustur', [SiparisController::class, 'olustur'])->name('siparis.olustur');
     Route::post('/siparis/tamamla', [SiparisController::class, 'tamamla'])->name('siparis.tamamla');
@@ -131,7 +147,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/siparis/{id}/fatura', [SiparisController::class, 'fatura'])->name('fatura.goster');
     Route::post('/siparis/kupon-kontrol', [SiparisController::class, 'kuponKontrol'])->name('siparis.kupon.kontrol');
 
-    // ÖDEME
+    // --- Ödeme ---
     Route::prefix('odeme')->name('odeme.')->group(function () {
         Route::get('/basla/{siparis_id}', [OdemeController::class, 'basla'])->name('basla');
         Route::post('/kredi-karti', [OdemeController::class, 'krediKarti'])->name('kredi.karti');
@@ -140,49 +156,46 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/callback', [OdemeController::class, 'callback'])->name('callback');
     });
 
-    // WIZARD
+    // --- Wizard (Sihirbaz) ---
     Route::get('/wizard', [WizardController::class, 'index'])->name('wizard.index');
     Route::get('/wizard/urunler/{altKategoriId}', [WizardController::class, 'getUrunler'])->name('wizard.getUrunler');
     Route::post('/wizard/konfigurasyon-kaydet', [WizardController::class, 'konfigurasyonKaydet'])->name('wizard.kaydet');
 });
 
-// ===================== SABİT SAYFALAR =====================
-Route::get('/hakkimizda', [SayfaController::class, 'hakkimizda'])->name('hakkimizda');
-Route::get('/iletisim', [SayfaController::class, 'iletisim'])->name('iletisim');
-Route::post('/iletisim', [SayfaController::class, 'iletisimGonder'])->name('iletisim.gonder');
-
-// ===================== ADMIN PANEL =====================
+// ===================== ADMIN PANELİ =====================
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
+    
+    // İçerik Yönetimi
     Route::resource('sliders', SliderController::class);
     Route::resource('blog', BlogController::class);
-    // SAYFA YÖNETİMİ
+    
+    // Sayfa Yönetimi
     Route::get('pages', [PageController::class, 'index'])->name('pages.index');
     Route::get('pages/create', [PageController::class, 'create'])->name('pages.create');
     Route::post('pages/store', [PageController::class, 'store'])->name('pages.store');
     Route::get('pages/{slug}/edit', [PageController::class, 'edit'])->name('pages.edit');
     Route::put('pages/{slug}/update', [PageController::class, 'update'])->name('pages.update');
 
-    // DEĞERLENDİRME YÖNETİMİ
+    // Değerlendirmeler
     Route::get('/degerlendirmeler', [DegerlendirmeController::class, 'index'])->name('degerlendirmeler.index');
     Route::post('/degerlendirmeler/{id}/onayla', [DegerlendirmeController::class, 'onayla'])->name('degerlendirmeler.onayla');
     Route::delete('/degerlendirmeler/{id}/sil', [DegerlendirmeController::class, 'sil'])->name('degerlendirmeler.sil');
     Route::post('/degerlendirmeler/{id}/cevapla', [DegerlendirmeController::class, 'cevapla'])->name('degerlendirmeler.cevapla');
     Route::delete('/degerlendirmeler/{id}/cevap-sil', [DegerlendirmeController::class, 'cevapSil'])->name('degerlendirmeler.cevapSil');
 
-    // KATEGORİ & ALT KATEGORİ
+    // Kategoriler
     Route::resource('kategoriler', KategoriController::class)->parameters(['kategoriler' => 'kategori']);
     Route::resource('altkategoriler', AltKategoriController::class)->except(['index', 'create']);
 
-    // ÜRÜN & FİYAT YÖNETİMİ
+    // Ürün & Fiyat
     Route::resource('urunler', UrunController::class);
     Route::get('urunler/kriterler/{altKategoriId}', [UrunController::class, 'getKriterlerByAltKategori'])->name('urunler.getKriterlerByAltKategori');
-    
-    // --> DÜZELTİLEN KISIM: Fiyat ekleme ve silme rotaları UrunController'a bağlandı
     Route::post('urunler/{id}/fiyat-ekle', [UrunController::class, 'storeFiyat'])->name('urunler.fiyat.store');
     Route::delete('urunler/fiyat-sil/{id}', [UrunController::class, 'deleteFiyat'])->name('urunler.fiyat.delete');
 
-    // KRİTERLER
+    // Kriterler
     Route::resource('kriterler', KriterController::class)->except(['create'])->parameters(['kriterler' => 'kriter']);
     Route::controller(KriterDegerController::class)->group(function () {
         Route::get('/kriter-degerleri', 'index')->name('kriterdegerleri.index'); 
@@ -190,21 +203,29 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::delete('/kriter-degerleri/{kriterDeger}', 'destroy')->name('kriterdegerleri.destroy');
     });
 
-    // SİPARİŞ YÖNETİMİ
+    // Siparişler
     Route::post('siparisler/{id}/durum-guncelle', [AdminSiparisController::class, 'durumGuncelle'])->name('siparisler.durumGuncelle');
     Route::resource('siparisler', AdminSiparisController::class);
     
-    // KUPON YÖNETİMİ
-    Route::put('kuponlar/{kupon}', [KuponController::class, 'update'])->name('kuponlar.update');
+    // --- KUPON YÖNETİMİ (DÜZELTİLDİ) ---
+    // 1. Önce özel (spesifik) rotalar
+    Route::get('kuponlar/ara/kullanici', [KuponController::class, 'kullaniciAra'])->name('kuponlar.kullanici-ara');
     Route::post('kuponlar/otomatik-ata', [KuponController::class, 'kuralBazliKuponlariAta'])->name('kuponlar.otomatik-ata');
-    Route::get('kuponlar/kullanici-ara', [KuponController::class, 'kullaniciAra'])->name('kuponlar.kullanici-ara');
-    Route::resource('kuponlar', KuponController::class)->except(['update'])->parameters(['kuponlar' => 'kupon']);
-        
-    // KAMPANYA & GENEL FİYATLAR
+    Route::post('kuponlar/{kupon}/kural-calistir', [KuponController::class, 'tekilKuralCalistir'])->name('kuponlar.kural-calistir');
+    Route::get('kuponlar/{kupon}/istatistikler', [KuponController::class, 'istatistikler'])->name('kuponlar.istatistikler');
+    
+    // 2. Resource Tanımlaması (Hata burada düzeltildi)
+    // parameters(['kuponlar' => 'kupon']) sayesinde URL'deki {kuponlar} parametresi {kupon} olarak değişir
+    // ve Controller'daki (Kupon $kupon) ile eşleşir.
+    Route::resource('kuponlar', KuponController::class)->parameters([
+        'kuponlar' => 'kupon'
+    ]);
+
+    // Kampanyalar & Fiyatlar
     Route::resource('kampanyalar', KampanyaIndirimController::class);
     Route::resource('fiyatlar', UrunFiyatController::class)->except(['show']);
 
-    // BAYİ YÖNETİMİ
+    // Bayiler
     Route::prefix('bayiler')->name('bayiler.')->group(function () {
         Route::get('/basvurular', [BayiController::class, 'basvurular'])->name('basvurular'); 
         Route::get('/', [BayiController::class, 'index'])->name('index'); 
@@ -213,16 +234,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     });
 });
 
-// ===================== WEBHOOKS & PROXY =====================
-Route::prefix('webhook')->name('webhook.')->withoutMiddleware(['web'])->group(function () {
+// ===================== WEBHOOK & DOSYA PROXY (Auth Gerektirmez) =====================
+Route::prefix('webhook')->name('webhook.')->withoutMiddleware(['web', 'auth'])->group(function () {
     Route::post('/odeme-callback', [OdemeController::class, 'paymentCallback'])->name('odeme.callback');
 });
 
+// Storage Proxy
 Route::get('storage/{path}', function ($path) {
     $fullPath = storage_path('app/public/' . $path);
     if (!File::exists($fullPath)) abort(404);
+    
     $file = File::get($fullPath);
     $type = File::mimeType($fullPath);
+    
     $response = Response::make($file, 200);
     $response->header("Content-Type", $type);
     return $response;
